@@ -1,0 +1,119 @@
+<html>
+    <head>
+    	<script type="text/javascript">
+
+$(function () {
+    var css_id = "#placeholder";
+    try{
+        var data = [
+            { data: [[1,{{data_table.0.4}}], [2,{{data_table.1.4}}]]},
+            { data: [[1,{{data_table.0.5}}], [2,{{data_table.1.5}}]]},
+            { data: [[1,{{data_table.0.6}}], [2,{{data_table.1.6}}]]},
+            { data: [[1,{{data_table.0.7}}], [2,{{data_table.1.7}}]]}
+        ];
+        var options = {
+            series: {stack: 0,
+                     lines: {show: false, steps: false },
+                     bars: {show: true, barWidth: 0.9, align: 'center',},},
+            xaxis: {ticks: [[1, "{{data_table.0.0}}"], [2,"{{data_table.1.0}}"]]},
+        };
+
+        $.plot($(css_id), data, options); 
+        }
+    catch(err){console.log("Неполные данные! " + "Произошла ошибка " + err);}
+}); 
+
+
+
+	</script>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br> 
+{% if is_electric_delta == "0" %}  
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>T0 A+</th>
+<th>T1 A+</th>
+<th>T2 A+</th>
+<th>T3 A+</th>
+<!--<th>T4 A+</th>-->
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<!--<td>{{value.7}}</td>-->
+</tr>
+{% empty %}
+   <span>Нет данных.</span>
+{% endfor %}
+</table>
+{% elif is_electric_delta == "1" %}
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>T0 A+</th>
+<th>T1 A+</th>
+<th>T2 A+</th>
+<th>T3 A+</th>
+<!--<th>T4 A+</th>-->
+<th>T0 A+</th>
+<th>T1 A+</th>
+<th>T2 A+</th>
+<th>T3 A+</th>
+<!--<th>T4 A+</th>-->
+<th>расход T0 A+</th>
+<th>расход T1 A+</th>
+<th>расход T2 A+</th>
+<th>расход T3 A+</th>
+<!--<th>расход T4 A+</th>-->
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<!--<td>{{value.6}}</td>-->
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<!--<td>{{value.11}}</td>-->
+<td>{{value.12}}</td>
+<td>{{value.13}}</td>
+<td>{{value.14}}</td>
+<td>{{value.15}}</td>
+<!--<td>{{value.16}}</td>-->
+</tr>
+{% empty %}
+   <span>Нет данных.</span>
+{% endfor %}
+</table>
+{% else %}
+<span>Нет данных</span>
+{% endif%}
+<br>
+<div class="demo-container">
+    <div id="placeholder" class="demo-placeholder"></div>
+</div>
+
+</body>
+</html>

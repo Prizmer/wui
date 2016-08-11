@@ -1,0 +1,380 @@
+<!doctype html>
+
+<html>
+<head>
+<meta charset="utf-8">
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+<!-- Alternate skin for datepicker-->
+{% load staticfiles %} <link href="{%static "jquery-ui/themes/base/jquery-ui.css"%}" rel="stylesheet" type="text/css">
+<!---->
+
+{% load staticfiles %} <link href="{%static "fancytree/skin-win8/ui.fancytree.css"%}" rel="stylesheet" type="text/css">
+{% load staticfiles %} <script src="{%static "fancytree/jquery.fancytree-all.min.js" %}" type="text/javascript"></script>
+
+<!-- Monthpicker plugin-->
+{% load staticfiles %} <script src="{%static "jquery.mtz.monthpicker.js" %}" type="text/javascript"></script>
+
+<!-- Graph plugin-->
+{% load staticfiles %}	<link href="{%static "flot/examples.css"%}" rel="stylesheet" type="text/css">
+{% load staticfiles %}  <script src="{%static "flot/jquery.flot.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "flot/jquery.flot.stack.js" %}" type="text/javascript" ></script>
+
+
+<title>ПРИЗМЕР|Автоматизированная Система Комплексного Учёта Энергоресурсов</title>
+
+ <script type="text/javascript">
+     
+// Variables     
+var is_electric_monthly = 0;
+var is_electric_daily = 1;
+var is_electric_current = 0;
+var is_electric_delta = 0;
+var is_electric_period = 0;
+// Variables End     
+     
+$(document).ready(function(){
+    
+// Loader 
+hide_loader();
+// Loader End
+$("#datepickerEnd").datepicker("setDate", new Date());
+$("#tree").click(function clickTree(){
+        refresh_data_table($("#choice_report").val());
+        });
+// Меню выбора типа отчета
+$("#choice_report").selectmenu({ width: 330 });
+$("#choice_report").selectmenu({
+     select: function( event, ui ) {
+    if ($(this).val()%2==0)
+    { //для чётного отображаем 1 календаря
+        $("#datepickerEnd").show();
+        $("#datepickerStart").hide();
+        $("#title-date-start").hide();
+        $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт Excel</a>')
+        refresh_data_table($(this).val());
+    }
+    else
+    { //для нечётного отображаем 2 календарь
+        $("#datepickerEnd").show();
+        $("#datepickerStart").show();
+        $("#title-date-start").show();
+        $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт Excel</a>')
+        refresh_data_table($(this).val());
+    }
+        }   
+    });
+// конец Меню выбора отчета
+// Подкрашиваем зеленым "На начало суток"
+$("#electric-daily-button").css( "color", "green" );
+
+// Убираем календари при загрузке страницы
+$("#datepickerStart").hide();
+$("#datepickerEnd").hide();
+
+$("#datepickerStart").datepicker({onSelect:function(){refresh_data_table($("#choice_report").val())}}) 
+$("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choice_report").val())}})           
+   $("#electric-monthly-button").click(function(){
+        is_electric_monthly = 1;
+        is_electric_daily = 0;
+        is_electric_current = 0;
+        is_electric_delta = 0;
+        refresh_all();
+        $("#datepickerStart").hide();
+        $("#title-date-start").hide();
+        $("#electric-monthly-button").css( "color", "green" );
+        $("#electric-daily-button").css( "color", "black" );
+        $("#electric-current-button").css( "color", "black" );
+        $("#electric-delta").css( "color", "black" );      
+        });
+        
+   $("#electric-daily-button").click(function(){
+        is_electric_monthly = 0;
+        is_electric_daily = 1;
+        is_electric_current = 0;
+        is_electric_delta = 0;
+        refresh_all();
+        $("#datepickerStart").hide();
+        $("#title-date-start").hide();
+        $("#electric-monthly-button").css( "color", "black" );
+        $("#electric-daily-button").css( "color", "green" );
+        $("#electric-current-button").css( "color", "black" );
+        $("#electric-delta").css( "color", "black" );
+        });
+        
+   $("#electric-current-button").click(function(){
+        is_electric_monthly = 0;
+        is_electric_daily = 0;
+        is_electric_current = 1;
+        is_electric_delta = 0;
+        refresh_all();
+        $("#datepickerStart").hide();
+        $("#title-date-start").hide();
+        $("#electric-monthly-button").css( "color", "black" );
+        $("#electric-daily-button").css( "color", "black" );
+        $("#electric-current-button").css( "color", "green" );
+        $("#electric-delta").css( "color", "black" );
+        });
+        
+    $("#electric-delta").click(function(){
+        is_electric_monthly = 0;
+        is_electric_daily = 0;
+        is_electric_current = 0;
+        is_electric_delta = 1;
+        refresh_all();
+        $("#datepickerStart").show();
+        $("#title-date-start").show();
+        $("#electric-monthly-button").css( "color", "black" );
+        $("#electric-daily-button").css( "color", "black" );
+        $("#electric-current-button").css( "color", "black" );
+        $("#electric-delta").css( "color", "green" );
+        });
+
+       $("input").click(function(){
+        is_electric_period = $( "input:checked" ).val();
+        
+        if (is_electric_period == 0){ 
+            $("#datepickerStart").hide();
+            $("#title-date-start").hide(); }      
+        else { $("#datepickerStart").show();
+               $("#title-date-start").show(); }
+        refresh_all();
+        });
+        
+    $("#electric-mnemoschema").click(function(){
+        refresh_data_table_viz_new_window();
+    });
+ });
+ 
+    
+    function logEvent(event, data, msg){
+       var args = $.isArray(args) ? args.join(", ") :
+    msg = msg ? ": " + msg : "";
+    $.ui.fancytree.info("Event('" + event.type + "', node=" + data.node + ")" + msg);
+  }
+
+    $(function(){ 
+        $("#tree").fancytree({
+           source: {
+           url: "/askue/tree_data/"
+         },
+        blurTree: function(event, data) {
+        logEvent(event, data);
+      },
+      create: function(event, data) {
+        logEvent(event, data);
+      },
+      init: function(event, data, flag) {
+        logEvent(event, data, "flag=" + flag);
+      },
+      focusTree: function(event, data) {
+        logEvent(event, data);
+      },
+      // Node events
+      activate: function(event, data) {
+        logEvent(event, data);
+        var node = data.node;
+        // acces node attributes
+        $("#my-object-jquery").val(node.title);
+        if( !$.isEmptyObject(node.data) ){
+//          alert("custom node data: " + JSON.stringify(node.data));
+        }
+      },
+      beforeActivate: function(event, data) {
+        logEvent(event, data, "current state=" + data.node.isActive());
+        // return false to prevent default behavior (i.e. activation)
+//              return false;
+      },
+      beforeExpand: function(event, data) {
+        logEvent(event, data, "current state=" + data.node.isExpanded());
+        // return false to prevent default behavior (i.e. expanding or collapsing)
+//        return false;
+      },
+      beforeSelect: function(event, data) {
+//        console.log("select", event.originalEvent);
+        logEvent(event, data, "current state=" + data.node.isSelected());
+        // return false to prevent default behavior (i.e. selecting or deselecting)
+//        if( data.node.isFolder() ){
+//          return false;
+//        }
+      },
+      blur: function(event, data) {
+        logEvent(event, data);
+        $("#echoFocused").text("-");
+      },
+      click: function(event, data) {
+        logEvent(event, data, ", targetType=" + data.targetType);
+        // return false to prevent default behavior (i.e. activation, ...)
+        //return false;
+      },
+      collapse: function(event, data) {
+        logEvent(event, data);
+      },
+      createNode: function(event, data) {
+        // Optionally tweak data.node.span or bind handlers here
+        logEvent(event, data);
+      },
+      dblclick: function(event, data) {
+        logEvent(event, data);
+//        data.node.toggleSelect();
+      },
+      deactivate: function(event, data) {
+        logEvent(event, data);
+        $("#echoActive").text("-");
+      },
+      expand: function(event, data) {
+        logEvent(event, data);
+      },
+
+      select: function(event, data) {
+        logEvent(event, data, "current state=" + data.node.isSelected());
+        var s = data.tree.getSelectedNodes().join(", ");
+        $("#echoSelected").text(s);
+      }
+    }).bind("fancytreeactivate", function(event, data){
+      // alternative way to bind to 'activate' event
+//        logEvent(event, data);
+    });
+
+    });
+var refresh_data_table = function(xyz){
+    setTimeout(function() {
+     var electric_data_start = $('#datepickerStart').datepicker().val();
+     var electric_data_end = $('#datepickerEnd').datepicker().val();
+     var node = $("#tree").fancytree("getActiveNode");
+	     if(node){obj_title = node.title;
+              obj_key = node.key;
+              obj_parent_title = node.parent.title;}
+                else{obj_title = "Не выбран";
+                     obj_key = "Не выбран";
+                     obj_parent_title = "Не выбран";}
+     $.ajax({
+        type: "GET",
+        url: "/askue/"+xyz,
+        beforeSend: function(){show_loader();},
+        data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
+       })
+     
+
+	 
+     .done(function( msg ) {
+        $('#data-table').html(msg); // Пишем в div ответ от страницы /askue/?номер отчёта
+            hide_loader();
+        });
+  });
+};
+//--------------------------------------------------
+
+var refresh_data_table_viz = function(){
+     $.ajax({
+        type: "GET",
+        url: "/viz/test3",
+       })
+     
+     .done(function( msg_viz ) {
+        $('#data-table').html(msg_viz); // Пишем в div ответ от страницы /askue/?номер отчёта
+        });
+  };
+  
+var refresh_data_table_viz_new_window = function(){
+    window.open('/viz/energo_schema', '_blank');
+  };
+
+//----------------------------------------------------  
+
+var refresh_all = function(){
+        refresh_data_table($("#choice_report").val());
+    };
+
+var show_loader = function(){
+    $("#fadingBarsG_1").show();
+    $("#fadingBarsG_2").show();
+    $("#fadingBarsG_3").show();
+    $("#fadingBarsG_4").show();
+    $("#fadingBarsG_5").show();
+    $("#fadingBarsG_6").show();
+    $("#fadingBarsG_7").show();
+    $("#fadingBarsG_8").show();
+    };
+    
+var hide_loader = function(){
+    $("#fadingBarsG_1").hide();
+    $("#fadingBarsG_2").hide();
+    $("#fadingBarsG_3").hide();
+    $("#fadingBarsG_4").hide();
+    $("#fadingBarsG_5").hide();
+    $("#fadingBarsG_6").hide();
+    $("#fadingBarsG_7").hide();
+    $("#fadingBarsG_8").hide();
+    };
+    
+ $(function() {
+    $( "#datepickerStart" ).datepicker({ dateFormat: 'dd.mm.yy', defaultDate:+0 });
+    $( "#datepickerEnd" ).datepicker({ dateFormat: 'dd.mm.yy', defaultDate:+0 });
+    $("#QQQ").monthpicker();
+  });
+ </script>
+
+</head>
+<body>
+<div id=layout>
+    
+<div id=left-block>
+    <div>
+        {% load staticfiles %} <img id="logo" src="{%static "images/logo3.jpg" %}" alt="ООО Правильные Измерения">
+        <div id="fadingBarsG">
+            <div id="fadingBarsG_1" class="fadingBarsG"></div>
+            <div id="fadingBarsG_2" class="fadingBarsG"></div>
+            <div id="fadingBarsG_3" class="fadingBarsG"></div>
+            <div id="fadingBarsG_4" class="fadingBarsG"></div>
+            <div id="fadingBarsG_5" class="fadingBarsG"></div>
+            <div id="fadingBarsG_6" class="fadingBarsG"></div>
+            <div id="fadingBarsG_7" class="fadingBarsG"></div>
+            <div id="fadingBarsG_8" class="fadingBarsG"></div>
+        </div> 
+    </div>
+
+    <div id="title-structura">
+            {% load staticfiles %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/electric-ico.png" %}" alt="Электроучёт"></a>
+            {% load staticfiles %} <img id="water-ico" src="{%static "images/water-ico.jpg" %}" alt="Водоучёт">
+            {% load staticfiles %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/heat-ico.jpg" %}" alt="Теплоучёт"></a>
+            {% load staticfiles %} <a href="../../askue/gas" ><img id="gas-ico" src="{%static "images/gas-ico.png" %}" alt="Учёт газа"></a>
+            {% load staticfiles %} <img id="economic-ico" src="{%static "images/economic-ico.png" %}" alt="Экономика">
+    <br>
+    <br>
+    <span>Дерево объектов</span>
+    </div>
+
+    <div id="tree"></div>
+</div>
+<div id="right-block">
+    <div>
+        <h2 id="system-name">Автоматизированная Система Комплексного Учёта Энергоресурсов</h2>
+    </div>
+    <div id="control-block">
+        {% block control-block %}
+        <br>
+        <br>
+        <br>
+        <br>
+        <span><strong>Для начала работы выберите слева ресурс и объект.</strong></span>
+        {% endblock %}
+    </div>
+    <div id="data-block">
+        <div id="data-table"></div>
+        <span id="QQQ"></span>        
+    </div>
+</div>
+
+<div id="myfooter">
+    <div id="vizitka">
+        <span><strong><a href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span><br>
+    </div>
+</div>
+
+</div>
+</body>
+</html>

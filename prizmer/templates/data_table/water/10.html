@@ -1,0 +1,32 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по водосчётчикам за <strong>{{electric_data_end}}</strong></span>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Регистратор</th>
+<th>Показания, м3</th>
+<!--<th>Дата</th>-->
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td><strong>{{value.2}}</strong></td>
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

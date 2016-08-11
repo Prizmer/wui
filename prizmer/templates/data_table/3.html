@@ -1,0 +1,119 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<!-- Graph plugin-->
+{% load staticfiles %}	<link href="{%static "../../static/flot/examples.css"%}" rel="stylesheet" type="text/css">
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}  <script src="{%static "../../static/flot/jquery.flot.time.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.categories.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.axislabels.js" %}" type="text/javascript" ></script>
+
+	<script type="text/javascript">
+
+	$(function() {
+
+		var data = {{data_table_graph_a_plus|safe}};
+
+		$.plot("#profil-pokazaniy-a-plus", [ data ], {
+			series: {
+				bars: {
+					show: true,
+					barWidth: 0.6,
+					align: "center"
+				}
+			},
+			xaxis: {
+                label: "123123",
+                labelPos: "high",
+				mode: "categories",
+				tickLength: 0
+			}
+		});
+	});
+    
+	$(function() {
+
+		var data = {{data_table_graph_r_plus|safe}};
+
+		$.plot("#profil-pokazaniy-r-plus", [ data ], {
+			series: {
+				bars: {
+					show: true,
+					barWidth: 0.6,
+					align: "center"
+				}
+			},
+			xaxis: {
+                label: "123123",
+                labelPos: "high",
+				mode: "categories",
+				tickLength: 0
+			}
+		});
+	});
+
+	</script>
+<span>Показания потребленной электроэнергии в период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>
+<br>
+<span>График профиля потреблённой А+ с учетом Кт</span>
+<div id="content-2">
+		<div class="demo-container-2">
+			<div id="profil-pokazaniy-a-plus" class="demo-placeholder-2" style="width:1750;"></div>
+		</div>
+</div>
+<br>
+<span>График профиля потреблённой R+ с учетом Кт</span>
+<div id="content-2">
+		<div class="demo-container-2">
+			<div id="profil-pokazaniy-r-plus" class="demo-placeholder-2" style="width:1750;"></div>
+		</div>
+</div>
+<br>
+{% if data_table %}
+<span>Таблица значений профиля показаний за период без учёта Кт</span> 
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>T0 A+, кВт*ч</th>
+<!--<th>T1 A+</th>-->
+<!--<th>T2 A+</th>-->
+<!--<th>T3 A+</th>-->
+<th>T0 R+, кВар*ч</th>
+<th>+ A+ за прошедшие сутки, кВт*ч</th>
+<th>+ R+ за прошедшие сутки, кВар*ч</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<!--<td>{{value.4}}</td>-->
+<!--<td>{{value.5}}</td>-->
+<!--<td>{{value.6}}</td>-->
+<td>{{value.8}}</td>
+<td>{{value.9|floatformat:2}}</td>
+<td>{{value.10|floatformat:2}}</td>
+
+</tr>
+   {% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+{% endif %}
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  {% load staticfiles %} <link href="{%static "viz/css/stylesheet.css"%}" rel="stylesheet"/>
+  {% load staticfiles %} <script src="{%static "viz/script/script.js"%}" type=text/javascript></script>
+  {% load staticfiles %} <script src="{%static "viz/script/jquery-1.11.1.min.js"%}" type=text/javascript></script>
+
+
+    
+  <title>Схема энергоснабжения</title>
+ </head>
+    <body>
+        <div id='parentdiv'>
+                        <div id="modal_form">
+                    <div id="modal_close">X</div>
+                    <div id="overlay"></div>
+                </div>
+            <div id='mainframe'>
+                <div id="device_overlay"><div class="ico_ok"></div></div>
+
+                <div id="errordiv" style="color:red;"></div>
+            </div>
+        </div>
+
+        <script type='text/javascript'>
+            InitScript();
+        </script>
+    </body>
+</html>
+</html>

@@ -1,0 +1,41 @@
+<html>
+<head>
+</head>
+<body>
+<span>Потребление по теплосчётчикам за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Показания на {{electric_data_start}} , Гкал</th>
+<th>Показания на {{electric_data_end}} , Гкал</th>
+<th>Потребление , Гкал</th>
+<!--
+<th>Время работы c {{electric_data_start}} по {{electric_data_end}} , ч</th>
+-->
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td><strong>{{value.5}}</strong></td>
+<!--
+<td>{{value.6}}</td>
+-->
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,37 @@
+<html>
+<head>
+</head>
+<body>
+<span>Потребление по водосчётчикам за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Регистратор</th>
+<th>Показания на {{electric_data_start}}, м3</th>
+<!--<th>Дата</th>-->
+<th>Показания на {{electric_data_end}}, m3</th>
+<th>Расход, м3</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<!--<td>{{value.3}}</td>-->
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

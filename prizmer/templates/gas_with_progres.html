@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block control-block %}
+<h2 id="title-subsystem">Учёт расхода газа</h2>
+
+    <br>
+    <br>
+    <div>
+        <span id="title-report"><strong>Отчёты &nbsp;</strong></span>
+        <select id="choice_report">
+            <option value="0">Выберите отчёт...</option>
+            <!--<option value="1">Потребление за период.</option>
+            <option value="2">Показания на дату.</option>
+            <option value="3">Показания за период.</option>
+            <option value="4">30-мин. срез мощности.</option>
+            <option value="6">Часовые приращения энергии</option>
+            <option value="7">Удельный расход электроэнергии</option>-->
+<!--
+            <option value="10">Показания по воде</option>
+            <option value="11">Потребление за период по воде</option>
+            <option value="12">Показания по воде с идентификаторами</option>
+-->
+<!--
+            <option value="18">Показания по теплу</option>
+            <option value="19">Потребление по теплу</option>
+            <option value="20">Текущие данные по теплу</option>
+-->
+
+            <option value="22">Природный газ</option>
+
+        </select>
+        <div id ="export_report">-------</div>
+    </div>
+	
+	<div> <progress id="progressBar" value="0" max="100"></progress> </div>
+
+<div id="datepickerStart"><strong>Начальная дата:</strong></div>
+<div id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>
+</div>
+{% endblock %}

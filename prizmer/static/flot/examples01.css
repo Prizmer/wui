@@ -1,0 +1,214 @@
+
+#content {
+	position:relative;
+	width: 880px;
+	margin: 0 auto;
+	padding: 10px;
+	/*border: 1px solid green;*/
+}
+
+#content-2 {
+	position:relative;
+	width: 880px;
+	margin: 0 auto;
+	padding: 10px;
+	/*border: 1px solid green;*/
+}
+
+.demo-container {
+	/*box-sizing: border-box;*/
+	position:relative;
+	width: auto;
+	height: 400px;
+	/*padding: 20px 15px 15px 15px;*/
+	/*margin: 15px auto 30px auto;*/
+	background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+	border: 1px solid black;
+}
+
+.demo-container-2 {
+	/*box-sizing: border-box;*/
+	position:relative;
+	width: auto;
+	height: 200px;
+	/*padding: 20px 15px 15px 15px;*/
+	/*margin: 15px auto 30px auto;*/
+	background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+	border: 1px solid black;
+}
+
+
+.placeholderWrapper{
+	position:relative;
+	/*border: 1px red dashed;*/
+	margin: 0 20px 0 20px;
+	height: inherit;
+	width:auto;
+}
+
+.demo-placeholder {
+
+	top: 5px;
+	width: 840px;
+	height: 300px;
+	font-size: 14px;
+	line-height: 2.2em;
+}
+    
+.demo-placeholder-2 {
+
+	top: 5px;
+	width: 840px;
+	height: 180px;
+	font-size: 14px;
+	line-height: 2.2em;
+
+}
+.optionBoxTop {
+    margin-top: 10px;
+	position:relative;
+    height: 26px;
+    width: auto;
+    /*border: 1px solid orange;*/
+}
+
+#zoomoutBtnDiv{
+    border-radius: 3px;
+    text-align: center;
+    margin-top: 0;
+	position: absolute;
+	cursor: pointer;
+	width: 100px;
+	height: 20px;
+	right:0;
+    border: 1px solid gray;
+
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+
+    user-select: none;
+}
+
+
+.optionBoxBottom {
+    bottom: 0;
+    position:relative;
+    width: auto;
+    /*border: 1px solid orange;*/
+}
+
+#choices {
+    position: absolute;
+    left: 0;
+}
+
+
+.navBtnContainer{
+    position:absolute;
+    right: 30px;
+    height: 24px;
+    width: 90px;
+    top: 30px;
+    /*border: 1px solid orange;*/
+}
+
+.navBtnContainer #goLeftBtn{
+    position:absolute;
+	z-index: 100;
+    right: 26px;
+    cursor: pointer;
+}
+
+.navBtnContainer #goRightBtn{
+position:absolute;
+	right: 2px;
+	z-index: 100;
+    cursor: pointer;
+}
+
+.placeholderWrapper2{
+    box-sizing: border-box;
+    width: auto;
+    position: relative;
+
+   /* border: 1px yellowgreen dotted;*/
+}
+
+.subtitleContainer div{
+	float: left;
+}
+
+.legend table {
+	border-spacing: 5px;
+    width: 100px;
+}
+
+#legendContainer {
+    position: absolute;
+    right: 0;
+}
+
+
+#placeholder div.xAxis div.tickLabel
+{    
+    transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg); /* IE 9 */
+    -moz-transform:rotate(-90deg); /* Firefox */
+    -webkit-transform:rotate(-90deg); /* Safari and Chrome */
+    -o-transform:rotate(-90deg); /* Opera */
+    /*rotation-point:50% 50%;*/ /* CSS3 */
+    /*rotation:270deg;*/ /* CSS3 */
+    margin-top: 5px;
+}
+
+#profil-pokazaniy-a-plus div.xAxis div.tickLabel 
+{    
+    transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg); /* IE 9 */
+    -moz-transform:rotate(-90deg); /* Firefox */
+    -webkit-transform:rotate(-90deg); /* Safari and Chrome */
+    -o-transform:rotate(-90deg); /* Opera */
+    /*rotation-point:50% 50%;*/ /* CSS3 */
+    /*rotation:270deg;*/ /* CSS3 */
+    margin-top: 5px;
+}
+
+#profil-pokazaniy-r-plus div.xAxis div.tickLabel 
+{    
+    transform: rotate(-90deg);
+    -ms-transform:rotate(-90deg); /* IE 9 */
+    -moz-transform:rotate(-90deg); /* Firefox */
+    -webkit-transform:rotate(-90deg); /* Safari and Chrome */
+    -o-transform:rotate(-90deg); /* Opera */
+    /*rotation-point:50% 50%;*/ /* CSS3 */
+    /*rotation:270deg;*/ /* CSS3 */
+    margin-top: 5px;
+}
+
+.valBox{
+    position: relative; float: right;
+    margin-left: 20px;
+}

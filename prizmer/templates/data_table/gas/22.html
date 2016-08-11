@@ -1,0 +1,65 @@
+<html>
+<head>
+</head>
+<body>
+<span>Природный газ</span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>дата</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Время работы узла учёта</th>
+<th>Время работы при ненулевом расходе</th>
+<th>Атм. давление</th>
+<th>Темп. наружного воздуха</th>
+<th>Значение времени интегр.</th>
+<th>Среднее значение расхода газа</th>
+<th>Среднее значение температуры газа</th>
+<th>Среднее значение абс. давления</th>
+<!--
+<th>Среднее значение с доп. датчика 1</th>
+<th>Среднее значение с доп. датчика 2</th>
+-->
+<th>Масса газа при стандартных условиях</th>
+<th>Объем газа при стандартных условиях</th>
+<th>Объем газа при рабочих условиях</th>
+<th>Ошибки</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<!--
+<td>{{value.11}}</td>
+<td>{{value.12}}</td>
+-->
+<td>{{value.13}}</td>
+<td>{{value.14}}</td>
+<td>{{value.15}}</td>
+<td>{{value.16}}</td>
+
+
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

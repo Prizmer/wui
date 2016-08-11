@@ -1,0 +1,47 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по теплосчётчикам. Последние считанные данные.</span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Время</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Показания, Гкал</th>
+<th>Расход воды, м3</th>
+<th>Время работы, ч</th>
+<th>Твхода, С</th>
+<th>Твыхода, С</th>
+<th>Разница T, C</th>
+<th>Код Ошибки</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4}}</strong></td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10|floatformat:0}}</td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

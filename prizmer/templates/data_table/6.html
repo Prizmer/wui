@@ -1,0 +1,45 @@
+<html>
+    <head>
+    </head>
+    <body>
+<span>Часовые приращения электроэнергии за <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{meters_name}}</strong></span>
+<br>
+<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Время</th>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>T0 A+, кВт*ч</th>
+<th>+ A+, кВт*ч</th>
+<th>T0 R+, кВар*ч</th>
+<th>+ R+, кВар*ч</th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4|floatformat:2}}</td>
+<td><strong>{{value.6|floatformat:2}}</strong></td>
+<td>{{value.5|floatformat:2}}</td>
+<td><strong>{{value.7|floatformat:2}}</strong></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

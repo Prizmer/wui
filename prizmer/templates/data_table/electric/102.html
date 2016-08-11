@@ -1,0 +1,45 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания потребленной электроэнергии на <strong>{{electric_data_end}}</strong> по 3-ём тарифам</span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>T0 A+, кВт*ч</th>
+<th>T1 A+</th>
+<th>T2 A+</th>
+<th>T3 A+</th>
+<!--<th>T0 R+, кВар*ч</th>-->
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td><strong>{{value.3}}</strong></td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
