@@ -9,7 +9,7 @@ from openpyxl.compat import range
 import datetime
 from openpyxl.styles import Style, PatternFill, Border, Side, Alignment, Font
 from openpyxl.cell import get_column_letter
-
+import common_sql
 import re
 
 
@@ -32,530 +32,6 @@ def zagotovka(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
-def daterange(start, stop, step=datetime.timedelta(days=1), inclusive=True):
-    # inclusive=False to behave like range by default
-    if step.days > 0:
-        while start < stop:
-            yield start
-            start = start + step
-    elif step.days < 0:
-        while start > stop:
-            yield start
-            start = start + step
-    if inclusive and start == stop:
-        yield start
-
-def get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, type_of_meter ):
-    """Функция для получения одного параметра по теплу с указанием типа прибора"""
-    cursor = connection.cursor()
-    cursor.execute("""SELECT 
-                          daily_values.date, 
-                          objects.name, 
-                          abonents.name, 
-                          meters.factory_number_manual, 
-                          daily_values.value
-                        FROM 
-                          public.abonents, 
-                          public.objects, 
-                          public.daily_values, 
-                          public.taken_params, 
-                          public.link_abonents_taken_params, 
-                          public.names_params, 
-                          public.params, 
-                          public.meters, 
-                          public.types_meters
-                        WHERE 
-                          daily_values.id_taken_params = taken_params.id AND
-                          taken_params.guid_params = params.guid AND
-                          taken_params.guid_meters = meters.guid AND
-                          link_abonents_taken_params.guid_abonents = abonents.guid AND
-                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                          params.guid_names_params = names_params.guid AND
-                          types_meters.guid = meters.guid_types_meters AND
-                          abonents.name = %s AND 
-                          objects.name = %s AND 
-                          names_params.name = %s AND 
-                          daily_values.date = %s AND 
-                          types_meters.name = %s 
-                        ORDER BY
-                        objects.name ASC
-                        LIMIT 1;""",[obj_title, obj_parent_title, my_parametr, electric_data, type_of_meter])
-    data_table = cursor.fetchall()
-    # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
-    return data_table
-
-#Отчет по теплу
-def get_data_table_by_date_heat(obj_title, obj_parent_title, electric_data):
-    data_table = []
-    
-    my_parametr = "Энергия"    
-    data_table_heat_energy      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Эльф 1.08")
-    
-    my_parametr = 'Объем'               
-    data_table_heat_water_delta      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Эльф 1.08")
-
-    my_parametr = 'ElfTon'               
-    data_table_heat_time_on      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Эльф 1.08")
-
-              
-    for x in range(len(data_table_heat_energy)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_heat_energy[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy[x][2]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy[x][3]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_water_delta[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_time_on[x][4]) # время работы
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-
-        data_table.append(data_table_temp)
-    return data_table
-#------------
-    
-def get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, type_of_meter ):
-    """Функция для получения одного параметра по теплу с указанием типа прибора"""
-    cursor = connection.cursor()
-    cursor.execute("""SELECT 
-                          current_values.date,
-                          current_values.time, 
-                          objects.name, 
-                          abonents.name, 
-                          meters.factory_number_manual, 
-                          current_values.value
-                        FROM 
-                          public.abonents, 
-                          public.objects, 
-                          public.current_values, 
-                          public.taken_params, 
-                          public.link_abonents_taken_params, 
-                          public.names_params, 
-                          public.params, 
-                          public.meters, 
-                          public.types_meters
-                        WHERE 
-                          current_values.id_taken_params = taken_params.id AND
-                          taken_params.guid_params = params.guid AND
-                          taken_params.guid_meters = meters.guid AND
-                          link_abonents_taken_params.guid_abonents = abonents.guid AND
-                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                          params.guid_names_params = names_params.guid AND
-                          types_meters.guid = meters.guid_types_meters AND
-                          abonents.name = %s AND 
-                          objects.name = %s AND 
-                          names_params.name = %s AND 
-                          types_meters.name = %s 
-                        ORDER BY
-                        objects.name ASC
-                        LIMIT 1;""",[obj_title, obj_parent_title, my_parametr, type_of_meter])
-    data_table = cursor.fetchall()
-    # 0 - дата, 1 - Время  2 - Имя объекта, 3 - Имя абонента, 4 - заводской номер, 5 - значение
-    return data_table
-    
-def get_data_table_current_heat(obj_title, obj_parent_title):
-    data_table = []
-    
-    my_parametr = "Энергия"    
-    data_table_heat_energy_current       = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-    
-    my_parametr = 'Объем'               
-    data_table_heat_water_delta_current  = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-
-    my_parametr = 'ElfTon'               
-    data_table_heat_time_on_current      = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-
-    my_parametr = "Ti"    
-    data_table_heat_temp_in_current       = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-    
-    my_parametr = 'To'               
-    data_table_heat_temp_out_current  = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-
-    my_parametr = 'ElfErr'               
-    data_table_heat_error_current      = get_data_table_heat_parametr_current(obj_title, obj_parent_title, my_parametr, u"Эльф 1.08")
-              
-    for x in range(len(data_table_heat_energy_current)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_heat_energy_current[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy_current[x][1]) # время
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy_current[x][3]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy_current[x][4]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_energy_current[x][5]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_water_delta_current[x][5]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_time_on_current[x][5]) # время работы
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_temp_in_current[x][5]) # значение температуры входа
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_temp_out_current[x][5]) # значение температуры выхода
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_temp_in_current[x][5] - data_table_heat_temp_out_current[x][5]) # значение температуры выхода
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_error_current[x][5]) # код ошибки
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        data_table.append(data_table_temp)
-    return data_table
-
-def list_of_abonents_heat(parent_guid, object_name): # Отличие в сортировке
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                       abonents.name
-                      FROM 
-                       public.objects,
-                       public.abonents
-                      WHERE 
-                       objects.guid = abonents.guid_objects AND
-                       objects.guid_parent = %s AND
-                       objects.name = %s""",[parent_guid, object_name])
-    simpleq = simpleq.fetchall()
-    return simpleq    
-        
-def get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr ):
-    cursor = connection.cursor()
-    cursor.execute("""SELECT 
-                        daily_values.date, objects.name, abonents.name, meters.factory_number_manual, daily_values.value 
-                        FROM
-                         public.daily_values, public.link_abonents_taken_params, public.taken_params, public.abonents, public.objects, public.names_params, public.params, public.meters 
-                        WHERE
-                         taken_params.guid = link_abonents_taken_params.guid_taken_params AND taken_params.id = daily_values.id_taken_params AND taken_params.guid_params = params.guid AND taken_params.guid_meters = meters.guid AND abonents.guid = link_abonents_taken_params.guid_abonents AND objects.guid = abonents.guid_objects AND names_params.guid = params.guid_names_params AND
-                        abonents.name = %s AND 
-                        objects.name = %s AND 
-                        names_params.name = %s AND 
-                        daily_values.date = %s 
-                        ORDER BY
-                        objects.name ASC;""",[obj_title, obj_parent_title, my_parametr, electric_data])
-    data_table = cursor.fetchall()
-    # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
-    return data_table
-    
-def get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr ):
-    cursor = connection.cursor()
-    cursor.execute("""SELECT 
-                        monthly_values.date, objects.name, abonents.name, meters.factory_number_manual, monthly_values.value 
-                        FROM
-                         public.monthly_values, public.link_abonents_taken_params, public.taken_params, public.abonents, public.objects, public.names_params, public.params, public.meters 
-                        WHERE
-                         taken_params.guid = link_abonents_taken_params.guid_taken_params AND taken_params.id = monthly_values.id_taken_params AND taken_params.guid_params = params.guid AND taken_params.guid_meters = meters.guid AND abonents.guid = link_abonents_taken_params.guid_abonents AND objects.guid = abonents.guid_objects AND names_params.guid = params.guid_names_params AND
-                        abonents.name = %s AND 
-                        objects.name = %s AND 
-                        names_params.name = %s AND 
-                        monthly_values.date = %s 
-                        ORDER BY
-                        objects.name ASC;""",[obj_title, obj_parent_title, my_parametr, electric_data])
-    data_table = cursor.fetchall()
-    # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
-    return data_table
-    
-def get_data_table_by_date_daily_2_zones(obj_title, obj_parent_title, electric_data):
-    data_table = []
-    
-    my_parametr = "T0 A+"    
-    data_table_t0_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T1 A+"                
-    data_table_t1_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-
-    my_parametr = "T2 A+"                
-    data_table_t2_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-              
-    for x in range(len(data_table_t0_aplus)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][2]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][3]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t1_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t2_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-            
-        data_table.append(data_table_temp)
-    return data_table
-    
-def get_data_table_by_date_daily_3_zones(obj_title, obj_parent_title, electric_data):
-    data_table = []
-    
-    my_parametr = "T0 A+"    
-    data_table_t0_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T1 A+"                
-    data_table_t1_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-
-    my_parametr = "T2 A+"                
-    data_table_t2_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T3 A+"                
-    data_table_t3_aplus = get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr)
-              
-    for x in range(len(data_table_t0_aplus)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][2]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][3]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t1_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t2_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")            
-        try:
-            data_table_temp.append(data_table_t3_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-            
-        data_table.append(data_table_temp)
-    return data_table
-    
-def get_data_table_by_date_monthly_2_zones(obj_title, obj_parent_title, electric_data):
-    data_table = []
-    
-    my_parametr = "T0 A+"    
-    data_table_t0_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T1 A+"                
-    data_table_t1_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-
-    my_parametr = "T2 A+"                
-    data_table_t2_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-              
-    for x in range(len(data_table_t0_aplus)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][2]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][3]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t1_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t2_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-            
-        data_table.append(data_table_temp)
-    return data_table
-    
-def get_data_table_by_date_monthly_3_zones(obj_title, obj_parent_title, electric_data):
-    data_table = []
-    
-    my_parametr = "T0 A+"    
-    data_table_t0_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T1 A+"                
-    data_table_t1_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-
-    my_parametr = "T2 A+"                
-    data_table_t2_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-    
-    my_parametr = "T3 A+"                
-    data_table_t3_aplus = get_data_table_electric_parametr_by_date_monthly(obj_title, obj_parent_title, electric_data, my_parametr)
-              
-    for x in range(len(data_table_t0_aplus)):
-        data_table_temp = []
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][0]) # дата
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][2]) # имя абонента
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][3]) # заводской номер
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t0_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t1_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t2_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_t3_aplus[x][4]) # значение
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-            
-        data_table.append(data_table_temp)
-    return data_table
-
 # Стили
 ali_grey   = Style(fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white  = Style(border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
@@ -563,87 +39,6 @@ ali_yellow = Style(fill=PatternFill(fill_type='solid', start_color='EEEE00'), bo
 ali_white_size_18  = Style(font=Font(size=18))
 # Конец описания стилей
 
-def get_daily_value_by_meter_name(meters_name, electric_data_end, parametr ):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                                daily_values.value
-                                FROM 
-                                public.daily_values, 
-                                public.link_abonents_taken_params, 
-                                public.taken_params, 
-                                public.abonents, 
-                                public.objects, 
-                                public.names_params, 
-                                public.params, 
-                                public.meters, 
-                                public.resources
-                                WHERE 
-                                taken_params.guid = link_abonents_taken_params.guid_taken_params AND
-                                taken_params.id = daily_values.id_taken_params AND
-                                taken_params.guid_params = params.guid AND
-                                taken_params.guid_meters = meters.guid AND
-                                abonents.guid = link_abonents_taken_params.guid_abonents AND
-                                objects.guid = abonents.guid_objects AND
-                                names_params.guid = params.guid_names_params AND
-                                resources.guid = names_params.guid_resources AND
-                                abonents.name = %s AND 
-                                daily_values.date = %s AND
-                                names_params.name = %s AND
-                                resources.name = 'Электричество'
-                                ORDER BY
-                                objects.name ASC;""",[meters_name, electric_data_end, parametr])
-    simpleq = simpleq.fetchall()
-    try:
-        result = simpleq[0][0]
-    except IndexError:
-        result = u'Нет данных'
-    return result
-    
-    
-def get_30_min_by_meter_name(meters_name, electric_data_end, electric_data_time, parametr):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                                  various_values.value 
-
-                                FROM 
-                                  public.various_values, 
-                                  public.meters, 
-                                  public.params, 
-                                  public.taken_params, 
-                                  public.names_params
-                                WHERE 
-                                  params.guid_names_params = names_params.guid AND
-                                  taken_params.guid_params = params.guid AND
-                                  taken_params.guid_meters = meters.guid AND
-                                  taken_params.id = various_values.id_taken_params AND
-                                  meters.name = %s AND
-                                  various_values.date = %s AND 
-                                  various_values.time = %s AND 
-                                  names_params.name = %s
-                                 LIMIT 1;""",[meters_name, electric_data_end, electric_data_time, parametr])
-    simpleq = simpleq.fetchall()
-    try:
-        result = simpleq[0][0]
-    except IndexError:
-        result = u'Нет данных'
-    return result
-
-def get_k_t_n(meter_name):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                          link_abonents_taken_params.coefficient
-                        FROM 
-                          public.link_abonents_taken_params, 
-                          public.taken_params, 
-                          public.meters
-                        WHERE 
-                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                          meters.guid = taken_params.guid_meters AND
-                          meters.name = %s
-                          LIMIT 1;""", [meter_name])
-    simpleq = simpleq.fetchall()
-    return simpleq[0][0]
-    
 def get_k_t_n_by_serial_number(serial_number):
     """Получаем Ктн по серийному номеру счтчика"""
     simpleq = connection.cursor()
@@ -663,22 +58,7 @@ def get_k_t_n_by_serial_number(serial_number):
     simpleq = simpleq.fetchall()
     return simpleq[0][0]
     
-    
-def get_k_t_t(meter_name):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                          link_abonents_taken_params.coefficient_2
-                        FROM 
-                          public.link_abonents_taken_params, 
-                          public.taken_params, 
-                          public.meters
-                        WHERE 
-                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                          meters.guid = taken_params.guid_meters AND
-                          meters.name = %s
-                          LIMIT 1;""", [meter_name])
-    simpleq = simpleq.fetchall()
-    return simpleq[0][0]
+
     
 def get_k_t_t_by_serial_number(serial_number):
     """Получаем Ктт по серийному номеру счтчика"""
@@ -715,17 +95,6 @@ def get_k_a_by_serial_number(serial_number):
                         ORDER BY
                           link_abonents_taken_params.coefficient DESC
                         LIMIT 1;""", [serial_number])
-    simpleq = simpleq.fetchall()
-    return simpleq[0][0]
-    
-def get_serial_number_by_meter_name(meters_name):
-    simpleq = connection.cursor()
-    simpleq.execute(""" SELECT 
-                         meters.factory_number_manual
-                       FROM 
-                         public.meters
-                       WHERE 
-                         meters.name = %s LIMIT 1; """,[meters_name])
     simpleq = simpleq.fetchall()
     return simpleq[0][0]
 
@@ -1415,8 +784,8 @@ def profil_30_min(request):
     
     ws.merge_cells('A2:F2')
     ws['A2'] = u'Профиль мощности по абоненту ' + unicode(request.session['obj_title']) + u' за ' + str(request.session["electric_data_end"])
-    ws['A3'] = u'Ктн = ' + str(get_k_t_n(meters_name))
-    ws['B3'] = u'Ктт = ' + str(get_k_t_t(meters_name))
+    ws['A3'] = u'Ктн = ' + str(common_sql.get_k_t_n(meters_name))
+    ws['B3'] = u'Ктт = ' + str(common_sql.get_k_t_t(meters_name))
     ws['B5'] = 'Дата'
     ws['B5'].style = ali_grey
     ws['C5'] = 'Время'
@@ -1502,13 +871,13 @@ def profil_30_min(request):
         except TypeError:
             data_table_temp.append(u"Н/Д")
         try:
-            data_table_temp.append(a_plus[x][2]*2*get_k_t_n(meters_name)*get_k_t_t(meters_name))
+            data_table_temp.append(a_plus[x][2]*2*common_sql.get_k_t_n(meters_name)*common_sql.get_k_t_t(meters_name))
         except IndexError:
             data_table_temp.append(u"Н/Д")
         except TypeError:
             data_table_temp.append(u"Н/Д")
         try:
-            data_table_temp.append(r_plus[x][2]*2*get_k_t_n(meters_name)*get_k_t_t(meters_name))
+            data_table_temp.append(r_plus[x][2]*2*common_sql.get_k_t_n(meters_name)*common_sql.get_k_t_t(meters_name))
         except IndexError:
             data_table_temp.append(u"Н/Д")
         except TypeError:
@@ -1589,23 +958,23 @@ def report_hour_increment(request): # Выгрузка excel по часовым
     meters_name         = request.session["obj_title"]
     electric_data_end   = request.session["electric_data_end"]
     
-    serial_number = get_serial_number_by_meter_name(meters_name)
+    serial_number = common_sql.get_serial_number_by_meter_name(meters_name)
         
     data_table = []
     # Добавляем первую строку в таблицу данных. Делаем запрос показаний на начало суток.
-    data_table.append([electric_data_end,u'00:00', meters_name, serial_number, get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ),get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ), u'0', u'0'])
+    data_table.append([electric_data_end,u'00:00', meters_name, serial_number, common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ),common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ), u'0', u'0'])
     
-    if get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ) != u'Нет данных':  # Если есть показания на начало суток выполняем почасовое приращение  
+    if common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ) != u'Нет данных':  # Если есть показания на начало суток выполняем почасовое приращение  
         for x in range(24):
             data_table_temp = []
             data_table_temp.append(electric_data_end)
             data_table_temp.append(time_list[(2*x)])
             data_table_temp.append(meters_name)
             data_table_temp.append(serial_number)
-            data_table_temp.append(data_table[len(data_table)-1][4] + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))
-            data_table_temp.append(get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ) + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))
-            data_table_temp.append(get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))
-            data_table_temp.append(get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))    
+            data_table_temp.append(data_table[len(data_table)-1][4] + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))
+            data_table_temp.append(common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ) + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))
+            data_table_temp.append(common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))
+            data_table_temp.append(common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))    
             if x == 0: # Убираем первую строку. Так как показания на 00:00 берем отдельным запросом
                 next
             else:
@@ -1689,7 +1058,7 @@ def pokazania_period(request): # Показания по абоненту за �
 #Запрашиваем данные для отчета
     end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
     start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
-    dates = [x for x in daterange(start_date,
+    dates = [x for x in common_sql.daterange(start_date,
                   end_date,
                   step=datetime.timedelta(days=1),
                   inclusive=True)]
@@ -1699,7 +1068,7 @@ def pokazania_period(request): # Показания по абоненту за �
         if data_table_temp:
             data_table.extend(data_table_temp)
         else:
-            data_table.append([datetime.datetime.strftime(dates[x], "%d.%m.%Y"),meters_name,get_serial_number_by_meter_name(meters_name), u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д'])
+            data_table.append([datetime.datetime.strftime(dates[x], "%d.%m.%Y"),meters_name,common_sql.get_serial_number_by_meter_name(meters_name), u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д'])
    
 # Заполняем отчет значениями
     for row in range(6, len(data_table)+6):
@@ -1740,7 +1109,7 @@ def report_rejim_day(request): # Отчет по режимному дню
     electric_data_end   = request.session["electric_data_end"]
 #    electric_data_start = request.session['electric_data_start']
     data_table = []
-    general_k = get_k_t_t(meters_name) * get_k_t_n(meters_name)
+    general_k = common_sql.get_k_t_t(meters_name) * common_sql.get_k_t_n(meters_name)
 # Шапка отчета
     ws['A1'] = u"ЗАО 'Кировская керамика'"
     ws['H1'] = u'Шифр'
@@ -1754,8 +1123,8 @@ def report_rejim_day(request): # Отчет по режимному дню
     
     ws['B6'] = u'записей показаний электросчетчиков и вольтметров, а также определения нагрузок'
     ws['B7'] = u"и тангенса 'фи' за " + str(electric_data_end) + u'г'
-    ws['B9'] = u'Акт. Счетчик № '# + str(get_serial_number_by_meter_name(meters_name)) 
-    ws['E9'] = u'Реакт. Счетчик № '# + str(get_serial_number_by_meter_name(meters_name))
+    ws['B9'] = u'Акт. Счетчик № '# + str(common_sql.get_serial_number_by_meter_name(meters_name)) 
+    ws['E9'] = u'Реакт. Счетчик № '# + str(common_sql.get_serial_number_by_meter_name(meters_name))
     ws['B10'] = u'Расч. Коэфициент' 
     ws['E10'] = u'Расч. Коэфициент'
 
@@ -1775,7 +1144,7 @@ def report_rejim_day(request): # Отчет по режимному дню
     ws['G46'] = u'фамилия ______________ подпись ______________'
 
     ws['D10'] = ws['G10'] = general_k # Общий коэффициент
-    ws['D9'] = ws['G9'] = str(get_serial_number_by_meter_name(meters_name)) #Серийный номер прибора
+    ws['D9'] = ws['G9'] = str(common_sql.get_serial_number_by_meter_name(meters_name)) #Серийный номер прибора
         
     ws['A13'] = u'0' 
     ws['A14'] = u'1' 
@@ -1851,28 +1220,28 @@ def report_rejim_day(request): # Отчет по режимному дню
 #Запрашиваем данные для отчета
     time_list = ['00:00', '00:30','01:00', '01:30', '02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00', '05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00', '23:30']
     
-    serial_number = get_serial_number_by_meter_name(meters_name)
+    serial_number = common_sql.get_serial_number_by_meter_name(meters_name)
     # Добавляем первую строку в таблицу данных. Делаем запрос показаний на начало суток.
-    data_table.append([electric_data_end,u'00:00', meters_name, serial_number, get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ),get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ), u'0', u'0'])
+    data_table.append([electric_data_end,u'00:00', meters_name, serial_number, common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ),common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 R+' ), u'0', u'0'])
     
-    if get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ) != u'Нет данных':  # Если есть показания на начало суток выполняем почасовое приращение  
+    if common_sql.get_daily_value_by_meter_name(meters_name, electric_data_end, 'T0 A+' ) != u'Нет данных':  # Если есть показания на начало суток выполняем почасовое приращение  
         for x in range(24):
             data_table_temp = []
             data_table_temp.append(electric_data_end) # Дата
             data_table_temp.append(time_list[(2*x)])  # Отчетный час
             data_table_temp.append(meters_name)       # Имя абонента
             data_table_temp.append(serial_number)     # Серийный номер
-            data_table_temp.append(data_table[len(data_table)-1][4] + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))     # Показиние счётчика за предыдущий час + две получасовки А+           
-            data_table_temp.append(data_table[len(data_table)-1][5] + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))     # Показиние счётчика за предыдущий час + две получасовки R+
+            data_table_temp.append(data_table[len(data_table)-1][4] + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))     # Показиние счётчика за предыдущий час + две получасовки А+           
+            data_table_temp.append(data_table[len(data_table)-1][5] + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))     # Показиние счётчика за предыдущий час + две получасовки R+
 
-            data_table_temp.append(get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))                                        # Сумма двух получасовок: потребленная энергия за час А+
-            data_table_temp.append(get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))                                        # Сумма двух получасовок: потребленная энергия за час R+  
+            data_table_temp.append(common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'A+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'A+ Профиль'))                                        # Сумма двух получасовок: потребленная энергия за час А+
+            data_table_temp.append(common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)-1], 'R+ Профиль') + common_sql.get_30_min_by_meter_name(meters_name, electric_data_end, time_list[(2*x)], 'R+ Профиль'))                                        # Сумма двух получасовок: потребленная энергия за час R+  
             if x == 0: # Убираем первую строку. Так как показания на 00:00 берем отдельным запросом 
                 next
             else:
                 data_table.append(data_table_temp)
     if data_table[23][4] and data_table[23][5]:
-        data_table.append([(datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'),u'00:00', meters_name, serial_number, get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 A+' ),get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 R+' ),get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 A+' ) - data_table[23][4],get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 R+' ) - data_table[23][5]])
+        data_table.append([(datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'),u'00:00', meters_name, serial_number, common_sql.get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 A+' ),common_sql.get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 R+' ),common_sql.get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 A+' ) - data_table[23][4],common_sql.get_daily_value_by_meter_name(meters_name, (datetime.datetime.strptime(electric_data_end, u'%d.%m.%Y') + datetime.timedelta(days=1)).strftime(u'%d.%m.%Y'), 'T0 R+' ) - data_table[23][5]])
 
     #------------
 
@@ -1919,186 +1288,6 @@ def report_rejim_day(request): # Отчет по режимному дню
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
     
-
-def delta_sum_a_plus(electric_data_end): # Возвращаем потребление по группе за число по группе Литейный цех
-    cursor_abonents_list = connection.cursor()
-    cursor_abonents_list.execute("""
-                                SELECT 
-                                  meters.name,
-                                  link_balance_groups_meters.type
-                                FROM 
-                                  public.meters, 
-                                  public.link_balance_groups_meters, 
-                                  public.balance_groups
-                                WHERE 
-                                  link_balance_groups_meters.guid_balance_groups = balance_groups.guid AND
-                                  link_balance_groups_meters.guid_meters = meters.guid AND
-                                  balance_groups.name = 'Литейный цех'
-                                ORDER BY
-                                  meters.name ASC;""")
-    abonents_list = cursor_abonents_list.fetchall()
-    obj_title=u'Завод'
-    data_table=[]
-
-    for x in range(len(abonents_list)):
-        cursor_t0_aplus_daily_temp = connection.cursor()
-        cursor_t0_aplus_daily_temp.execute("""
-                    SELECT 
-                      daily_values.date, 
-                      daily_values.value, 
-                      abonents.name, 
-                      daily_values.id_taken_params, 
-                      objects.name, 
-                      names_params.name, 
-                      meters.factory_number_manual, 
-                      resources.name
-                    FROM 
-                      public.daily_values, 
-                      public.link_abonents_taken_params, 
-                      public.taken_params, 
-                      public.abonents, 
-                      public.objects, 
-                      public.names_params, 
-                      public.params, 
-                      public.meters, 
-                      public.resources
-                    WHERE 
-                      taken_params.guid = link_abonents_taken_params.guid_taken_params AND
-                      taken_params.id = daily_values.id_taken_params AND
-                      taken_params.guid_params = params.guid AND
-                      taken_params.guid_meters = meters.guid AND
-                      abonents.guid = link_abonents_taken_params.guid_abonents AND
-                      objects.guid = abonents.guid_objects AND
-                      names_params.guid = params.guid_names_params AND
-                      resources.guid = names_params.guid_resources AND
-                      abonents.name = %s AND 
-                      objects.name = %s AND 
-                      names_params.name = 'T0 A+' AND 
-                      daily_values.date = %s AND 
-                      resources.name = 'Электричество'
-                      ORDER BY
-                      objects.name ASC;""",[abonents_list[x][0], obj_title, electric_data_end])
-        data_table_t0_aplus_daily_temp = cursor_t0_aplus_daily_temp.fetchall()
-        
-        data_table_temp = []
-        try:
-            if abonents_list[x][1]: # Если абонент входит в группу со знаком плюс, то показания как есть
-                data_table_temp.append(data_table_t0_aplus_daily_temp[0][1]*get_k_t_n(abonents_list[x][0])*get_k_t_t(abonents_list[x][0]))
-            else:
-                data_table_temp.append(-data_table_t0_aplus_daily_temp[0][1]*get_k_t_n(abonents_list[x][0])*get_k_t_t(abonents_list[x][0]))
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-
-        data_table.append(data_table_temp)
-    sum_a_plus = 0
-
-    for x in range(len(data_table)):
-        try:
-            sum_a_plus = sum_a_plus + data_table[x][0]
-        except:
-            next
-      
-    if sum_a_plus:
-        return sum_a_plus
-    else:
-        return u'Н/Д'
-
-def delta_sum_r_plus(electric_data_end): # Возвращаем потребление по группе за число
-    cursor_abonents_list = connection.cursor()
-    cursor_abonents_list.execute("""
-                        SELECT 
-                          meters.name,
-                          link_balance_groups_meters.type
-                        FROM 
-                          public.meters, 
-                          public.link_balance_groups_meters, 
-                          public.balance_groups
-                        WHERE 
-                          link_balance_groups_meters.guid_balance_groups = balance_groups.guid AND
-                          link_balance_groups_meters.guid_meters = meters.guid AND
-                          balance_groups.name = 'Литейный цех'
-                                ORDER BY
-                                  meters.name ASC;""")
-    abonents_list = cursor_abonents_list.fetchall()
-    obj_title=u'Завод'
-    data_table=[]
-
-    for x in range(len(abonents_list)):
-        cursor_t0_rplus_daily_temp = connection.cursor()
-        cursor_t0_rplus_daily_temp.execute("""
-                    SELECT 
-                      daily_values.date, 
-                      daily_values.value, 
-                      abonents.name, 
-                      daily_values.id_taken_params, 
-                      objects.name, 
-                      names_params.name, 
-                      meters.factory_number_manual, 
-                      resources.name
-                    FROM 
-                      public.daily_values, 
-                      public.link_abonents_taken_params, 
-                      public.taken_params, 
-                      public.abonents, 
-                      public.objects, 
-                      public.names_params, 
-                      public.params, 
-                      public.meters, 
-                      public.resources
-                    WHERE 
-                      taken_params.guid = link_abonents_taken_params.guid_taken_params AND
-                      taken_params.id = daily_values.id_taken_params AND
-                      taken_params.guid_params = params.guid AND
-                      taken_params.guid_meters = meters.guid AND
-                      abonents.guid = link_abonents_taken_params.guid_abonents AND
-                      objects.guid = abonents.guid_objects AND
-                      names_params.guid = params.guid_names_params AND
-                      resources.guid = names_params.guid_resources AND
-                      abonents.name = %s AND 
-                      objects.name = %s AND 
-                      names_params.name = 'T0 R+' AND 
-                      daily_values.date = %s AND 
-                      resources.name = 'Электричество'
-                      ORDER BY
-                      objects.name ASC;""",[abonents_list[x][0], obj_title, electric_data_end])
-        data_table_t0_rplus_daily_temp = cursor_t0_rplus_daily_temp.fetchall()
-        
-        data_table_temp = []
-        try:
-            if abonents_list[x][1]: # Если абонент входит в группу со знаком плюс, то показания как есть
-                data_table_temp.append(data_table_t0_rplus_daily_temp[0][1]*get_k_t_n(abonents_list[x][0])*get_k_t_t(abonents_list[x][0]))
-            else:
-                data_table_temp.append(-data_table_t0_rplus_daily_temp[0][1]*get_k_t_n(abonents_list[x][0])*get_k_t_t(abonents_list[x][0]))
-
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-
-        data_table.append(data_table_temp)
-    sum_r_plus = 0
-
-    for x in range(len(data_table)):
-        try:
-            sum_r_plus = sum_r_plus + data_table[x][0]
-        except:
-            next
-      
-    if sum_r_plus:
-        return sum_r_plus
-    else:
-        return u'Н/Д'
-
-def product_sum(date):
-    simpleq = connection.cursor()
-    simpleq.execute(""" SELECT 
-          sum(product_info_kilns.product_weight)
-        FROM 
-          public.product_info_kilns
-        WHERE 
-          product_info_kilns.dt = %s;""",[date])
-    simpleq = simpleq.fetchall()
-    return simpleq[0][0]
-
-
 
 def report_economic_electric(request):
     response = StringIO.StringIO()
@@ -2152,7 +1341,7 @@ def report_economic_electric(request):
 
     end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
     start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
-    dates = [x for x in daterange(start_date,
+    dates = [x for x in common_sql.daterange(start_date,
                   end_date,
                   step=datetime.timedelta(days=1),
                   inclusive=True)]
@@ -2164,12 +1353,12 @@ def report_economic_electric(request):
             delta_r_plus = 1
 
             try:
-                delta_a_plus = delta_sum_a_plus(dates[x+1])-delta_sum_a_plus(dates[x])
+                delta_a_plus = common_sql.delta_sum_a_plus(dates[x+1])-common_sql.delta_sum_a_plus(dates[x])
                 if delta_a_plus > 0:
 				    delta_a_plus = delta_a_plus
                 else:
 				    delta_a_plus = u'Н/Д'
-                delta_r_plus = delta_sum_r_plus(dates[x+1])-delta_sum_r_plus(dates[x])
+                delta_r_plus = common_sql.delta_sum_r_plus(dates[x+1])-common_sql.delta_sum_r_plus(dates[x])
                 if delta_r_plus > 0:
 				    delta_r_plus = delta_r_plus
                 else:
@@ -2180,11 +1369,11 @@ def report_economic_electric(request):
                 delta_r_plus = u'Н/Д'
 
             data_table_temp.append(dates[x])
-            data_table_temp.append(product_sum(dates[x]))
+            data_table_temp.append(common_sql.product_sum(dates[x]))
             data_table_temp.append(delta_a_plus)
-            data_table_temp.append(delta_a_plus/(product_sum(dates[x])))
+            data_table_temp.append(delta_a_plus/(common_sql.product_sum(dates[x])))
             data_table_temp.append(delta_r_plus)
-            data_table_temp.append(delta_r_plus/(product_sum(dates[x])))
+            data_table_temp.append(delta_r_plus/(common_sql.product_sum(dates[x])))
         except:
             next
         data_table.append(data_table_temp)
@@ -2232,71 +1421,6 @@ def report_economic_electric(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
-def get_daily_water_channel(meters_name, electric_data_end):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                          abonents.name, 
-                          meters.name, 
-                          daily_values.value, 
-                          daily_values.date,
-                          abonents.account_2
-                        FROM 
-                          public.daily_values, 
-                          public.taken_params, 
-                          public.meters, 
-                          public.params, 
-                          public.abonents, 
-                          public.link_abonents_taken_params
-                        WHERE 
-                          daily_values.id_taken_params = taken_params.id AND
-                          taken_params.guid_meters = meters.guid AND
-                          params.guid = taken_params.guid_params AND
-                          link_abonents_taken_params.guid_abonents = abonents.guid AND
-                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                          abonents.name = %s AND 
-                          daily_values.date = %s;""",[meters_name, electric_data_end])
-    simpleq = simpleq.fetchall()
-    
-    return simpleq
-
-def return_parent_guid_by_abonent_name(object_name):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                          objects.guid
-                        FROM 
-                          public.objects
-                        WHERE 
-                          objects.name = %s;""",[object_name])
-    simpleq = simpleq.fetchall()
-    return simpleq[0][0]
-    
-def list_of_abonents(parent_guid, object_name):
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                       abonents.name
-                      FROM 
-                       public.objects,
-                       public.abonents
-                      WHERE 
-                       objects.guid = abonents.guid_objects AND
-                       objects.guid_parent = %s AND
-                       objects.name = %s 
-
-                       ORDER BY
-                       abonents.name ASC;""",[parent_guid, object_name])
-    simpleq = simpleq.fetchall()
-    return simpleq
-    
-def list_of_objects(parent_guid): #Возвращает список объектов
-    simpleq = connection.cursor()
-    simpleq.execute("""SELECT 
-                          objects.name
-                        FROM 
-                          public.objects
-                        WHERE 
-                          objects.guid_parent = %s;""",[parent_guid])
-    simpleq = simpleq.fetchall()
-    return simpleq
 
 def report_pokazaniya_water_identificators(request): # Показания по воде за дату с идентификаторами
     response = StringIO.StringIO()
@@ -2345,22 +1469,22 @@ def report_pokazaniya_water_identificators(request): # Показания по �
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
                      
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table = get_daily_water_channel(meters_name, electric_data_end)
+        data_table = common_sql.get_daily_water_channel(meters_name, electric_data_end)
     elif (bool(is_object_level_2.search(obj_key))):
-        list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []        
         for x in range(len(list_of_abonents_2)):
-            data_table_temp = get_daily_water_channel(list_of_abonents_2[x], electric_data_end)
+            data_table_temp = common_sql.get_daily_water_channel(list_of_abonents_2[x], electric_data_end)
             data_table.extend(data_table_temp)
     elif(bool(is_object_level_1.search(obj_key))):
         
-        list_of_objects_2 = list_of_objects(return_parent_guid_by_abonent_name(meters_name)) #Список квартир для объекта с пульсарами
+        list_of_objects_2 = common_sql.list_of_objects(common_sql.return_parent_guid_by_abonent_name(meters_name)) #Список квартир для объекта с пульсарами
         data_table = []
         for x in range(len(list_of_objects_2)):
             data_table_temp = [(list_of_objects_2[x][0],)]
-            list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(meters_name), list_of_objects_2[x][0])
+            list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(meters_name), list_of_objects_2[x][0])
             for y in range(len(list_of_abonents_2)):
-                data_table_temp2 = get_daily_water_channel(list_of_abonents_2[y], electric_data_end)
+                data_table_temp2 = common_sql.get_daily_water_channel(list_of_abonents_2[y], electric_data_end)
 
                 data_table_temp.extend(data_table_temp2)                                
                       
@@ -2505,18 +1629,18 @@ def report_electric_simple_2_zones(request):
                   
     if (bool(is_abonent_level.search(obj_key))):
         if (is_electric_monthly == "1"):
-            data_table = get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_end)
+            data_table = common_sql.get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_end)
         elif (is_electric_daily == "1"):
-            data_table = get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_end)
+            data_table = common_sql.get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_end)
 
     elif (bool(is_object_level_2.search(obj_key))):
-            list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+            list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
             data_table = []
             for x in range(len(list_of_abonents_2)):
                 if (is_electric_monthly == "1"):                
-                    data_table_temp = get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp = common_sql.get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
                 elif (is_electric_daily == "1"):                
-                    data_table_temp = get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp = common_sql.get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
                 if data_table_temp:
                     data_table.extend(data_table_temp)
                 else:
@@ -2726,18 +1850,18 @@ def report_electric_simple_3_zones(request):
 #Запрашиваем данные для отчета конец                  
     if (bool(is_abonent_level.search(obj_key))):
         if (is_electric_monthly == "1"):
-            data_table = get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_end)
+            data_table = common_sql.get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_end)
         elif (is_electric_daily == "1"):
-            data_table = get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_end)
+            data_table = common_sql.get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_end)
 
     elif (bool(is_object_level_2.search(obj_key))):
-            list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+            list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
             data_table = []
             for x in range(len(list_of_abonents_2)):
                 if (is_electric_monthly == "1"):                
-                    data_table_temp = get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp = common_sql.get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
                 elif (is_electric_daily == "1"):                
-                    data_table_temp = get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp = common_sql.get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
                 if data_table_temp:
                     data_table.extend(data_table_temp)
                 else:
@@ -3022,25 +2146,25 @@ def report_electric_potreblenie_2_zones(request):
                  
     if (bool(is_abonent_level.search(obj_key))):
         if (is_electric_monthly == "1"):
-            data_table_end   = get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_end)
-            data_table_start = get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_start)
+            data_table_end   = common_sql.get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_end)
+            data_table_start = common_sql.get_data_table_by_date_monthly_2_zones(meters_name, parent_name, electric_data_start)
         elif (is_electric_daily == "1"):
-            data_table_end   = get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_end)
-            data_table_start = get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_start)
+            data_table_end   = common_sql.get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_end)
+            data_table_start = common_sql.get_data_table_by_date_daily_2_zones(meters_name, parent_name, electric_data_start)
 
 
     elif (bool(is_object_level_2.search(obj_key))):
-            list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+            list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
             data_table_end   = []
             data_table_start = []
             for x in range(len(list_of_abonents_2)):
                 if (is_electric_monthly == "1"):                
-                    data_table_temp_end = get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
-                    data_table_temp_start = get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_start)
+                    data_table_temp_end = common_sql.get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp_start = common_sql.get_data_table_by_date_monthly_2_zones(list_of_abonents_2[x], meters_name, electric_data_start)
 
                 elif (is_electric_daily == "1"):                
-                    data_table_temp_end = get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
-                    data_table_temp_start = get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_start)
+                    data_table_temp_end = common_sql.get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp_start = common_sql.get_data_table_by_date_daily_2_zones(list_of_abonents_2[x], meters_name, electric_data_start)
 
                 if data_table_temp_end and data_table_start:
                     data_table_end.extend(data_table_temp_end)
@@ -3434,25 +2558,25 @@ def report_electric_potreblenie_3_zones(request):
                  
     if (bool(is_abonent_level.search(obj_key))):
         if (is_electric_monthly == "1"):
-            data_table_end   = get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_end)
-            data_table_start = get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_start)
+            data_table_end   = common_sql.get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_end)
+            data_table_start = common_sql.get_data_table_by_date_monthly_3_zones(meters_name, parent_name, electric_data_start)
         elif (is_electric_daily == "1"):
-            data_table_end   = get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_end)
-            data_table_start = get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_start)
+            data_table_end   = common_sql.get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_end)
+            data_table_start = common_sql.get_data_table_by_date_daily_3_zones(meters_name, parent_name, electric_data_start)
 
 
     elif (bool(is_object_level_2.search(obj_key))):
-            list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+            list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
             data_table_end   = []
             data_table_start = []
             for x in range(len(list_of_abonents_2)):
                 if (is_electric_monthly == "1"):                
-                    data_table_temp_end = get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
-                    data_table_temp_start = get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_start)
+                    data_table_temp_end = common_sql.get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp_start = common_sql.get_data_table_by_date_monthly_3_zones(list_of_abonents_2[x], meters_name, electric_data_start)
 
                 elif (is_electric_daily == "1"):                
-                    data_table_temp_end = get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
-                    data_table_temp_start = get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_start)
+                    data_table_temp_end = common_sql.get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_end)
+                    data_table_temp_start = common_sql.get_data_table_by_date_daily_3_zones(list_of_abonents_2[x], meters_name, electric_data_start)
 
                 if data_table_temp_end and data_table_start:
                     data_table_end.extend(data_table_temp_end)
@@ -3732,13 +2856,13 @@ def pokazaniya_heat_report(request):
     list_except = [u'ВРУ Счётчик01',u'ВРУ Счётчик02',u'ВРУ Счётчик03',u'ВРУ Счётчик04',u'ВРУ Счётчик05',u'ВРУ Счётчик06',u'ВРУ Счётчик07',u'ВРУ Счётчик08',u'ВРУ Счётчик09',u'ВРУ Счётчик10',u'ВРУ Счётчик11',u'ВРУ Счётчик12',u'ВРУ Счётчик13',u'ВРУ Счётчик14',u'ВРУ Счётчик15',u'ВРУ Счётчик16',u'ВРУ Счётчик17',u'ВРУ Счётчик18',u'ВРУ Счётчик19',u'ВРУ Счётчик20',u'ВРУ Счётчик21',u'ВРУ Счётчик22',u'ВРУ Счётчик23',u'Гараж Счётчик 1',u'Гараж Счётчик 2']
                      
     if (bool(is_abonent_level.search(obj_key))):     
-        data_table = get_data_table_by_date_heat(meters_name, parent_name, electric_data_end)
+        data_table = common_sql.get_data_table_by_date_heat(meters_name, parent_name, electric_data_end)
 
     elif (bool(is_object_level_2.search(obj_key))):
-        list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []
         for x in range(len(list_of_abonents_2)):
-            data_table_temp = get_data_table_by_date_heat(list_of_abonents_2[x], meters_name, electric_data_end)
+            data_table_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x], meters_name, electric_data_end)
 
             if list_of_abonents_2[x][0] in list_except:
                 next
@@ -3869,12 +2993,12 @@ def pokazaniya_heat_current_report(request):
             #request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']  
 
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table = get_data_table_current_heat(meters_name, parent_name)
+        data_table = common_sql.get_data_table_current_heat(meters_name, parent_name)
     elif (bool(is_object_level_2.search(obj_key))):
-        list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []
         for x in range(len(list_of_abonents_2)):
-            data_table_temp = get_data_table_current_heat(list_of_abonents_2[x], parent_name)
+            data_table_temp = common_sql.get_data_table_current_heat(list_of_abonents_2[x], parent_name)
             
             if list_of_abonents_2[x][0] in list_except:
                 next
@@ -4038,9 +3162,9 @@ def report_potreblenie_heat(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
                      
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table_end = get_data_table_by_date_heat(meters_name, parent_name, electric_data_end)
+        data_table_end = common_sql.get_data_table_by_date_heat(meters_name, parent_name, electric_data_end)
         print data_table_end
-        data_table_start = get_data_table_by_date_heat(meters_name, parent_name, electric_data_start)
+        data_table_start = common_sql.get_data_table_by_date_heat(meters_name, parent_name, electric_data_start)
         print data_table_start
         data_table = []
         for x in range(len(data_table_end)):
@@ -4052,11 +3176,11 @@ def report_potreblenie_heat(request):
             
 
     elif (bool(is_object_level_2.search(obj_key))):
-        list_of_abonents_2 = list_of_abonents(return_parent_guid_by_abonent_name(parent_name), meters_name)
+        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []
         for x in range(len(list_of_abonents_2)):
-            data_table_end_temp = get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_end)
-            data_table_start_temp = get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_start)
+            data_table_end_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_end)
+            data_table_start_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_start)
             data_table_temp = []
             for x in range(len(data_table_end_temp)):
 
