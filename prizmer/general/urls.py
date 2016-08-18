@@ -39,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^12/$', views.pokazaniya_water_identificators), # потребление по воде с идентификаторами
     url(r'^14/$', views.electric_simple_2_zones), # Показания по электричеству на дату. 2 тарифа
     url(r'^15/$', views.electric_potreblenie_2_zones), # Потребление по электричеству за период. 2 тарифа    
-    url(r'^16/$', views.electric_simple_3_zones), # Показания по электричеству на дату. 3 тарифа
+    url(r'^16/$', views.electric_simple_3_zones_v2), # Показания по электричеству на дату. 3 тарифа
     url(r'^17/$', views.electric_potreblenie_3_zones), # Потребление по электричеству за период. 3 тарифа
     url(r'^18/$', views.pokazaniya_heat), # показания по теплу
     url(r'^19/$', views.potreblenie_heat), # потребление по теплу
