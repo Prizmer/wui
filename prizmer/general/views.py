@@ -9365,6 +9365,75 @@ def electric_potreblenie_3_zones(request):
     args['dates'] = dates
     return render_to_response("data_table/electric/17.html", args)
        
+
+def electric_potreblenie_3_zones_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u'1'
+    electric_data_start = u''
+    electric_data_end = u''
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            
+            res='Электричество'
+
+            if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
+                    isAbon=True
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
+                
+            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+                    isAbon=False
+                    print u'tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt'
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
+            #*********************************************************************************************************************************************************************
+            else:
+                pass
+        else:
+            obj_title = u'Не выбран'
+            obj_parent_title = u'Не выбран'
+            obj_key = u'Не выбран'
+            is_electric_monthly = 0
+            is_electric_daily = 0 
+            is_electric_current = 0
+            is_electric_delta = 0
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    return render_to_response("data_table/electric/17.html", args)
+    
+    
 def electric_simple_2_zones(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
@@ -9780,151 +9849,33 @@ def electric_simple_3_zones_v2(request):
                 pass
                             
             elif (is_electric_period == "1") & (is_electric_daily =="1") & (bool(is_abonent_level.search(obj_key))): # pokazaniya za period
-
-                end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
-                start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
-                dates = [x for x in common_sql.daterange(start_date,
-                              end_date,
-                              step=datetime.timedelta(days=1),
-                              inclusive=True)]
-                '''for x in range(len(dates)):
-                    data_table_temp = [dates[x], dates[x], datetime.datetime.strftime(dates[x], "%d.%m.%Y")]
-                    data_table.append(data_table_temp)'''
-
-                for x in range(len(dates)):
-                    data_table_temp = common_sql.get_data_table_by_date_daily_3_zones(obj_title, obj_parent_title, datetime.datetime.strftime(dates[x], "%d.%m.%Y"))
-                    data_table.extend(data_table_temp)
+                pass
                 #------------
 
 #*********************************************************************************************************************************************************************      
             elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # показания на начало месяца для объекта
-                cursor_abonents_list = connection.cursor()
-                cursor_abonents_list.execute("""
-                                              SELECT 
-                                               abonents.name
-                                              FROM 
-                                               public.objects, 
-                                               public.abonents
-                                              WHERE 
-                                               objects.guid = abonents.guid_objects AND
-                                               objects.name = %s 
-                                               ORDER BY
-                                               abonents.name ASC;""",[obj_title]) 
-                abonents_list = cursor_abonents_list.fetchall()
-#                data_table = []
-                for x in range(len(abonents_list)):
-                    # query data for each abonent
-                    data_table_temp = common_sql.get_data_table_by_date_monthly_3_zones(abonents_list[x][0], obj_title, electric_data_end)
-                    if not data_table_temp:
-                        data_table_temp = [[electric_data_end, abonents_list[x][0], u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
-                    data_table.extend(data_table_temp)
+                    data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'monthly')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
 #*********************************************************************************************************************************************************************
-            elif (is_electric_daily == '1'): # daily for abonents group
-                    
-                if (bool(is_object_level.search(obj_key))):
-                    cursor_abonents_list = connection.cursor()
-                    cursor_abonents_list.execute("""
-                                              SELECT 
-                                               abonents.name
-                                              FROM 
-                                               public.objects, 
-                                               public.abonents
-                                              WHERE 
-                                               objects.guid = abonents.guid_objects AND
-                                               objects.name = %s
-                                               ORDER BY
-                                               abonents.name ASC;""",[obj_title])
-                    abonents_list = cursor_abonents_list.fetchall()
+            elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for abonents group
+                    data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'daily')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
 
-                elif(bool(is_group_level.search(obj_key))):
-                    cursor_abonents_list = connection.cursor()
-                    cursor_abonents_list.execute("""
-                                              SELECT 
-                                                  abonents.name
-                                                FROM 
-                                                  public.balance_groups, 
-                                                  public.abonents, 
-                                                  public.link_balance_groups_meters, 
-                                                  public.meters, 
-                                                  public.link_abonents_taken_params, 
-                                                  public.taken_params
-                                                WHERE 
-                                                  balance_groups.guid = link_balance_groups_meters.guid_balance_groups AND
-                                                  meters.guid = link_balance_groups_meters.guid_meters AND
-                                                  meters.guid = taken_params.guid_meters AND
-                                                  link_abonents_taken_params.guid_abonents = abonents.guid AND
-                                                  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                                                  balance_groups.name = %s
-                                                GROUP BY
-                                                 abonents.name
-                                                ORDER BY
-                                                  abonents.name ASC;""",[obj_title])
-                    abonents_list = cursor_abonents_list.fetchall()
-                    obj_title_group = obj_title
-                            
-                for x in range(len(abonents_list)):
-                    #print abonents_list[x][0]
-                    if bool(is_group_level.search(obj_key)):
-                        cursor_obj_title = connection.cursor()
-                        cursor_obj_title.execute("""
-                                              SELECT 
-                                              objects.name
-                                            FROM 
-                                              public.abonents, 
-                                              public.balance_groups, 
-                                              public.objects, 
-                                              public.link_balance_groups_meters, 
-                                              public.meters, 
-                                              public.taken_params, 
-                                              public.link_abonents_taken_params
-                                            WHERE 
-                                              abonents.guid_objects = objects.guid AND
-                                              link_balance_groups_meters.guid_balance_groups = balance_groups.guid AND
-                                              link_balance_groups_meters.guid_meters = meters.guid AND
-                                              taken_params.guid_meters = meters.guid AND
-                                              link_abonents_taken_params.guid_abonents = abonents.guid AND
-                                              link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                                              balance_groups.name = %s AND 
-                                              abonents.name = %s
-                                             GROUP BY
-                                             objects.name;""",[obj_title_group, abonents_list[x][0]])
-                        obj_title = cursor_obj_title.fetchall()
-                        obj_title = obj_title[0][0]
-                        #print obj_title
-                    data_table_temp = common_sql.get_data_table_by_date_daily_3_zones(abonents_list[x][0], obj_title, electric_data_end)
-
-                    if not data_table_temp:
-                        data_table_temp = [[electric_data_end, abonents_list[x][0], u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]                    
-                    data_table.extend(data_table_temp)
+            elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # поиск по баланскной группе
+                    data_table= common_sql.get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data_end, 'daily')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
               
-
+            elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))): # поиск по баланскной группе
+                    data_table= common_sql.get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data_end, 'monthly')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
 
             elif (is_electric_current == '1') & (bool(is_object_level.search(obj_key))): # текущие для объекта учёта
-                cursor_abonents_list = connection.cursor()
-                cursor_abonents_list.execute("""
-                                              SELECT 
-                                               abonents.name
-                                              FROM 
-                                               public.objects, 
-                                               public.abonents
-                                              WHERE 
-                                               objects.guid = abonents.guid_objects AND
-                                               objects.name = %s
-                                              ORDER BY
-                                               abonents.name ASC;""",[obj_title])
-                abonents_list = cursor_abonents_list.fetchall()
-#                data_table = []
-                for x in range(len(abonents_list)): # Заполняем табличку тестовыми значениями
-                    data_table_temp = []
-                    data_table_temp.append(u'Дата')
-                    data_table_temp.append(abonents_list[x][0])
-                    data_table_temp.append(u'Какой-то заводской номер')
-                    data_table_temp.append(0)
-                    data_table_temp.append(100)
-                    data_table_temp.append(200)
-                    data_table_temp.append(300)
-                    data_table_temp.append(400)
-                    data_table.append(data_table_temp)
+                    pass
 
 #*********************************************************************************************************************************************************************
             else:
