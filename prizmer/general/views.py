@@ -9370,6 +9370,7 @@ def electric_potreblenie_3_zones_v2(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
     is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
     data_table = []
     obj_title = u'Не выбран'
     obj_key = u'Не выбран'
@@ -9380,6 +9381,7 @@ def electric_potreblenie_3_zones_v2(request):
     is_electric_delta = u'1'
     electric_data_start = u''
     electric_data_end = u''
+    
     dates = None
     is_electric_period = None
     if request.is_ajax():
@@ -9404,10 +9406,12 @@ def electric_potreblenie_3_zones_v2(request):
                 
             elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
                     isAbon=False
-                    print u'tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt'
                     data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
                     request.session["data_table_export"] = data_table
             #*********************************************************************************************************************************************************************
+            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):
+                    data_table=common_sql.get_data_table_electric_period_for_group(obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
             else:
                 pass
         else:
