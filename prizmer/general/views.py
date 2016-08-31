@@ -40,45 +40,7 @@ def simple_query(): # Пример запроса в БД на чистом SQL
 #------------------------------------------------------------------------------------------------------------------------
 
 
-def get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, type_of_meter ):
-    """Функция для получения одного параметра по теплу с указанием типа прибора"""
-    cursor = connection.cursor()
-    cursor.execute("""SELECT 
-                      daily_values.date,
-                      objects.name, 
-                      abonents.name, 
-                      meters.factory_number_manual, 
-                      daily_values.value
-                    FROM 
-                      public.taken_params, 
-                      public.meters, 
-                      public.abonents, 
-                      public.objects, 
-                      public.daily_values, 
-                      public.link_abonents_taken_params, 
-                      public.names_params, 
-                      public.params, 
-                      public.types_meters
-                    WHERE 
-                      taken_params.guid_meters = meters.guid AND
-                      meters.guid_types_meters = types_meters.guid AND
-                      abonents.guid_objects = objects.guid AND
-                      daily_values.id_taken_params = taken_params.id AND
-                      link_abonents_taken_params.guid_abonents = abonents.guid AND
-                      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-                      params.guid = taken_params.guid_params AND
-                      params.guid_names_params = names_params.guid AND
-                      abonents.name = %s AND
-                      objects.name = %s AND
-                      names_params.name = %s AND
-                      daily_values.date = %s AND  
-                      types_meters.name = %s
-                    ORDER BY
-                      objects.name ASC
-                    LIMIT 1;""",[obj_title, obj_parent_title, my_parametr, electric_data, type_of_meter])
-    data_table = cursor.fetchall()
-    # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
-    return data_table
+
     
 
 # Отчет по СПГ на начало суток
@@ -10067,7 +10029,107 @@ def potreblenie_heat(request):
 
     return render_to_response("data_table/heat/19.html", args)
 #--------------------------------------------
+def potreblenie_heat_v2(request): 
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start = request.GET['electric_data_start']
+    obj_key             = request.GET['obj_key']
+    list_except = []
+    
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
+# функция для объектов не передлана
 
+    elif (bool(is_object_level_2.search(obj_key))):
+        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
+        data_table = []
+        for x in range(len(list_of_abonents_2)):
+            data_table_end_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_end)
+            data_table_start_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_start)
+            data_table_temp = []
+            for x in range(len(data_table_end_temp)):
+
+                data_table_temp_2 = []
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][0])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][1])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][2])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_start_temp[x][3])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][3])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][3]-data_table_start_temp[x][3])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+                try:
+                    data_table_temp_2.append(data_table_end_temp[x][5]-data_table_start_temp[x][5])
+                except IndexError:
+                    data_table_temp_2.append(u"Н/Д")
+                except TypeError:
+                    data_table_temp_2.append(u"Н/Д")
+
+                data_table_temp.append(data_table_temp_2)
+            data_table_end_temp = []
+            data_table_start_temp = []
+            
+
+            if list_of_abonents_2[x][0] in list_except:
+                next
+            elif data_table_temp:            
+                data_table.extend(data_table_temp)
+            else:
+                data_table.extend([[0,list_of_abonents_2[x][0],u'Н/Д',u'Н/Д',u'Н/Д',u'Н/Д',u'Н/Д']])
+                
+              
+    else:
+        data_table = []
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+
+
+    return render_to_response("data_table/heat/19.html", args)
     
 def pokazaniya_heat_current(request):
     args = {}
@@ -10112,7 +10174,42 @@ def pokazaniya_heat_current(request):
     args['electric_data_end'] = electric_data_end
 
     return render_to_response("data_table/heat/20.html", args)
+
+
+def pokazaniya_heat_current_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
     
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key'] 
+    list_except = []
+    data_table=[]
+    
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_current_heat_v2(meters_name, parent_name, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_current_heat_v2(meters_name, parent_name, False)
+        for row in data_table:
+            for x in list_except:
+                if x==row[2]:
+                    data_table.remove(x)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    return render_to_response("data_table/heat/20.html", args)
+
 # Test SPG
 def pokazaniya_spg(request):
     args= {}

@@ -1269,8 +1269,8 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
 
 #--------------------!!!!!!! Для работы с ведомостью по электрике
 
-cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/mosfilm-teplo.xlsx'
-cfg_sheet_name = u'Корпус 3'
+cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/k3_forLoad_full_v2.xlsx'
+cfg_sheet_name = u'к3'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
