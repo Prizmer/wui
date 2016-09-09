@@ -14,7 +14,7 @@ import calendar
 import common_sql
 #---------
 
-from general.models import Objects, Abonents, BalanceGroups
+from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters
 
 def dictfetchall(cursor):
 #"Returns all rows from a cursor as a dict"
@@ -5072,7 +5072,60 @@ def rejim_day(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
     return render_to_response("data_table/8.html", args)    
 
+def load_balance_groups(request):
+    #сделать потом воду, пока тут балансные группы!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    parent_name         = request.GET['obj_parent_title']
+    ab_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+                # Добавляем привязку к балансной группе 
+    cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/kB_balance_for_load.xlsx'
+    cfg_sheet_name = u'ВРУ-1'
+    is_electic_cfg = True
+    is_water_cfg = False
+    is_heat_cfg = False
+    from django.db import connection
+    from openpyxl import load_workbook
+    wb = load_workbook(filename = cfg_excel_name)
+    sheet_ranges = wb[cfg_sheet_name]
+    row = 2
+    dt=[]
 
+    while (bool(sheet_ranges[u'A%s'%(row)].value)):
+        guid_balance_groups_from_excel = connection.cursor()
+        balance_group_name=[unicode(sheet_ranges[u'A%s'%(row)].value)]
+        guid_balance_groups_from_excel.execute("""SELECT balance_groups.guid FROM public.balance_groups WHERE balance_groups.name = %s;""",balance_group_name)
+        guid_balance_groups_from_excel = guid_balance_groups_from_excel.fetchall()
+        if len(guid_balance_groups_from_excel)>0:
+            guid_balance_groups = BalanceGroups.objects.get(guid=guid_balance_groups_from_excel[0][0])
+        else: 
+            print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            print u'Надо создать балансную группу(вручную), прежде чем добавлять в неё что-то.'
+            break
+        guid_meters_from_excel = connection.cursor()
+        meters_name=[unicode(sheet_ranges[u'E%s'%(row)].value)]
+        znak=[bool(sheet_ranges[u'D%s'%(row)].value)]
+        guid_meters_from_excel.execute("""SELECT meters.guid FROM public.meters WHERE meters.factory_number_manual = %s;""",meters_name)
+        guid_meters_from_excel = guid_meters_from_excel.fetchall()
+        if len(guid_meters_from_excel)>0:
+            guid_meters = Meters.objects.get(guid=guid_meters_from_excel[0][0])
+        else:
+            print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            print u'Такого счётчика не существует в БД, он не может быть добавлен в балансную группу.'
+            continue
+        add_link_meter_balance_group = LinkBalanceGroupsMeters(guid_balance_groups = guid_balance_groups, guid_meters = guid_meters, type=znak[0])
+        add_link_meter_balance_group.save()
+        
+        dt.append([balance_group_name,meters_name,znak])
+        print unicode(sheet_ranges[u'A%s'%(row)].value), unicode(row), unicode([balance_group_name,meters_name,znak])
+        row = row + 1
+    
+    args = {}
+
+    args['data_table'] = dt
+    args['electric_data_end'] = electric_data_end
+    return render_to_response("data_table/water/24.html", args)
 
 def pokazaniya_water(request):
     args = {}
@@ -5101,8 +5154,8 @@ def pokazaniya_water(request):
         for x in range(len(list_of_abonents_2)):
             data_table_temp = common_sql.get_daily_water_channel(list_of_abonents_2[x], electric_data_end)
             data_table.extend(data_table_temp)
+            
     elif(bool(is_object_level_1.search(obj_key))):
-        
         list_of_objects_2 = common_sql.list_of_objects(common_sql.return_parent_guid_by_abonent_name(meters_name)) #Список квартир для объекта с пульсарами
         data_table = []
         for x in range(len(list_of_objects_2)):
@@ -5171,8 +5224,74 @@ def pokazaniya_water_identificators(request):
     args['electric_data_end'] = electric_data_end
 
     return render_to_response("data_table/water/12.html", args)     
+
+def pokazaniya_water_gvs_hvs_daily(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
     
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
     
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_daily_water_gvs_hvs(obj_title, obj_parent_title , electric_data_end, 'daily', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table=common_sql.get_daily_water_gvs_hvs(obj_title, obj_parent_title , electric_data_end, 'daily', False)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+
+    return render_to_response("data_table/water/28.html", args)     
+def pokazaniya_water_gvs_hvs_current(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_current_water_gvs_hvs(obj_title, obj_parent_title , electric_data_end,  True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table_temp=common_sql.get_current_water_gvs_hvs(obj_title, obj_parent_title , electric_data_end,  False)
+        for row in data_table_temp:
+            if row[4]==u'Н/Д' and row[5]==u'Н/Д':
+                row2=common_sql.get_current_water_gvs_hvs(unicode(row[2]), unicode(row[6]) , electric_data_end, True)
+                print row2
+                print unicode(row[2]), unicode(row[6]), electric_data_end, True
+                if len(row2)==0:
+                    r=[unicode(electric_data_end), u'Н/Д', unicode(row[2]),unicode(row[3]), u'Н/Д', u'Н/Д']
+                    data_table.append(r)
+                else:
+                    data_table.append(row2[0])
+            else:
+                data_table.append(row)
+
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+
+    return render_to_response("data_table/water/26.html", args)     
     
 def potreblenie_water(request):
     args = {}
@@ -9557,7 +9676,102 @@ def electric_simple_2_zones(request):
     
 
     return render_to_response("data_table/electric/14.html", args)
+
+def electric_simple_2_zones_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   = request.GET['is_electric_delta']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            
+            if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):   # monthly for abonents
+                data_table = common_sql.get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, electric_data_end, 'monthly')
+
+                
+            elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):   # daily for abonents
+                data_table = common_sql.get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, electric_data_end, 'daily')
+
+
+            elif (is_electric_current == "1") & (bool(is_abonent_level.search(obj_key))):
+                pass
+                            
+            elif (is_electric_period == "1") & (is_electric_daily =="1") & (bool(is_abonent_level.search(obj_key))): # pokazaniya za period
+                pass
+                #------------
+
+#*********************************************************************************************************************************************************************      
+            elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # показания на начало месяца для объекта
+                    data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'monthly')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
+#*********************************************************************************************************************************************************************
+            elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for abonents group
+                    data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'daily')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+            elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # поиск по баланскной группе
+                    data_table= common_sql.get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data_end, 'daily')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+              
+            elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))): # поиск по баланскной группе
+                    data_table= common_sql.get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data_end, 'monthly')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+            elif (is_electric_current == '1') & (bool(is_object_level.search(obj_key))): # текущие для объекта учёта
+                    pass
+            else:
+                pass
+        else:
+            obj_title = u'Не выбран'
+            obj_parent_title = u'Не выбран'
+            obj_key = u'Не выбран'
+            is_electric_monthly = 0
+            is_electric_daily = 0 
+            is_electric_current = 0
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
     
+    return render_to_response("data_table/electric/14.html", args)
+
+
 def electric_simple_3_zones(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
@@ -9918,6 +10132,40 @@ def pokazaniya_heat(request):
 
     return render_to_response("data_table/heat/18.html", args)
 
+def pokazaniya_heat_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    data_table = []
+    list_except = []
+    if (bool(is_abonent_level.search(obj_key))):     
+        data_table = common_sql.get_data_table_by_date_heat_v2(meters_name, parent_name, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_heat_v2(meters_name, parent_name, electric_data_end, False)
+        for row in data_table:
+            for x in list_except:
+                if x==row[2]:
+                    data_table.remove(x)
+
+
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    return render_to_response("data_table/heat/18.html", args)
 
 def potreblenie_heat(request): 
     args = {}
@@ -10052,75 +10300,11 @@ def potreblenie_heat_v2(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
                      
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table = common_sql.get_data_table_by_date_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
-# функция для объектов не передлана
+        data_table = common_sql.get_data_table_for_period_for_abon_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
 
     elif (bool(is_object_level_2.search(obj_key))):
-        list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
-        data_table = []
-        for x in range(len(list_of_abonents_2)):
-            data_table_end_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_end)
-            data_table_start_temp = common_sql.get_data_table_by_date_heat(list_of_abonents_2[x][0], meters_name, electric_data_start)
-            data_table_temp = []
-            for x in range(len(data_table_end_temp)):
+        data_table = common_sql.get_data_table_for_period_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
 
-                data_table_temp_2 = []
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][0])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][1])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][2])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_start_temp[x][3])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][3])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][3]-data_table_start_temp[x][3])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-                try:
-                    data_table_temp_2.append(data_table_end_temp[x][5]-data_table_start_temp[x][5])
-                except IndexError:
-                    data_table_temp_2.append(u"Н/Д")
-                except TypeError:
-                    data_table_temp_2.append(u"Н/Д")
-
-                data_table_temp.append(data_table_temp_2)
-            data_table_end_temp = []
-            data_table_start_temp = []
-            
-
-            if list_of_abonents_2[x][0] in list_except:
-                next
-            elif data_table_temp:            
-                data_table.extend(data_table_temp)
-            else:
-                data_table.extend([[0,list_of_abonents_2[x][0],u'Н/Д',u'Н/Д',u'Н/Д',u'Н/Д',u'Н/Д']])
-                
-              
     else:
         data_table = []
     

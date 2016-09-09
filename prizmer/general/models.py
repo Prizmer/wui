@@ -807,10 +807,16 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         # "To"      Температура выхода
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"01487323-a28f-419e-9589-2563d785ab2a"))
         add_param.save()
-        # "Канал 1"      Импульсный вход 1
+        # "Канал 1"      Импульсный вход 1 текущий
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6e7f0d37-df5c-4850-991e-b5d7cb793924"))
         add_param.save()
-        # "Канал 2"      Импульсный вход 2
+        # "Канал 1"      Импульсный вход 1 суточный
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9af27a62-d6c8-4b67-bd36-da7103e0b1f1"))
+        add_param.save()
+        # "Канал 2"      Импульсный вход 2 суточный
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"86acc33d-7bea-4977-a5b5-c5858ce9a09d"))
+        add_param.save()
+        # "Канал 2"      Импульсный вход 2 текущий
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"de7bfdfd-c17f-4a7c-942d-b28e85db33cb"))
         add_param.save()
         #-------------Архивные
@@ -826,6 +832,7 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         # "ElfErr" Время работы прибора с ошибкой
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"af047098-bd45-4579-a60c-b75bed376bbe"))
         add_param.save()
+        
         
     elif instance.guid_types_meters.name == u'СПГ762-1':
         #Добавляем параметры для счётчика газа СПГ762 Подсистема 1
@@ -1367,7 +1374,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
