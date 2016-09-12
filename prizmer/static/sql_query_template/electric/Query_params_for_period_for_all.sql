@@ -2,13 +2,13 @@
 z3.t0_start, z3.t1_start, z3.t2_start, z3.t3_start, z3.t4_start, 
 z4.t0_end, z4.t1_end, z4.t2_end, z4.t3_end, z4.t4_end,  
 z4.t0_end-z3.t0_start as delta_t0, z4.t1_end-z3.t1_start as delta_t1, z4.t2_end-z3.t2_start as delta_t2, z4.t3_end-z3.t3_start as delta_t3, z4.t4_end-z3.t4_start as delta_t4,
-z3.t0R_start, z4.t0R_end,  z4.t0R_end-z3.t0R_start as delta_t0R, z4.ktt, z4.ktn, 
-z4.ktt*z4.ktn*(z4.t0_end-z3.t0_start), z4.ktt*z4.ktn*(z4.t0R_end-z3.t0R_start)
+z3.t0R_start, z4.t0R_end,  z4.t0R_end-z3.t0R_start as delta_t0R, z4.ktt,  
+z4.ktt*z4.ktn*(z4.t0_end-z3.t0_start), z4.ktt*z4.ktn*(z4.t0R_end-z3.t0R_start),z4.ktn,z4.a
 from
-(Select z2.ktt, z2.ktn, z2.date as date_end, electric_abons.obj_name, electric_abons.ab_name, electric_abons.factory_number_manual, z2.name_res, z2.t0 as t0_end, z2.t1 as t1_end, z2.t2 as t2_end, z2.t3 as t3_end, z2.t4 as t4_end, z2.t0r as t0r_end
+(Select z2.ktt, z2.ktn, z2.a, z2.date as date_end, electric_abons.obj_name, electric_abons.ab_name, electric_abons.factory_number_manual, z2.name_res, z2.t0 as t0_end, z2.t1 as t1_end, z2.t2 as t2_end, z2.t3 as t3_end, z2.t4 as t4_end, z2.t0r as t0r_end
 from electric_abons
 Left join
-(SELECT z1.ktt, z1.ktn, z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+(SELECT z1.ktt, z1.ktn, z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
 sum(Case when z1.params_name = 'T0 A+' then z1.value else null end) as t0,
 sum(Case when z1.params_name = 'T1 A+' then z1.value else null end) as t1,
 sum(Case when z1.params_name = 'T2 A+' then z1.value else null end) as t2,
@@ -19,8 +19,9 @@ sum(Case when z1.params_name = 'T0 R+' then z1.value else null end) as t0R
                         FROM
                         (
 SELECT 
-                                  link_abonents_taken_params.coefficient_2 as ktt,
-                                  link_abonents_taken_params.coefficient as ktn,
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
                                   daily_values.date,    
                                   daily_values.value,                            
                                   abonents.name, 
@@ -52,7 +53,7 @@ SELECT
                                   daily_values.date = '06.06.2016' AND 
                                   resources.name = 'Электричество'
                                   ) z1                       
-                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn,z1.a
                       order by z1.name) z2
 on electric_abons.ab_name=z2.name_abonent
 where electric_abons.obj_name='Корпус Б') z4, 
