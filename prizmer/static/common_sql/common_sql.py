@@ -1246,7 +1246,7 @@ def get_data_table_electric_parametr_by_date_monthly_v2(obj_title, obj_parent_ti
     # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
     return data_table
 
-def makeSqlQuery_electric_by_period(obj_title, obj_parent_title, date_start, date_end, params,res):
+def makeSqlQuery_electric_by_period(obj_title, obj_parent_title, date_start, date_end, params,res, dm):
     sQuery="""
 Select z3.ab_name, z3.factory_number_manual,
 z3.t0_start, z3.t1_start, z3.t2_start, z3.t3_start, z3.t4_start, 
@@ -1360,9 +1360,12 @@ on electric_abons.ab_name=z2.name_abonent
 where electric_abons.obj_name='%s') z3
 where z3.ab_name=z4.ab_name and z3.ab_name='%s'""" % (params[0],params[1],params[2],params[3], params[4], params[5],  obj_parent_title, obj_title, date_end, res, obj_parent_title, 
                             params[0],params[1],params[2],params[3], params[4], params[5],obj_parent_title, obj_title, date_start, res,obj_parent_title, obj_title)
+    
+    if dm=='monthly' or dm=='daily' or dm=='current':
+        sQuery=sQuery.replace('daily',dm)    
     return sQuery
 
-def makeSqlQuery_electric_by_period_for_all(obj_title, obj_parent_title, date_start, date_end,params, res):
+def makeSqlQuery_electric_by_period_for_all(obj_title, obj_parent_title, date_start, date_end,params, res,dm):
     sQuery="""
 Select z3.ab_name, z3.factory_number_manual,
 z3.t0_start, z3.t1_start, z3.t2_start, z3.t3_start, z3.t4_start, 
@@ -1477,15 +1480,18 @@ where electric_abons.obj_name='%s') z3
 where z3.ab_name=z4.ab_name
 order by z3.ab_name ASC""" % (params[0],params[1],params[2],params[3], params[4], params[5], obj_title, date_end, res, obj_title, 
                             params[0],params[1],params[2],params[3], params[4], params[5],obj_title,  date_start, res,obj_title)
+    if dm=='monthly' or dm=='daily' or dm=='current':
+        sQuery=sQuery.replace('daily',dm)
+    
     return sQuery
 
-def get_data_table_electric_parametr_by_period_v2(isAbon,obj_title, obj_parent_title, electric_data_start, electric_data_end, params, res):
+def get_data_table_electric_parametr_by_period_v2(isAbon,obj_title, obj_parent_title, electric_data_start, electric_data_end, params, res, dm):
     cursor = connection.cursor()
     #isAbon - запрос для абонента или для корпуса
     if isAbon:
-        cursor.execute(makeSqlQuery_electric_by_period(obj_title, obj_parent_title, electric_data_start, electric_data_end,params, res))
+        cursor.execute(makeSqlQuery_electric_by_period(obj_title, obj_parent_title, electric_data_start, electric_data_end,params, res, dm))
     else:
-        cursor.execute(makeSqlQuery_electric_by_period_for_all(obj_title, obj_parent_title, electric_data_start, electric_data_end,params, res))
+        cursor.execute(makeSqlQuery_electric_by_period_for_all(obj_title, obj_parent_title, electric_data_start, electric_data_end,params, res, dm))
     data_table = cursor.fetchall()
     # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
     return data_table
@@ -1918,10 +1924,10 @@ def get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, elect
     if len(data_table)>0: data_table=ChangeNull(data_table, electric_data)
     return data_table
     
-def get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res):
+def get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm):
     data_table = []
     params=[u'T0 A+',u'T1 A+',u'T2 A+',u'T3 A+',u'T4 A+', u'T0 R+']
-    data_table=get_data_table_electric_parametr_by_period_v2(isAbon,obj_title, obj_parent_title, electric_data_start, electric_data_end, params, res)
+    data_table=get_data_table_electric_parametr_by_period_v2(isAbon,obj_title, obj_parent_title, electric_data_start, electric_data_end, params, res, dm)
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
     return data_table
 
