@@ -3442,21 +3442,27 @@ def report_electric_potreblenie_3_zones_v2(request):
     electric_data_start   = request.session['electric_data_start']
     obj_key             = request.session['obj_key']
     is_electric_delta  = request.session['is_electric_delta']
+    is_electric_monthly=request.session['is_electric_monthly']
     data_table = []
     if True:
         if True:                        
             res=u'Электричество'
+            
+            if (is_electric_monthly=="1"):
+                dm='monthly'
+            else:
+                dm='daily'
             if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
-                    isAbon=True
-                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    isAbon=True                    
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
                     request.session["data_table_export"] = data_table
                 
-            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for object
+            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
                     isAbon=False
-                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
                     request.session["data_table_export"] = data_table
             #*********************************************************************************************************************************************************************
-            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):# daily delta for abonents group
+            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):
                     data_table=common_sql.get_data_table_electric_period_for_group(obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
                     request.session["data_table_export"] = data_table
 #Запрашиваем данные для отчета конец
