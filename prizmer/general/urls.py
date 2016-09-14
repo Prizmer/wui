@@ -30,6 +30,7 @@ urlpatterns = patterns('',
     url(r'^1/$', views.data_table_3_tarifa_k), # Потребление за период по T0 A+ и T0 R+ с учётом коэфф.-не переделывала
     url(r'^2/$', views.report_2), # Простой отчёт-не переделывала
     url(r'^3/$', views.data_table_period_3_tarifa), # показания за период. 3 тарифа-не переделывала
+
     url(r'^4/$', views.profil_30_aplus), #получасовки-не переделывала
     url(r'^6/$', views.hour_increment), #часовые приращения энергии-не переделывала
     url(r'^7/$', views.economic_electric), #удельный расход электроэнергии-не переделывала
@@ -45,6 +46,8 @@ urlpatterns = patterns('',
     url(r'^14/$', views.electric_simple_2_zones_v2), # Показания по электричеству на дату. 2 тарифа
     url(r'^16/$', views.electric_simple_3_zones_v2), # Показания по электричеству на дату. 3 тарифа
     url(r'^17/$', views.electric_potreblenie_3_zones_v2), # Потребление по электричеству за период. 3 тарифа
+    
+    
     url(r'^18/$', views.pokazaniya_heat_v2), # показания по теплу
     url(r'^19/$', views.potreblenie_heat_v2), # потребление по теплу
     url(r'^20/$', views.pokazaniya_heat_current_v2), # текущие показания по теплу
@@ -52,8 +55,9 @@ urlpatterns = patterns('',
     url(r'^22/$', views.pokazaniya_spg), #показания суточные по СПГ
     url(r'^23/$', views.test_test),
 
-
-
+    url(r'^25/$', views.electric_between), #срез показаний С date_start ПО date_end
+    url(r'^27/$', views.electric_between_2_zones), #срез показаний С date_start ПО date_end
+    url(r'^29/$', views.electric_between_3_zones), #срез показаний С date_start ПО date_end
     
 
    

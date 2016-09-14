@@ -25,6 +25,9 @@ urlpatterns = patterns('',
     url(r'^18/$', views.pokazaniya_heat_report_v2), # Тепло. Простой отчет по показаниям на дату.
     url(r'^19/$', views.report_potreblenie_heat_v2), # Тепло. Отчет по потреблению за период.
     url(r'^20/$', views.pokazaniya_heat_current_report_v2), # Тепло. Простой отчет по показаниям. Последние считанные данные.
+    url(r'^25/$', views.electric_between_report), # Электрика, показания на даты С date_start ПО date_end
+    url(r'^27/$', views.electric_between_2_zones_report), # Электрика, показания на даты С date_start ПО date_end
+    url(r'^29/$', views.electric_between_3_zones_report), # Электрика, показания на даты С date_start ПО date_end
     url(r'^26/$', views.pokazaniya_water_current_report),#текущие(последние считанные) показания для Эльфов ГВС и ХВС
     url(r'^28/$', views.pokazaniya_water_daily_report),# показания на дату  для Эльфов ГВС и ХВС
    

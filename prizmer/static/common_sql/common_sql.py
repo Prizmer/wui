@@ -1163,7 +1163,7 @@ group by z1.name_objects, z1.monthly_date, z1.name_objects, z1.name_abonents, z1
 on electric_abons.ab_name=z2.name_abonents
 where electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name ASC;
-;"""%(params[0],params[1],params[2],params[3], res,obj_title, electric_data, obj_title)
+"""%(params[0],params[1],params[2],params[3], res,obj_title, electric_data, obj_title)
 
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('monthly',dm)
@@ -1179,11 +1179,91 @@ def get_data_table_electric_parametr_by_date_for_object_v2(obj_title, electric_d
     # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
     return data_table
 
+def makeSqlQuery_electric_between(obj_title, obj_parent_title,data_start, data_end, params):
+    sQuery="""
+    Select *, 
+z3.t0-lag(t0) over (order by c_date) as delta,
+z3.t1-lag(t1) over (order by c_date) as delta_t1,
+z3.t2-lag(t2) over (order by c_date) as delta_t2,
+z3.t3-lag(t3) over (order by c_date) as delta_t3
+from
+(select c_date::date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z4
+left join 
+(Select  z2.daily_date,
+  electric_abons.obj_name, electric_abons.ab_name, 
+    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3, z2.ktn, z2.ktt, z2.a 
+from electric_abons
+LEFT JOIN 
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+z1.ktn, z1.ktt, z1.a 
+                        FROM
+                        (SELECT daily_values.date as daily_date, 
+                        objects.name as name_objects, 
+                        abonents.name as name_abonents, 
+                        meters.factory_number_manual as number_manual, 
+                        daily_values.value as value_daily, 
+                        names_params.name as params_name,
+                        link_abonents_taken_params.coefficient as ktt,
+                         link_abonents_taken_params.coefficient_2 as ktn,
+                          link_abonents_taken_params.coefficient_3 as a
+                        FROM
+                         public.daily_values, 
+                         public.link_abonents_taken_params, 
+                         public.taken_params, 
+                         public.abonents, 
+                         public.objects, 
+                         public.names_params, 
+                         public.params, 
+                         public.meters,
+                         public.types_meters,
+                         public.resources			
+                        WHERE
+                        taken_params.guid = link_abonents_taken_params.guid_taken_params AND 
+                        taken_params.id = daily_values.id_taken_params AND 
+                        taken_params.guid_params = params.guid AND 
+                        taken_params.guid_meters = meters.guid AND 
+                        abonents.guid = link_abonents_taken_params.guid_abonents AND 
+                        objects.guid = abonents.guid_objects AND 
+                        names_params.guid = params.guid_names_params AND
+                        params.guid_names_params=names_params.guid and 
+                        types_meters.guid=meters.guid_types_meters and
+                        names_params.guid_resources=resources.guid and
+                        resources.name='%s' and
+                        abonents.name = '%s' AND 
+                        objects.name = '%s' AND                      
+                        daily_values.date between '%s' and '%s'
+                        ) z1                      
+group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktn, z1.ktt, z1.a 
+) z2
+on electric_abons.ab_name=z2.name_abonents
+where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
+ORDER BY electric_abons.ab_name, z2.daily_date  ASC) z3
+on z4.c_date=z3.daily_date 
+order by z4.c_date"""%(data_start,data_end,params[0],params[1],params[2],params[3],params[4],obj_title, obj_parent_title, data_start,data_end,obj_title, obj_parent_title)
+    print sQuery
+    return sQuery
+
+def get_data_table_electric_between(obj_title, obj_parent_title,data_start, data_end):
+    data_table = []
+    params=[u'T0 A+',u'T1 A+',u'T2 A+',u'T3 A+', u'Электричество']
+    cursor = connection.cursor()
+    cursor.execute(makeSqlQuery_electric_between(obj_title, obj_parent_title,data_start, data_end, params))
+    data_table = cursor.fetchall()
+    if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table
+
+
 def makeSqlQuery_electric_by_daily_or_monthly(obj_title, obj_parent_title, electric_data, params, dm):
     sQuery="""
-    Select  z2.daily_date,
+   Select  z2.daily_date,
    electric_abons.ab_name, 
-    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3, electric_abons.obj_name,  z2.ktt, z2.ktn, z2.a 
+   electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3, electric_abons.obj_name,  z2.ktt, z2.ktn, z2.a 
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
