@@ -47,7 +47,6 @@ urlpatterns = patterns('',
     url(r'^16/$', views.electric_simple_3_zones_v2), # Показания по электричеству на дату. 3 тарифа
     url(r'^17/$', views.electric_potreblenie_3_zones_v2), # Потребление по электричеству за период. 3 тарифа
     
-    
     url(r'^18/$', views.pokazaniya_heat_v2), # показания по теплу
     url(r'^19/$', views.potreblenie_heat_v2), # потребление по теплу
     url(r'^20/$', views.pokazaniya_heat_current_v2), # текущие показания по теплу

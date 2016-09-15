@@ -9555,7 +9555,6 @@ def electric_potreblenie_2_zones_v2(request):
             request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
             
             res='Электричество'
-
             if (is_electric_monthly=="1"):
                 dm='monthly'
             else:

@@ -1180,6 +1180,7 @@ def get_data_table_electric_parametr_by_date_for_object_v2(obj_title, electric_d
     return data_table
 
 def makeSqlQuery_electric_between(obj_title, obj_parent_title,data_start, data_end, params):
+
     sQuery="""
     Select *, 
 z3.t0-lag(t0) over (order by c_date) as delta,
@@ -1245,8 +1246,8 @@ on electric_abons.ab_name=z2.name_abonents
 where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name, z2.daily_date  ASC) z3
 on z4.c_date=z3.daily_date 
-order by z4.c_date"""%(data_start,data_end,params[0],params[1],params[2],params[3],params[4],obj_title, obj_parent_title, data_start,data_end,obj_title, obj_parent_title)
-    print sQuery
+order by z4.c_date""" % (data_start,data_end,params[0],params[1],params[2],params[3],params[4],unicode(obj_title), unicode(obj_parent_title), data_start,data_end,unicode(obj_title), unicode(obj_parent_title))
+
     return sQuery
 
 def get_data_table_electric_between(obj_title, obj_parent_title,data_start, data_end):
