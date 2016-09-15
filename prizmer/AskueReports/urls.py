@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     url(r'^16/$', views.report_electric_simple_3_zones_v2), # Электрика. Простой отчет по показаниям на дату. 3 Тарифа
     url(r'^15/$', views.report_electric_potreblenie_2_zones), # Электрика. Отчет по потреблению за период по двум датам. 2 Тарифа.
     url(r'^17/$', views.report_electric_potreblenie_3_zones_v2), # Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
+    url(r'^31/$', views.report_electric_potreblenie_2_zones_v2), # Электрика. Отчет по потреблению за период по двум датам. 2 Тарифа.
     url(r'^18/$', views.pokazaniya_heat_report_v2), # Тепло. Простой отчет по показаниям на дату.
     url(r'^19/$', views.report_potreblenie_heat_v2), # Тепло. Отчет по потреблению за период.
     url(r'^20/$', views.pokazaniya_heat_current_report_v2), # Тепло. Простой отчет по показаниям. Последние считанные данные.

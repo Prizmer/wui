@@ -22,16 +22,16 @@ SELECT
                                   link_abonents_taken_params.coefficient_2 as ktn,
                                   link_abonents_taken_params.coefficient as ktt,
                                   link_abonents_taken_params.coefficient_3 as a,
-                                  monthly_values.date,    
-                                  monthly_values.value,                            
+                                  daily_values.date,    
+                                  daily_values.value,                            
                                   abonents.name, 
-                                  monthly_values.id_taken_params, 
+                                  daily_values.id_taken_params, 
                                   objects.name as name_objects,
                                   names_params.name as params_name,
                                   meters.factory_number_manual as num_manual, 
                                   resources.name as name_res
                                 FROM 
-                                  public.monthly_values, 
+                                  public.daily_values, 
                                   public.link_abonents_taken_params, 
                                   public.taken_params, 
                                   public.abonents, 
@@ -42,7 +42,7 @@ SELECT
                                   public.resources
                                 WHERE 
                                   taken_params.guid = link_abonents_taken_params.guid_taken_params AND
-                                  taken_params.id = monthly_values.id_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
                                   taken_params.guid_params = params.guid AND
                                   taken_params.guid_meters = meters.guid AND
                                   abonents.guid = link_abonents_taken_params.guid_abonents AND
@@ -50,7 +50,7 @@ SELECT
                                   names_params.guid = params.guid_names_params AND
                                   resources.guid = names_params.guid_resources AND                                  
                                   objects.name = 'Корпус Б' AND 
-                                  monthly_values.date = '01.06.2016' AND 
+                                  daily_values.date = '23.08.2016' AND 
                                   resources.name = 'Электричество'
                                   ) z1                       
                       group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn,z1.a
@@ -73,16 +73,16 @@ sum(Case when z1.params_name = 'T0 R+' then z1.value else null end) as t0R
                         FROM
                         (
 SELECT 
-                                  monthly_values.date,    
-                                  monthly_values.value,                            
+                                  daily_values.date,    
+                                  daily_values.value,                            
                                   abonents.name, 
-                                  monthly_values.id_taken_params, 
+                                  daily_values.id_taken_params, 
                                   objects.name as name_objects,
                                   names_params.name as params_name,
                                   meters.factory_number_manual as num_manual, 
                                   resources.name as name_res
                                 FROM 
-                                  public.monthly_values, 
+                                  public.daily_values, 
                                   public.link_abonents_taken_params, 
                                   public.taken_params, 
                                   public.abonents, 
@@ -93,7 +93,7 @@ SELECT
                                   public.resources
                                 WHERE 
                                   taken_params.guid = link_abonents_taken_params.guid_taken_params AND
-                                  taken_params.id = monthly_values.id_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
                                   taken_params.guid_params = params.guid AND
                                   taken_params.guid_meters = meters.guid AND
                                   abonents.guid = link_abonents_taken_params.guid_abonents AND
@@ -101,7 +101,7 @@ SELECT
                                   names_params.guid = params.guid_names_params AND
                                   resources.guid = names_params.guid_resources AND                                  
                                   objects.name = 'Корпус Б' AND 
-                                  monthly_values.date = '01.07.2016' AND 
+                                  daily_values.date = '01.08.2016' AND 
                                   resources.name = 'Электричество'
                                   ) z1                       
                       group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res

@@ -9522,7 +9522,82 @@ def electric_potreblenie_3_zones_v2(request):
     args['dates'] = dates
     return render_to_response("data_table/electric/17.html", args)
     
+
+def electric_potreblenie_2_zones_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u'1'
+    electric_data_start = u''
+    electric_data_end = u''
     
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            
+            res='Электричество'
+
+            if (is_electric_monthly=="1"):
+                dm='monthly'
+            else:
+                dm='daily'
+            if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
+                    isAbon=True                    
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table
+                
+            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+                    isAbon=False
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table
+            #*********************************************************************************************************************************************************************
+            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):
+                    data_table=common_sql.get_data_table_electric_period_for_group(obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
+            else:
+                pass
+        else:
+            obj_title = u'Не выбран'
+            obj_parent_title = u'Не выбран'
+            obj_key = u'Не выбран'
+            is_electric_monthly = 0
+            is_electric_daily = 0 
+            is_electric_current = 0
+            is_electric_delta = 0
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    return render_to_response("data_table/electric/31.html", args)
+
 def electric_simple_2_zones(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')

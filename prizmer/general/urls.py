@@ -58,7 +58,7 @@ urlpatterns = patterns('',
     url(r'^25/$', views.electric_between), #срез показаний С date_start ПО date_end
     url(r'^27/$', views.electric_between_2_zones), #срез показаний С date_start ПО date_end
     url(r'^29/$', views.electric_between_3_zones), #срез показаний С date_start ПО date_end
-    
+    url(r'^31/$', views.electric_potreblenie_2_zones_v2), # Потребление по электричеству за период. 3 тарифа
 
    
    #---- Test urls
