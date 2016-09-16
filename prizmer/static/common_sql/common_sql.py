@@ -286,7 +286,6 @@ def makeSqlQuery_heat_by_date_daily_for_obj(obj_title, electric_data_end,my_para
 from heat_abons
 left join
 (SELECT 
-
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
@@ -318,7 +317,8 @@ WHERE
   group by   abonents.name, meters.factory_number_manual
   ) z1
 on heat_abons.ab_name=z1.ab_name
-order by heat_abons.ab_name"""%(my_params[0],my_params[1],my_params[2],obj_title, electric_data_end,my_params[3])
+where heat_abons.obj_name='%s'
+order by heat_abons.ab_name"""%(my_params[0],my_params[1],my_params[2],obj_title, electric_data_end,my_params[3],obj_title)
     return sQuery
 
 def get_data_table_heat_parametr_by_date_daily_v2(obj_title, obj_parent_title,electric_data_end, my_params, isAbon):

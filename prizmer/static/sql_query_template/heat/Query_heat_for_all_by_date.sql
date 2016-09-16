@@ -28,10 +28,11 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   params.guid_names_params = names_params.guid AND
   params.guid_types_meters = types_meters.guid AND
-  objects.name = 'Корпус 3' AND 
-  daily_values.date= '03.09.2016' AND 
+  objects.name = 'Корпус 2' AND 
+  daily_values.date= '15.09.2016' AND 
   types_meters.name = 'Эльф 1.08'
   group by   abonents.name, meters.factory_number_manual
   ) z1
 on heat_abons.ab_name=z1.ab_name
+where heat_abons.obj_name='Корпус 2'
 order by heat_abons.ab_name
