@@ -31,12 +31,12 @@ current_values.id_taken_params=taken_params.id and
   names_params.guid_resources = resources.guid AND
   meters.guid_types_meters = types_meters.guid and
   resources.name='Импульс' and
-  objects.name='Корпус 3'
+  objects.name='Корпус 2'
   group by   objects.name, 
   abonents.name, 
   meters.factory_number_manual, 
   current_values.date
   order by current_values.date) z1
   on water_abons.ab_name=z1.ab_name and water_abons.obj_name=z1.obj_name
-  where water_abons.obj_name='Корпус 3'
+  where water_abons.obj_name='Корпус 2'
   order by water_abons.ab_name

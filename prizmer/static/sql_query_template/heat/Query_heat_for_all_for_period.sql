@@ -32,8 +32,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   params.guid_types_meters = types_meters.guid AND
 
-  objects.name = 'Корпус 3' AND 
-  daily_values.date= '03.09.2016' and
+  objects.name = 'Корпус 2' AND 
+  daily_values.date= '10.09.2016' and
   names_params.name='Энергия'
   order by  daily_values.value ASC
   ) z1,
@@ -66,11 +66,12 @@ WHERE
   params.guid_names_params = names_params.guid AND
   params.guid_types_meters = types_meters.guid AND
 
-  objects.name = 'Корпус 3' AND 
-  daily_values.date= '03.09.2016' and
+  objects.name = 'Корпус 2' AND 
+  daily_values.date= '09.09.2016' and
   names_params.name='Энергия'
   order by  daily_values.value ASC
   ) z2
   where z1.ab_name=z2.ab_name) z3
   on heat_abons.ab_name=z3.ab_name
+  where heat_abons.obj_name='Корпус 2'
   order by heat_abons.ab_name

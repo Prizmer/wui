@@ -407,8 +407,9 @@ WHERE
   ) z2
   where z1.ab_name=z2.ab_name) z3
   on heat_abons.ab_name=z3.ab_name
+  where heat_abons.obj_name='%s'
   order by heat_abons.ab_name
-    """%(obj_title, electric_data_start,my_params[0],obj_title,electric_data_end,my_params[0])
+    """%(obj_title, electric_data_start,my_params[0],obj_title,electric_data_end,my_params[0],obj_title)
     print sQuery
     return sQuery
 
