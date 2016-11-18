@@ -10661,6 +10661,46 @@ def pokazaniya_spg(request):
 
     return render_to_response("data_table/gas/22.html", args)
     
+def pokazaniya_sayany(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_sayany(meters_name, parent_name, electric_data_end)
+    elif (bool(is_object_level_2.search(obj_key))):
+        list_of_abonents_2 = common_sql.list_of_abonents_heat(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
+        data_table = []
+        for x in range(len(list_of_abonents_2)):
+
+            data_table_temp = common_sql.get_data_table_by_date_heat_sayany(list_of_abonents_2[x], meters_name, electric_data_end)
+            if data_table_temp:            
+                data_table.extend(data_table_temp)
+            else:
+                data_table.extend([[electric_data_end,list_of_abonents_2[x][0],u'Н/Д',u'Н/Д',u'Н/Д']])
+                
+              
+    else:
+        data_table = [] 
+        
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/heat/30.html", args)
+    
 def test_test(request):
     args={}
     args['test_test'] = 10

@@ -1136,9 +1136,38 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         # Объем газа при раб.условиях нарастающим итогом              
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"d16b31ea-87d1-409a-bbf8-4a743b678dbb"))
         add_param.save()
-        
+
+    elif instance.guid_types_meters.name == u'Саяны Комбик':
+        #Добавляем параметры для счётчика Саяны Комбик
+    
+        #-------------Суточные
+        # "Q" Тепловая энергия. Канал1
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e7f2ffba-9a40-43e1-80f3-ddd22596cdb8"))
+        add_param.save()    
+        # "Q" Тепловая энергия. Канал2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6f9cd79e-ca34-447e-8ad1-d54531389fe1"))
+        add_param.save() 
+        # "M" Расход воды. Канал1
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"b05de8e2-6176-4fc0-bc44-79ceb4229c80"))
+        add_param.save() 
+        # "M" ТРасход воды. Канал2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5f256e9b-1cb3-4f27-a53a-d08b446dda58"))
+        add_param.save() 
+        # "T" Температура. Канал1
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"75474616-f3db-4903-91d5-1f22f6593394"))
+        add_param.save() 
+        # "T" Температура. Канал2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"f3210c5b-afde-4c9a-b201-9c7c403c4cf2"))
+        add_param.save() 
+        # "T" Температура. Канал3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"b12762a0-0a06-49a4-b842-8ad3378f4602"))
+        add_param.save() 
+        # "T" Температура. Канал4
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"472ba2fd-cc06-4147-a1e7-c1bb66096536"))
+        add_param.save() 
     else:
-        pass
+        print u'Тип счётчика не определен'
+    
            
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
@@ -1276,8 +1305,8 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
 
 #--------------------!!!!!!! Для работы с ведомостью по электрике
 
-cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/mosfilm-teplo_tcp-ip_for_load.xlsx'
-cfg_sheet_name = u'Корпус 2'
+cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\vodniy_original_v2_for_load.xlsx'
+cfg_sheet_name = u'Heat k1'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1351,7 +1380,9 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
             elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'СПГ762-3':
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"e4fb7950-a44f-41f0-a6ff-af5e30d9d562") )
                 add_meter.save()
-                
+            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Саяны Комбик':
+                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"5429b439-233e-4944-b91b-4b521a10f77b") )
+                add_meter.save()
                 
              
             # Добавляем привязку к балансной группе 

@@ -2354,6 +2354,108 @@ def get_daily_water_channel(meters_name, electric_data_end):
     simpleq = simpleq.fetchall()
     
     return simpleq
+    
+    
+#Отчет по теплу на начало суток. Саяны
+def get_data_table_by_date_heat_sayany(obj_title, obj_parent_title, electric_data):
+    data_table = []
+    
+    my_parametr = "Q Система1"    
+    data_table_heat_Q1       = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    
+    my_parametr = 'Q Система2'               
+    data_table_heat_Q2  = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+
+    my_parametr = 'M Система1'               
+    data_table_heat_M1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+
+    my_parametr = 'M Система2'               
+    data_table_heat_M2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+
+    my_parametr = 'T Канал1'               
+    data_table_heat_T1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    
+    my_parametr = 'T Канал2'               
+    data_table_heat_T2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    
+    my_parametr = 'T Канал3'               
+    data_table_heat_T3      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    
+    my_parametr = 'T Канал4'               
+    data_table_heat_T4      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+
+              
+    for x in range(len(data_table_heat_Q1)):
+        data_table_temp = []
+        try:
+            data_table_temp.append(data_table_heat_Q1[x][0]) # дата
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_Q1[x][2]) # имя абонента
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_Q1[x][3]) # заводской номер
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_Q1[x][4]) # значение Q1
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_Q2[x][4]) # значение Q2
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_M1[x][4]) # значение M1
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_M2[x][4]) # значение M2
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_T1[x][4]) # значение T1
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_T2[x][4]) # значение T2
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_T3[x][4]) # значение T3
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+        try:
+            data_table_temp.append(data_table_heat_T4[x][4]) # значение T4
+        except IndexError:
+            data_table_temp.append(u"Н/Д")
+        except TypeError:
+            data_table_temp.append(u"Н/Д")
+
+        data_table.append(data_table_temp)
+    return data_table
 
 def return_parent_guid_by_abonent_name(object_name):
     simpleq = connection.cursor()
