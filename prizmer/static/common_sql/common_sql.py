@@ -2355,34 +2355,140 @@ def get_daily_water_channel(meters_name, electric_data_end):
     
     return simpleq
     
+def makeSqlQuery_heat_sayany_by_date_for_abon(obj_title, obj_parent_title , electric_data_end, my_params):
+    sQuery="""
+    SELECT 
+
+  daily_values.date, 
+   
+  abonents.name,   
+  meters.factory_number_manual, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  abonents.name = '%s' AND 
+  daily_values.date = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name
+    """%(my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title,electric_data_end)
+    return sQuery
+    
+def makeSqlQuery_heat_sayany_by_date_for_obj(obj_title, obj_parent_title , electric_data_end, my_params):
+    sQuery="""
+    select z1.date, heat_abons.ab_name, heat_abons.factory_number_manual, z1.q1, z1.m1,z1.t1, z1.t2
+from heat_abons
+left join
+(
+SELECT 
+  daily_values.date,    
+  abonents.name as ab_name,   
+  meters.factory_number_manual, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  daily_values.date = '%s'  
+  group by daily_values.date,
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name
+  order by abonents.name) as z1
+on heat_abons.ab_name=z1.ab_name
+where heat_abons.obj_name='%s'
+order by heat_abons.ab_name
+  
+
+    """%(my_params[1],my_params[2],my_params[3],my_params[4],obj_title,my_params[0],electric_data_end,obj_title)
+    return sQuery
+
+def get_data_table_by_date_heat_sayany_v2(obj_title, obj_parent_title, electric_data_end, isAbon):
+    my_params=[u'Sayany',u'Q Система1' ,u'M Система1',u'T Канал1',u'T Канал2' ]
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(makeSqlQuery_heat_sayany_by_date_for_abon(obj_title, obj_parent_title , electric_data_end, my_params))
+    else:
+        cursor.execute(makeSqlQuery_heat_sayany_by_date_for_obj(obj_title, obj_parent_title , electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    if len(data_table)>0: 
+        data_table=ChangeNull(data_table, electric_data_end)
+    return data_table
     
 #Отчет по теплу на начало суток. Саяны
 def get_data_table_by_date_heat_sayany(obj_title, obj_parent_title, electric_data):
     data_table = []
     
     my_parametr = "Q Система1"    
-    data_table_heat_Q1       = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    data_table_heat_Q1       = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
     
-    my_parametr = 'Q Система2'               
-    data_table_heat_Q2  = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+#    my_parametr = 'Q Система2'               
+#    data_table_heat_Q2  = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
 
     my_parametr = 'M Система1'               
-    data_table_heat_M1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
-
-    my_parametr = 'M Система2'               
-    data_table_heat_M2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    data_table_heat_M1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
+#
+#    my_parametr = 'M Система2'               
+#    data_table_heat_M2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
 
     my_parametr = 'T Канал1'               
-    data_table_heat_T1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    data_table_heat_T1      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
     
     my_parametr = 'T Канал2'               
-    data_table_heat_T2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
-    
-    my_parametr = 'T Канал3'               
-    data_table_heat_T3      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
-    
-    my_parametr = 'T Канал4'               
-    data_table_heat_T4      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Саяны Комбик")
+    data_table_heat_T2      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
+#    
+#    my_parametr = 'T Канал3'               
+#    data_table_heat_T3      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
+#    
+#    my_parametr = 'T Канал4'               
+#    data_table_heat_T4      = get_data_table_heat_parametr_by_date_daily(obj_title, obj_parent_title, electric_data, my_parametr, u"Sayany")
 
               
     for x in range(len(data_table_heat_Q1)):
@@ -2411,24 +2517,24 @@ def get_data_table_by_date_heat_sayany(obj_title, obj_parent_title, electric_dat
             data_table_temp.append(u"Н/Д")
         except TypeError:
             data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_Q2[x][4]) # значение Q2
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
+#        try:
+#            data_table_temp.append(data_table_heat_Q2[x][4]) # значение Q2
+#        except IndexError:
+#            data_table_temp.append(u"Н/Д")
+#        except TypeError:
+#            data_table_temp.append(u"Н/Д")
         try:
             data_table_temp.append(data_table_heat_M1[x][4]) # значение M1
         except IndexError:
             data_table_temp.append(u"Н/Д")
         except TypeError:
             data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_M2[x][4]) # значение M2
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
+#        try:
+#            data_table_temp.append(data_table_heat_M2[x][4]) # значение M2
+#        except IndexError:
+#            data_table_temp.append(u"Н/Д")
+#        except TypeError:
+#            data_table_temp.append(u"Н/Д")
         try:
             data_table_temp.append(data_table_heat_T1[x][4]) # значение T1
         except IndexError:
@@ -2441,18 +2547,18 @@ def get_data_table_by_date_heat_sayany(obj_title, obj_parent_title, electric_dat
             data_table_temp.append(u"Н/Д")
         except TypeError:
             data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_T3[x][4]) # значение T3
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
-        try:
-            data_table_temp.append(data_table_heat_T4[x][4]) # значение T4
-        except IndexError:
-            data_table_temp.append(u"Н/Д")
-        except TypeError:
-            data_table_temp.append(u"Н/Д")
+#        try:
+#            data_table_temp.append(data_table_heat_T3[x][4]) # значение T3
+#        except IndexError:
+#            data_table_temp.append(u"Н/Д")
+#        except TypeError:
+#            data_table_temp.append(u"Н/Д")
+#        try:
+#            data_table_temp.append(data_table_heat_T4[x][4]) # значение T4
+#        except IndexError:
+#            data_table_temp.append(u"Н/Д")
+#        except TypeError:
+#            data_table_temp.append(u"Н/Д")
 
         data_table.append(data_table_temp)
     return data_table

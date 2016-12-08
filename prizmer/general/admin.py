@@ -24,7 +24,9 @@ class ParamsAdmin(admin.ModelAdmin):
     search_fields = [u'name']
     
 class LinkMetersTcpipSettingsAdmin(admin.ModelAdmin):
-    search_fields = [u'guid_meters__factory_number_manual']
+    search_fields = [u'guid_meters__factory_number_manual', u'guid_meters__name']
+
+
     
 class LinkMetersComportSettingsAdmin(admin.ModelAdmin):
     search_fields = [u'guid_meters__factory_number_manual']

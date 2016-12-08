@@ -5150,6 +5150,10 @@ def pokazaniya_water(request):
         data_table = common_sql.get_daily_water_channel(meters_name, electric_data_end)
     elif (bool(is_object_level_2.search(obj_key))):
         list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
+        print list_of_abonents_2
+        print common_sql.return_parent_guid_by_abonent_name(parent_name)
+        print meters_name
+        print common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []        
         for x in range(len(list_of_abonents_2)):
             data_table_temp = common_sql.get_daily_water_channel(list_of_abonents_2[x], electric_data_end)
@@ -10695,6 +10699,35 @@ def pokazaniya_sayany(request):
               
     else:
         data_table = [] 
+        
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/heat/30.html", args)
+    
+def pokazaniya_sayany_v2(request):
+    # Ещё не переделано
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
+         
         
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end

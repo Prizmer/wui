@@ -603,53 +603,53 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
   
     # Текущие
       # Канал 1
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e3f1325e-3018-40ba-b94a-ab6d6ac093e9"))
-        add_param.save()
+       # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e3f1325e-3018-40ba-b94a-ab6d6ac093e9"))
+       # add_param.save()
       # Канал 2
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5a6b0338-c15d-4224-a04f-a10fc73c5fc7"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5a6b0338-c15d-4224-a04f-a10fc73c5fc7"))
+        #add_param.save()
       # Канал 3
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"48a42afe-d9ac-4180-a733-6dd5f9d9ca80"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"48a42afe-d9ac-4180-a733-6dd5f9d9ca80"))
+        #add_param.save()
       # Канал 4
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"01a5419c-c701-4185-95b6-457b8c9ca2d0"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"01a5419c-c701-4185-95b6-457b8c9ca2d0"))
+        #add_param.save()
       # Канал 5
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"85c4295e-bc6a-46ec-9866-0bf9f77c6904"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"85c4295e-bc6a-46ec-9866-0bf9f77c6904"))
+        #add_param.save()
       # Канал 6
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"68270d0a-5043-4ea2-9b61-4adaa298abad"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"68270d0a-5043-4ea2-9b61-4adaa298abad"))
+        #add_param.save()
       # Канал 7
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"cd489c4b-6e74-4c65-bfee-c0fa78a853bf"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"cd489c4b-6e74-4c65-bfee-c0fa78a853bf"))
+        #add_param.save()
       # Канал 8
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"f29062a4-ab60-4117-8f85-0cdec634c797"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"f29062a4-ab60-4117-8f85-0cdec634c797"))
+        #add_param.save()
       # Канал 9
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e8521cd7-2f38-4619-935d-8fe86234dbe7"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e8521cd7-2f38-4619-935d-8fe86234dbe7"))
+        #add_param.save()
       # Канал 10
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"1349b747-41ca-4ba8-a690-69c649129f44"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"1349b747-41ca-4ba8-a690-69c649129f44"))
+        #add_param.save()
       # Канал 11
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"99ab1a30-fde8-4b81-9f9e-2f731516ce1b"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"99ab1a30-fde8-4b81-9f9e-2f731516ce1b"))
+        #add_param.save()
       # Канал 12
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"c7f6a397-833d-4020-9d2b-38c19bec272c"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"c7f6a397-833d-4020-9d2b-38c19bec272c"))
+        #add_param.save()
       # Канал 13
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"4413bffb-1832-4900-9351-5ac3666dd8b0"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"4413bffb-1832-4900-9351-5ac3666dd8b0"))
+        #add_param.save()
       # Канал 14
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6280490b-123d-4e27-bef9-19fd7dc2cf54"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6280490b-123d-4e27-bef9-19fd7dc2cf54"))
+        #add_param.save()
       # Канал 15
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"93891c5a-1c8f-4906-b7f0-961dc8ad3c9f"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"93891c5a-1c8f-4906-b7f0-961dc8ad3c9f"))
+        #add_param.save()
       # Канал 16
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"22dd3a17-a828-44e0-80d9-db075ba120ae"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"22dd3a17-a828-44e0-80d9-db075ba120ae"))
+        #add_param.save()
 
     elif instance.guid_types_meters.name == u'Пульсар 10M':
         #Добавляем параметры для Пульсар10
@@ -699,35 +699,35 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 
     # Текущие
       # Канал 1
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"32dad392-ca1e-4110-8f2c-a86b02e26fb3"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"32dad392-ca1e-4110-8f2c-a86b02e26fb3"))
+        #add_param.save()
       # Канал 2
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"3e13694b-7cb5-4417-a091-af8a7db34dc7"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"3e13694b-7cb5-4417-a091-af8a7db34dc7"))
+        #add_param.save()
       # Канал 3
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"1023b35b-3cbf-4519-aac3-3bf1ebae07c1"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"1023b35b-3cbf-4519-aac3-3bf1ebae07c1"))
+        #add_param.save()
       # Канал 4
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"eea27ade-44cd-4e66-8298-00a4a6ad915a"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"eea27ade-44cd-4e66-8298-00a4a6ad915a"))
+        #add_param.save()
       # Канал 5
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"25e09d4d-3a48-4381-ad5d-b783c03c4d35"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"25e09d4d-3a48-4381-ad5d-b783c03c4d35"))
+        #add_param.save()
       # Канал 6
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"069898ea-9d74-4571-b719-e8e6f1513c12"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"069898ea-9d74-4571-b719-e8e6f1513c12"))
+        #add_param.save()
       # Канал 7
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"084aa5f4-75d5-41f6-b0d6-9f2403eacd2c"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"084aa5f4-75d5-41f6-b0d6-9f2403eacd2c"))
+        #add_param.save()
       # Канал 8
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"786ed8b8-aed1-478c-ae75-99caf1358cf0"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"786ed8b8-aed1-478c-ae75-99caf1358cf0"))
+        #add_param.save()
       # Канал 9
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6fc4c39c-9a43-4cb7-a066-c40fd2ca47e5"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6fc4c39c-9a43-4cb7-a066-c40fd2ca47e5"))
+        #add_param.save()
       # Канал 10
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"8b2aa40a-cd91-4e22-b9d1-596e49e5f839"))
-        add_param.save()  
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"8b2aa40a-cd91-4e22-b9d1-596e49e5f839"))
+        #add_param.save()  
 
     elif instance.guid_types_meters.name == u'Пульсар 2M':
         #Добавляем параметры для Пульсар10
@@ -1137,8 +1137,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"d16b31ea-87d1-409a-bbf8-4a743b678dbb"))
         add_param.save()
 
-    elif instance.guid_types_meters.name == u'Саяны Комбик':
-        #Добавляем параметры для счётчика Саяны Комбик
+    elif instance.guid_types_meters.name == u'Sayany':
+        #Добавляем параметры для счётчика Sayany
     
         #-------------Суточные
         # "Q" Тепловая энергия. Канал1
@@ -1171,33 +1171,46 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
            
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
+
+cfg_excel_name = 'D:\\Work\\wui-Lena-opt\\prizmer\\static\\cfg\\k1.xlsx'
+cfg_sheet_name = u'k5'
+is_electic_cfg = True
+is_water_cfg = False
+is_heat_cfg = False
         
+#--------------------!!!!!!! Для работы с ведомостью по Воде
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
 
 def add_objects(sender, instance, created, **kwargs): #Добавляем объекты:
     from openpyxl import load_workbook
-    wb = load_workbook(filename = '/home/danilov/WORK/SITE/django/02032015/prizmer/static/cfg/9.xlsx')
-    sheet_ranges = wb[u'Отчёт']
+    wb = load_workbook(filename = cfg_excel_name)
+    sheet_ranges = wb[cfg_sheet_name]
     row = 3
     while (bool(sheet_ranges[u'B%s'%(row)].value) ):
         if sheet_ranges[u'A%s'%(row)].value is not None:
             print sheet_ranges[u'A%s'%(row)].value
-            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u'e302381d-5160-4e76-bed5-13f66469ae60'))
+            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u"5472356a-0e1b-4867-a94b-92dff8213c21"))
             add_object.save()
             print u'OK'
         else:
-            pass
+            print u'Фигня какая-то'
         row = row + 1
-#signals.post_save.connect(add_objects, sender=Resources)
+signals.post_save.connect(add_objects, sender=Resources)
 
 def add_abonents(sender, instance, created, **kwargs): # Добавляем абонентов при создании объекта
 #***********************
     from openpyxl import load_workbook
-    wb = load_workbook(filename = '/home/danilov/WORK/SITE/django/02032015/prizmer/static/cfg/9.xlsx')
-    sheet_ranges = wb[u'Отчёт']
+    wb = load_workbook(filename = cfg_excel_name)
+    sheet_ranges = wb[cfg_sheet_name]
 
     row = 3
     while (bool(sheet_ranges[u'B%s'%(row)].value)):
+        print instance.name
+        print sheet_ranges[u'A%s'%(row)].value
         if sheet_ranges[u'A%s'%(row)].value == unicode(instance.name):
+            print u'123'
             add_abonent = Abonents(name = unicode(sheet_ranges[u'B%s'%(row)].value), account_1 =1, guid_objects = instance, guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
             add_abonent.save()
             print sheet_ranges[u'B%s'%(row)].value
@@ -1217,42 +1230,147 @@ def add_abonents(sender, instance, created, **kwargs): # Добавляем аб
         else:
             next
         row = row + 1
-#signals.post_save.connect(add_abonents, sender=Objects)
+signals.post_save.connect(add_abonents, sender=Objects)
 
+#def add_abonents_from_excel_cfg_water(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
+#    from openpyxl import load_workbook
+#    wb = load_workbook(filename = cfg_excel_name)
+#    sheet_ranges = wb[cfg_sheet_name]
+#    row = 2
+#    while (bool(sheet_ranges[u'C%s'%(row)].value) ):
+#        if sheet_ranges[u'A%s'%(row)].value != u'1':
+#            print sheet_ranges[u'A%s'%(row)].value
+#            print type(sheet_ranges[u'A%s'%(row)].value)
+#            print u'OK'
+#            add_abonent = Abonents(name = unicode(sheet_ranges[u'A%s'%(row)].value), account_1 =unicode(sheet_ranges[u'E%s'%(row)].value), account_2 =unicode(sheet_ranges[u'F%s'%(row)].value), guid_objects = instance, guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+#            add_abonent.save()
+#        else:
+#            pass
+#        row = row + 1
+#signals.post_save.connect(add_abonents_from_excel_cfg_water, sender=Objects)
 
-def add_meters(sender, instance, created, **kwargs): #Добавляем пульсары
-    # Заводские номера 10-канальных пульсаров
-    list_pulsar_10 = [28385, 28387, 28388, 28381, 28386, 28382, 28389, 28383, 28384, 25536, 25537, 28380, 24591, 25503, 25505, 25506, 25772]
-    # Заводские номера 16-канальных пульсаров   
-    list_pulsar_16 = [33638, 33650, 33629, 33639, 33524, 33651, 33637, 33521, 33635, 33634, 33636, 33523, 33545, 33653, 33658, 33659, 33520, 33655, 33526, 33627, 33633, 33657, 33647, 33554, 33648, 33656, 33559, 33652, 33654, 33527, 33643, 33646, 33555, 33556, 33544, 33522, 33644, 33528, 33563, 33642, 33549, 33548, 33567, 33566, 33562, 33564, 33560, 33565, 33568, 33547, 33645, 33546, 33561, 33557, 33529, 33525,  33390, 33391, 33392, 33393, 33394, 33395, 33396, 33397, 33398, 33399, 33420, 33421, 33422, 33423, 33424, 33425, 33426, 33428, 33429, 33430, 33431, 33433, 33434, 33435, 33436, 33437, 33438, 33439, 33569, 33610, 33611, 33612, 33613, 33614, 33616, 33617, 33618, 33619, 33620, 33625, 33626, 33628, 33630, 33631, 33632, 33640, 33641, 33649,  24062, 27095, 27096, 28034, 28036, 28037, 28038, 28256, 28890, 28891, 28892, 28893, 28894, 28895, 28897, 28898, 28899, 28900, 28901, 28902, 28903, 28904, 28905, 28906, 28907, 28908, 28909, 29410, 29411, 29412, 29413, 29414, 29415, 29416, 29417, 29418, 29419, 29590, 29591, 29592, 29593, 29594, 29595, 29596, 29597, 29598, 29599,  23690, 23691, 23692, 23693, 23694, 23695, 23696, 23697, 23698, 23699, 23781, 24040, 24041, 24042, 24043, 24044, 24045, 24046, 24047, 24048, 24049, 24060, 24061, 24063, 24064, 24065, 24069, 27097, 27098, 27099, 28990, 28991, 28992, 28993, 28994, 28995, 28996, 28997, 28998, 28999, 29250, 29251, 29252, 29253, 29255, 29256, 29257, 29258, 29259, 29510, 29511, 29512, 29513, 29514, 29515, 29516, 29517, 29518, 29519]
-    #Царицино к.9
-    
-    """# Царицино 5-3
-    list_pulsar_10 = [33142, 33149]
-    list_pulsar_16 = [33986, 34150, 34111, 34153, 33982, 34151, 33989, 34155, 34158, 34152, 36018, 35942, 36057, 35944, 34117, 34071, 33988, 29330, 33984, 34110, 34113, 34115, 34157, 34114, 36015, 35943, 36013, 36059, 84238, 36012, 35946, 36011, 35945, 35940, 36019, 33954, 34000, 34154, 36016, 36017, 36014, 35947, 36010, 35941, 36056, 35948, 36058, 34002, 33956, 33943, 33950, 33952, 33953, 33955, 33957, 33942, 33959, 33541, 33941, 33543, 33947, 33958, 33940, 33949, 33946, 28865, 34112, 34159, 33983, 34116, 34156]
-    #"""
-    
-    """# Царицино 5-5
-    list_pulsar_10 =  [33146]
-    list_pulsar_16 =  [33995, 33553, 33998, 34008, 33968, 33980, 33975, 33971, 33961, 33967, 33972, 33969, 33963, 33966, 33979, 33970, 33960, 33965, 33999, 33997, 33964, 34074, 34073, 34009, 34003, 34004, 33994, 34007, 34006, 33993, 33990, 33951, 33621, 33996, 33624, 33991, 33992, 34005, 33551, 34001, 34075, 33622, 34070, 33552, 33623, 34068, 34078, 34072, 33550, 34077, 34069, 33948, 34062, 34066, 34067, 34015, 34014, 33542, 33944, 34120, 34019, 34018, 34013, 34016, 33945, 34060, 34079, 34076, 34064, 34012, 34010, 34011, 33540, 34063, 34065]
-    #"""
-    
-    list_pulsar = list_pulsar_10 + list_pulsar_16
-    for x in range(len(list_pulsar)):
-        if list_pulsar[x] in list_pulsar_10:
-            add_meter = Meters(name = u'Пульсар 10M '+ str(list_pulsar[x]), address = str(list_pulsar[x]), factory_number_manual = str(list_pulsar[x]), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
-            add_meter.save()
-        elif list_pulsar[x] in list_pulsar_16:
-            add_meter = Meters(name = u'Пульсар 16M '+ str(list_pulsar[x]), address = str(list_pulsar[x]), factory_number_manual = str(list_pulsar[x]), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
-            add_meter.save()            
+#def add_meters(sender, instance, created, **kwargs): #Добавляем пульсары
+#    # Заводские номера 10-канальных пульсаров
+#    list_pulsar_10 = [170621]
+#    # Заводские номера 16-канальных пульсаров   
+#    list_pulsar_16 = [181914]
+#    
+#   
+#    list_pulsar = list_pulsar_10 + list_pulsar_16
+#    for x in range(len(list_pulsar)):
+#        if list_pulsar[x] in list_pulsar_10:
+#            add_meter = Meters(name = u'Пульсар 10M '+ str(list_pulsar[x]), address = str(list_pulsar[x]), factory_number_manual = str(list_pulsar[x]), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
+#            add_meter.save()
+#        elif list_pulsar[x] in list_pulsar_16:
+#            add_meter = Meters(name = u'Пульсар 16M '+ str(list_pulsar[x]), address = str(list_pulsar[x]), factory_number_manual = str(list_pulsar[x]), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
+#            add_meter.save()            
 #signals.post_save.connect(add_meters, sender=BalanceGroups)
 
-def add_link_meter_port(sender, instance, created, **kwargs): #Создаем привязку пульсара к com-порту
-    guid_com_port = ComportSettings.objects.get(guid=u'2376a4a5-a19a-4a1d-9417-7f65014961e1')
-    add_com_port_link = LinkMetersComportSettings(guid_meters = instance, guid_comport_settings = guid_com_port)            
-    add_com_port_link.save()
+def add_meters(sender, instance, created, **kwargs): #Добавляем пульсары
+    """Добавляем счётчики из excel файла ведомости"""
+    #from django.db import connection
+    from openpyxl import load_workbook
+    wb = load_workbook(filename = cfg_excel_name)
+    sheet_ranges = wb[cfg_sheet_name]
+    row = 3
+    pulsar_exception_list = [u'181973']
+    while (bool(sheet_ranges[u'C%s'%(row)].value) ):
+        if sheet_ranges[u'C%s'%(row)].value is not None:
+            print u'Обрабатываем строку ' + str(u'C%s '%(row))
+            if unicode(sheet_ranges[u'E%s'%(row)].value) not in pulsar_exception_list:
+                pulsar_exception_list.append(unicode(sheet_ranges[u'E%s'%(row)].value))
+                print  pulsar_exception_list
+                if unicode(sheet_ranges[u'F%s'%(row)].value) == u'Пульсар 10M':
 
-#signals.post_save.connect(add_link_meter_port, sender=Meters)
+                    add_meter = Meters(name = unicode(sheet_ranges[u'F%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'E%s'%(row)].value), address = unicode(sheet_ranges[u'E%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'E%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
+                    add_meter.save()
+                      
+                    print u'OK', u'Прибор добавлен в базу'
+                    
+                elif unicode(sheet_ranges[u'F%s'%(row)].value) == u'Пульсар 16M':
+
+                   add_meter = Meters(name = unicode(sheet_ranges[u'F%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'E%s'%(row)].value), address = unicode(sheet_ranges[u'E%s'%(row)].value),  factory_number_manual = unicode(sheet_ranges[u'E%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
+                   add_meter.save()
+                                                                      
+                   print u'OK', u'Прибор добавлен в базу'
+            else:
+                print u'Такой Пульсар уже есть'
+        
+        else:
+            pass
+        row = row + 1
+       
+signals.post_save.connect(add_meters, sender=BalanceGroups)
+
+#def add_link_meter_port(sender, instance, created, **kwargs): #Создаем привязку пульсара к com-порту
+#    guid_com_port = ComportSettings.objects.get(guid=u'2376a4a5-a19a-4a1d-9417-7f65014961e1')
+#    add_com_port_link = LinkMetersComportSettings(guid_meters = instance, guid_comport_settings = guid_com_port)            
+#    add_com_port_link.save()
+#
+##signals.post_save.connect(add_link_meter_port, sender=Meters)
+#
+#def add_link_meter_tcpip_water(sender, instance, created, **kwargs): #Создаем привязку пульсара к tcp-порту
+#    guid_tcpip_port = TcpipSettings.objects.get(guid=u'0346aea3-24ac-4776-900e-e1eb690af7bf')
+#    add_tcpip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_tcpip_port)            
+#    add_tcpip_port_link.save()
+#
+#signals.post_save.connect(add_link_meter_tcpip_water, sender=Meters)
+
+#def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
+#    """Делаем привязку счётчика к порту по excel файлу ведомости"""
+#    from django.db import connection
+#    from openpyxl import load_workbook
+#    wb = load_workbook(filename = cfg_excel_name)
+#    sheet_ranges = wb[cfg_sheet_name]
+#    row = 2
+#    
+#
+#    while (bool(sheet_ranges[u'C%s'%(row)].value) ):
+#        # Привязка к tpc порту
+#        if sheet_ranges[u'C%s'%(row)].value is not None:
+#            #print sheet_ranges[u'G%s'%(row)].value
+#            if unicode(sheet_ranges[u'E%s'%(row)].value) == instance.factory_number_manual :
+#                guid_ip_port_from_excel = connection.cursor()
+#                guid_ip_port_from_excel.execute("""SELECT 
+#                                                  tcpip_settings.guid
+#                                                FROM 
+#                                                  public.tcpip_settings
+#                                                WHERE 
+#                                                  tcpip_settings.ip_address = %s AND 
+#                                                  tcpip_settings.ip_port = %s;""",[unicode(sheet_ranges[u'G%s'%(row)].value), unicode(sheet_ranges[u'H%s'%(row)].value)])
+#                guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+#        
+#                guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+#                add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+#                add_ip_port_link.save()
+#            else:
+#                pass
+#            row = row + 1
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_water, sender=Meters)
+def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
+    """Делаем привязку счётчика к порту по excel файлу ведомости"""
+    from django.db import connection
+    from openpyxl import load_workbook
+    wb = load_workbook(filename = cfg_excel_name)
+    sheet_ranges = wb[cfg_sheet_name]
+    row = 3
+
+# Привязка к tpc порту
+    guid_ip_port_from_excel = connection.cursor()
+    guid_ip_port_from_excel.execute("""SELECT 
+                                      tcpip_settings.guid
+                                    FROM 
+                                      public.tcpip_settings
+                                    WHERE 
+                                      tcpip_settings.ip_address = %s AND 
+                                      tcpip_settings.ip_port = %s;""",[unicode(sheet_ranges[u'G%s'%(row)].value), unicode(sheet_ranges[u'H%s'%(row)].value)])
+    guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+
+    guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+    add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+    add_ip_port_link.save()
+
+signals.post_save.connect(add_link_meter_port_from_excel_cfg_water, sender=Meters)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -1260,8 +1378,8 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
     def get_taken_param_by_abonent_from_excel_cfg(input_taken_param):
         """Функция, которая читает excel файл. Составляет имя считываемого параметра типа "Пульсар 16M 33555 Пульсар 16M Канал 11". В случае совпадения должна привязать этот параметр к абоненту. Абоненты должны быть предварительно созданы."""    
         from openpyxl import load_workbook
-        wb = load_workbook(filename = '/home/danilov/WORK/SITE/django/02032015/prizmer/static/cfg/9.xlsx')
-        sheet_ranges = wb[u'Отчёт']
+        wb = load_workbook(filename = cfg_excel_name)
+        sheet_ranges = wb[cfg_sheet_name]
     
         def shrink_taken_param_name(taken_param_name):
             
@@ -1276,9 +1394,9 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
         
             return taken_param_name[:nn -1]
     
-        for row in range(1,2000):
-            taken_param = u'Пульсар' + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[17:20] + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[3:8] + u' ' + u'Пульсар' + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[17:20] + u' ' + u'Канал' + u' ' + unicode(sheet_ranges[u'D%s'%(row)].value)
-            
+        for row in range(1,810):
+            taken_param = u'Пульсар' + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[17:20] + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[2:8] + u' ' + u'Пульсар' + u' ' + unicode(sheet_ranges[u'C%s'%(row)].value)[17:20] + u' ' + u'Канал' + u' ' + unicode(sheet_ranges[u'D%s'%(row)].value)
+                       
             if taken_param == shrink_taken_param_name(input_taken_param):
                 try:
                     return unicode(sheet_ranges[u'B%s'%(row)].value)
@@ -1301,15 +1419,14 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
     else:
         pass
                  
-#signals.post_save.connect(add_link_abonents_taken_params, sender=TakenParams)
+signals.post_save.connect(add_link_abonents_taken_params, sender=TakenParams)
+
+
 
 #--------------------!!!!!!! Для работы с ведомостью по электрике
-
-cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\vodniy_original_v2_for_load.xlsx'
-cfg_sheet_name = u'Heat k1'
-is_electic_cfg = True
-is_water_cfg = False
-is_heat_cfg = False
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
 
 def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем объекты из файла excel ведомости по электрике:
     from openpyxl import load_workbook
@@ -1326,7 +1443,7 @@ def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #�
             pass
         row = row + 1
         
-signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
+#signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
 
 
 def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
@@ -1343,7 +1460,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1380,7 +1497,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
             elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'СПГ762-3':
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"e4fb7950-a44f-41f0-a6ff-af5e30d9d562") )
                 add_meter.save()
-            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Саяны Комбик':
+            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Sayany':
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"5429b439-233e-4944-b91b-4b521a10f77b") )
                 add_meter.save()
                 
@@ -1405,7 +1522,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1454,7 +1571,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1485,4 +1602,57 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+
+def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
+    """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
+    from django.db import connection
+    list_of_meters = connection.cursor()
+    list_of_meters.execute("""SELECT 
+  meters.guid
+FROM 
+  public.meters, 
+  public.types_meters
+WHERE 
+  meters.guid_types_meters = types_meters.guid AND
+  types_meters.name = 'Sayany';""")
+    list_of_meters = list_of_meters.fetchall()
+   
+    for x in range(len(list_of_meters)):
+        print list_of_meters[x][0]
+        instance_meter = Meters.objects.get(guid = list_of_meters[x][0])
+        print instance_meter
+        instance_ip_port = TcpipSettings.objects.get(guid = u"a4405a7f-7459-44b3-80a3-8d2c48e2d03f" )
+        
+        add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
+        add_ip_port_link.save()
+
+#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

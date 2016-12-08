@@ -4494,6 +4494,7 @@ def report_electric_potreblenie_2_zones_v2(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+
 def pokazaniya_heat_report(request):
     response = StringIO.StringIO()
     wb = Workbook()
@@ -4710,6 +4711,129 @@ def pokazaniya_heat_report_v2(request):
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
     output_name = u'heat_report' 
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_pokazaniya_sayany(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Показания теплосчётчиков Саяны на ' + str(request.session["electric_data_end"])
+    
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Номер счётчика'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Дата'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Показания Q1'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания Q2'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'M1'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'M2'
+    ws['G5'].style = ali_grey
+
+# ниже не переделывала
+    
+#Запрашиваем данные для отчета
+
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+
+    
+    parent_name    = request.session['obj_parent_title']
+    meters_name           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    obj_key             = request.session['obj_key']
+
+    
+    print parent_name,meters_name,electric_data_end, obj_key
+    
+    data_table = []
+#    if request.is_ajax():
+#        #if request.method == 'GET':
+#            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+#            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+#            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+#            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
+
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][0])  # Дата
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу Q1
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу Q2
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу t1
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу t2
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 17 
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'heat_sayany_report' 
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
