@@ -10706,7 +10706,6 @@ def pokazaniya_sayany(request):
     return render_to_response("data_table/heat/30.html", args)
     
 def pokazaniya_sayany_v2(request):
-    # Ещё не переделано
     args= {}
     is_abonent_level = re.compile(r'abonent')
     is_object_level_2 = re.compile(r'level2')
@@ -10727,13 +10726,102 @@ def pokazaniya_sayany_v2(request):
         data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
-         
-        
+
+#    for i in range(len(data_table)):
+#        data_table[i]=list(data_table[i])
+#        if (data_table[i][3] is None):
+#            print data_table[i][1], meters_name
+#            data_table[i][0]=electric_data_end
+#            dt=common_sql.get_data_table_by_date_heat_sayany_v2(data_table[i][1], meters_name, None, True)
+#            if (len(dt)>0):
+#                data_table[i]=dt[0]
+#        data_table[i]=tuple(data_table[i])
+    
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, electric_data_end)
+    
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
       
     return render_to_response("data_table/heat/30.html", args)
     
+def pokazaniya_sayany_last(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
+
+
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        if (data_table[i][3] is None):
+            print data_table[i][1], meters_name
+            data_table[i][0]=electric_data_end
+            dt=common_sql.get_data_table_by_date_heat_sayany_v2(data_table[i][1], meters_name, None, True)
+            if (len(dt)>0):
+                data_table[i]=dt[0]
+        data_table[i]=tuple(data_table[i])
+    
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/heat/32.html", args)
+    
+def heat_potreblenie_sayany(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_start = request.GET['electric_data_end']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_period_heat_sayany(meters_name, parent_name,electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_period_heat_sayany(meters_name, parent_name,electric_data_start, electric_data_end, False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/heat/33.html", args)
+
 def test_test(request):
     args={}
     args['test_test'] = 10

@@ -34,6 +34,9 @@ urlpatterns = patterns('',
     url(r'^30/$', views.report_pokazaniya_sayany), # показания на дату. Тепло. Саяны
    
     url(r'^31/$', views.report_electric_potreblenie_2_zones_v2), # Электрика. Отчет по потреблению за период по двум датам. 2 Тарифа.
+    
+    url(r'^32/$', views.report_sayany_last), #показания по теплосчётчикам Саяны последние считанные от требуемой даты
+    url(r'^33/$', views.report_heat_potreblenie_sayany), # расход по теплосчётчикам Саяны по двум датам
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

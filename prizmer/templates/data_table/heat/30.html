@@ -1,0 +1,49 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по теплосчётчикам.Саяны.</span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th> 
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Показания Q1</th>
+<th>M1</th>
+<th>T1</th>
+<th>T2</th>
+<!-- <th>Т1</th>
+<th>T2</th>
+<th>T3</th>
+<th>T4</th> -->
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4}}</strong></td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+
+<!-- 
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<td>{{value.11}}</td> -->
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

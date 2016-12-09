@@ -2448,18 +2448,264 @@ order by heat_abons.ab_name
     """%(my_params[1],my_params[2],my_params[3],my_params[4],obj_title,my_params[0],electric_data_end,obj_title)
     return sQuery
 
+def makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title, my_params):
+    print my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title
+    print 'Query-last reded date'
+    sQuery="""
+    SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  abonents.name = '%s' 
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name
+ order by daily_values.date DESC
+    """%(my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title)
+    print 'Query-ok'
+    return sQuery
+    
+    
 def get_data_table_by_date_heat_sayany_v2(obj_title, obj_parent_title, electric_data_end, isAbon):
     my_params=[u'Sayany',u'Q Система1' ,u'M Система1',u'T Канал1',u'T Канал2' ]
     cursor = connection.cursor()
     data_table=[]
-    if (isAbon):
+    if (isAbon) and (electric_data_end is not None):
+        print 'Abonent po date'
         cursor.execute(makeSqlQuery_heat_sayany_by_date_for_abon(obj_title, obj_parent_title , electric_data_end, my_params))
+    elif isAbon and (electric_data_end is None):
+        print 'Abonent last read'
+        cursor.execute(makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title , my_params))
     else:
+        print 'Obj po date'
         cursor.execute(makeSqlQuery_heat_sayany_by_date_for_obj(obj_title, obj_parent_title , electric_data_end, my_params))
     data_table = cursor.fetchall()
+        
     
-    if len(data_table)>0: 
-        data_table=ChangeNull(data_table, electric_data_end)
+    return data_table
+    
+def makeSqlQuery_heat_sayany_period_for_abon(obj_title, obj_parent_title , electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z1.ab_name,z1.zav_num, z1.Q1, z2.Q1 as q2, z2.Q1-z1.Q1 as deltaQ, 
+z1.m1, z2.m1 as m2, z2.m1-z1.m1 as deltam,
+
+z1.t1, z2.t1 as t1_2, z1.t1-z2.t1 as deltat1,
+z1.t2, z2.t2 as t2_2, z1.t2-z2.t2 as deltat2
+From
+(SELECT 
+  daily_values.date as date_start, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  abonents.name = '%s' AND 
+  daily_values.date = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name) z1,
+  (
+  Select
+  daily_values.date as date_end, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  abonents.name = '%s' AND 
+  daily_values.date = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name) z2"""%(my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title,electric_data_start,my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title,electric_data_end)
+  
+    return sQuery
+    
+def makeSqlQuery_heat_sayany_period_for_obj(obj_title, obj_parent_title , electric_data_start, electric_data_end, my_params):
+    sQuery="""
+Select heat_abons.ab_name,heat_abons.factory_number_manual, z3.q1, z3.q2, z3.deltaq, z3.m1, z3.m2, z3.deltam 
+from heat_abons
+left join 
+(Select z1.ab_name,z1.zav_num,z1.date_start, z2.date_end, z1.Q1, z2.Q1 as q2, z2.Q1-z1.Q1 as deltaQ, 
+z1.m1, z2.m1 as m2, z2.m1-z1.m1 as deltam,
+
+z1.t1, z2.t1 as t1_2, z1.t1-z2.t1 as deltat1,
+z1.t2, z2.t2 as t2_2, z1.t2-z2.t2 as deltat2
+From
+(SELECT 
+  daily_values.date as date_start, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  daily_values.date = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name) z1,
+  (
+  Select
+  daily_values.date as date_end, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  daily_values.date = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name) z2
+  where z1.ab_name=z2.ab_name) z3
+  on heat_abons.ab_name=z3.ab_name
+  where heat_abons.obj_name='%s'
+  order by heat_abons.ab_name
+ 
+"""    %(my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],electric_data_start,my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],electric_data_end, obj_parent_title)
+    return sQuery
+    
+def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data_start, electric_data_end, isAbon):
+    my_params=[u'Sayany',u'Q Система1' ,u'M Система1',u'T Канал1',u'T Канал2' ]
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon) and (electric_data_end is not None):
+        print 'Abonent po date'
+        cursor.execute(makeSqlQuery_heat_sayany_period_for_abon(obj_title, obj_parent_title , electric_data_start, electric_data_end, my_params))
+    elif isAbon and (electric_data_end is None):
+        print 'Abonent last read'
+        pass
+        #cursor.execute(makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title , my_params))
+    else:
+        print 'Obj po date'
+        cursor.execute(makeSqlQuery_heat_sayany_period_for_obj( obj_parent_title,obj_title, electric_data_start, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+        
+    
     return data_table
     
 #Отчет по теплу на начало суток. Саяны
