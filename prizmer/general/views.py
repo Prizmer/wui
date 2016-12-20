@@ -10890,6 +10890,74 @@ def water_potreblenie_hvs_tekon(request):
       
     return render_to_response("data_table/water/35.html", args)
 
+def pokazaniya_water_gvs_tekon(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):
+        # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2', False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, electric_data_end)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/water/36.html", args)
+
+def water_potreblenie_gvs_tekon(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):
+        # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 2', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 2', False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/water/37.html", args)
+
 def test_test(request):
     args={}
     args['test_test'] = 10

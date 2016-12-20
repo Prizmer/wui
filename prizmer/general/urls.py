@@ -66,6 +66,8 @@ urlpatterns = patterns('',
     
     url(r'^34/$', views.pokazaniya_water_hvs_tekon), # показания по ХВС -Текон
     url(r'^35/$', views.water_potreblenie_hvs_tekon), # потребление по ХВС -Текон за период
+    url(r'^36/$', views.pokazaniya_water_gvs_tekon), # показания по ХВС -Текон
+    url(r'^37/$', views.water_potreblenie_gvs_tekon), # потребление по ХВС -Текон за период
     
     
    #---- Test urls
