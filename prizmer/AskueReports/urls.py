@@ -37,6 +37,9 @@ urlpatterns = patterns('',
     
     url(r'^32/$', views.report_sayany_last), #показания по теплосчётчикам Саяны последние считанные от требуемой даты
     url(r'^33/$', views.report_heat_potreblenie_sayany), # расход по теплосчётчикам Саяны по двум датам
+    
+    url(r'^34/$', views.report_water_tekon_hvs), # показжания на дату по теплосчётчикам Текон-хвс
+    url(r'^35/$', views.report_water_potreblenie_tekon_hvs), # расход по теплосчётчикам Текон-хвс по двум датам
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

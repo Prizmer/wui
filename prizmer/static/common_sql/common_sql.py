@@ -410,7 +410,7 @@ WHERE
   where heat_abons.obj_name='%s'
   order by heat_abons.ab_name
     """%(obj_title, electric_data_start,my_params[0],obj_title,electric_data_end,my_params[0],obj_title)
-    print sQuery
+    #print sQuery
     return sQuery
 
 def get_data_table_heat_parametr_for_period_v2(obj_title, electric_data_start,electric_data_end, my_params):
@@ -916,7 +916,7 @@ daily_values.id_taken_params=taken_params.id and
   Limit 1"""%(params[0],params[1],params[2], obj_parent_title,obj_title)
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('daily',dm)
-        print sQuery
+        #print sQuery
         return sQuery
     else: return """Select 'Н/Д'"""
 
@@ -1704,7 +1704,7 @@ where z3.name_abonents=z4.name_abonents
 order by z3.name_abonents ASC
     """%(params[0],params[1],params[2],params[3], params[4], params[5], obj_title, date_end, res, obj_title, 
                             params[0],params[1],params[2],params[3], params[4], params[5],obj_title,  date_start, res,obj_title)
-    print sQuery
+    #print sQuery
     return sQuery
 
 def get_data_table_electric_parametr_by_period_for_group_v2(obj_title, electric_data_start, electric_data_end, params, res):
@@ -2449,8 +2449,8 @@ order by heat_abons.ab_name
     return sQuery
 
 def makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title, my_params):
-    print my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title
-    print 'Query-last reded date'
+    #print my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title
+    #print 'Query-last reded date'
     sQuery="""
     SELECT 
   daily_values.date, 
@@ -2489,7 +2489,7 @@ WHERE
   types_meters.name
  order by daily_values.date DESC
     """%(my_params[1],my_params[2],my_params[3],my_params[4],obj_parent_title,my_params[0],obj_title)
-    print 'Query-ok'
+    #print 'Query-ok'
     return sQuery
     
     
@@ -2498,13 +2498,13 @@ def get_data_table_by_date_heat_sayany_v2(obj_title, obj_parent_title, electric_
     cursor = connection.cursor()
     data_table=[]
     if (isAbon) and (electric_data_end is not None):
-        print 'Abonent po date'
+        #print 'Abonent po date'
         cursor.execute(makeSqlQuery_heat_sayany_by_date_for_abon(obj_title, obj_parent_title , electric_data_end, my_params))
     elif isAbon and (electric_data_end is None):
-        print 'Abonent last read'
+        #print 'Abonent last read'
         cursor.execute(makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title , my_params))
     else:
-        print 'Obj po date'
+        #print 'Obj po date'
         cursor.execute(makeSqlQuery_heat_sayany_by_date_for_obj(obj_title, obj_parent_title , electric_data_end, my_params))
     data_table = cursor.fetchall()
         
@@ -2694,17 +2694,239 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
     cursor = connection.cursor()
     data_table=[]
     if (isAbon) and (electric_data_end is not None):
-        print 'Abonent po date'
+        #print 'Abonent po date'
         cursor.execute(makeSqlQuery_heat_sayany_period_for_abon(obj_title, obj_parent_title , electric_data_start, electric_data_end, my_params))
     elif isAbon and (electric_data_end is None):
-        print 'Abonent last read'
+        #print 'Abonent last read'
         pass
         #cursor.execute(makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title , my_params))
     else:
-        print 'Obj po date'
+        #print 'Obj po date'
         cursor.execute(makeSqlQuery_heat_sayany_period_for_obj( obj_parent_title,obj_title, electric_data_start, electric_data_end, my_params))
     data_table = cursor.fetchall()
-        
+            
+    return data_table
+    
+def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
+    sQuery="""
+    SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and
+  water_abons.ab_name='%s' and
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' 
+    """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
+    return sQuery
+    
+def MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
+    sQuery="""
+    Select z1.date, water_abons.ab_name, water_abons.factory_number_manual, z1.value
+from public.water_abons
+left join 
+(SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' ) as z1
+   
+   on water_abons.ab_name=z1.ab_name
+   where water_abons.obj_name='%s' 
+   order by water_abons.ab_name
+    """%(chanel,my_params[0], obj_title, electric_data_end, obj_title)
+    return sQuery
+    
+def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, chanel, isAbon):
+    my_params=[u'Импульс']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+    
+def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params):
+    sQuery="""
+    Select z1.ab_name, z1.factory_number_manual, z1.value, z2.value, z2.value-z1.value as delta
+from
+(SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and
+   water_abons.ab_name='%s' and
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' 
+) z1,
+(SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and
+   water_abons.ab_name='%s' and
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' 
+) z2
+where z1.ab_name=z2.ab_name
+    """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_start, chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
+    return sQuery
+
+def MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params):
+
+    sQuery="""
+    Select water_abons.ab_name, water_abons.factory_number_manual, z3.val_start, z3.val_end, z3.delta
+from water_abons
+left join
+(Select z1.ab_name, z1.factory_number_manual, z1.value as val_start, z2.value as val_end, z2.value-z1.value as delta
+from
+(SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and   
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' 
+) z1,
+(SELECT 
+  daily_values.date,
+  water_abons.ab_name, 
+  water_abons.factory_number_manual, 
+  daily_values.value,
+  water_abons.name AS resources_name,   
+  names_params.name
+FROM 
+  public.water_abons, 
+  public.link_abonents_taken_params, 
+  public.daily_values, 
+  public.taken_params, 
+  public.params, 
+  public.names_params
+WHERE 
+  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+  And
+   names_params.name='%s' and
+   water_abons.name='%s' and
+   water_abons.obj_name='%s' and
+   daily_values.date='%s' 
+) z2
+where z1.ab_name=z2.ab_name) z3
+on water_abons.ab_name=z3.ab_name
+where water_abons.obj_name='%s' 
+order by water_abons.ab_name
+    """%(chanel,my_params[0], obj_title, electric_data_start,chanel,my_params[0], obj_title, electric_data_end, obj_title)
+    
+    return sQuery
+
+
+def get_data_table_tekon_period(obj_title,obj_parent_title, electric_data_start, electric_data_end, chanel, isAbon):
+    my_params=[u'Импульс']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, chanel, my_params))
+    data_table = cursor.fetchall()
     
     return data_table
     

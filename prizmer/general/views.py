@@ -5100,8 +5100,8 @@ def load_balance_groups(request):
         if len(guid_balance_groups_from_excel)>0:
             guid_balance_groups = BalanceGroups.objects.get(guid=guid_balance_groups_from_excel[0][0])
         else: 
-            print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            print u'Надо создать балансную группу(вручную), прежде чем добавлять в неё что-то.'
+            #print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            #print u'Надо создать балансную группу(вручную), прежде чем добавлять в неё что-то.'
             break
         guid_meters_from_excel = connection.cursor()
         meters_name=[unicode(sheet_ranges[u'E%s'%(row)].value)]
@@ -5111,14 +5111,14 @@ def load_balance_groups(request):
         if len(guid_meters_from_excel)>0:
             guid_meters = Meters.objects.get(guid=guid_meters_from_excel[0][0])
         else:
-            print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            print u'Такого счётчика не существует в БД, он не может быть добавлен в балансную группу.'
+            #print u'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            #print u'Такого счётчика не существует в БД, он не может быть добавлен в балансную группу.'
             continue
         add_link_meter_balance_group = LinkBalanceGroupsMeters(guid_balance_groups = guid_balance_groups, guid_meters = guid_meters, type=znak[0])
         add_link_meter_balance_group.save()
         
         dt.append([balance_group_name,meters_name,znak])
-        print unicode(sheet_ranges[u'A%s'%(row)].value), unicode(row), unicode([balance_group_name,meters_name,znak])
+        #print unicode(sheet_ranges[u'A%s'%(row)].value), unicode(row), unicode([balance_group_name,meters_name,znak])
         row = row + 1
     
     args = {}
@@ -5150,10 +5150,10 @@ def pokazaniya_water(request):
         data_table = common_sql.get_daily_water_channel(meters_name, electric_data_end)
     elif (bool(is_object_level_2.search(obj_key))):
         list_of_abonents_2 = common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
-        print list_of_abonents_2
-        print common_sql.return_parent_guid_by_abonent_name(parent_name)
-        print meters_name
-        print common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
+        #print list_of_abonents_2
+        #print common_sql.return_parent_guid_by_abonent_name(parent_name)
+        #print meters_name
+        #print common_sql.list_of_abonents(common_sql.return_parent_guid_by_abonent_name(parent_name), meters_name)
         data_table = []        
         for x in range(len(list_of_abonents_2)):
             data_table_temp = common_sql.get_daily_water_channel(list_of_abonents_2[x], electric_data_end)
@@ -5281,8 +5281,8 @@ def pokazaniya_water_gvs_hvs_current(request):
         for row in data_table_temp:
             if row[4]==u'Н/Д' and row[5]==u'Н/Д':
                 row2=common_sql.get_current_water_gvs_hvs(unicode(row[2]), unicode(row[6]) , electric_data_end, True)
-                print row2
-                print unicode(row[2]), unicode(row[6]), electric_data_end, True
+                #print row2
+                #print unicode(row[2]), unicode(row[6]), electric_data_end, True
                 if len(row2)==0:
                     r=[unicode(electric_data_end), u'Н/Д', unicode(row[2]),unicode(row[3]), u'Н/Д', u'Н/Д']
                     data_table.append(r)
@@ -5346,7 +5346,7 @@ def potreblenie_water(request):
             for y in range(len(list_of_abonents_2)):
                 data_table_temp2_end = common_sql.get_daily_water_channel(list_of_abonents_2[y], electric_data_end)
                 data_table_temp2_start = common_sql.get_daily_water_channel(list_of_abonents_2[y], electric_data_start)
-                print data_table_temp2_end
+                #print data_table_temp2_end
                 if bool(data_table_temp2_end) and bool(data_table_temp2_start):
                 
                     data_table_temp2 = [[data_table_temp2_start[0][0],data_table_temp2_start[0][1],data_table_temp2_start[0][2],data_table_temp2_start[0][3],data_table_temp2_end[0][2],data_table_temp2_end[0][2]-data_table_temp2_start[0][2]]]
@@ -10772,7 +10772,7 @@ def pokazaniya_sayany_last(request):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
         if (data_table[i][3] is None):
-            print data_table[i][1], meters_name
+            #print data_table[i][1], meters_name
             data_table[i][0]=electric_data_end
             dt=common_sql.get_data_table_by_date_heat_sayany_v2(data_table[i][1], meters_name, None, True)
             if (len(dt)>0):
@@ -10795,7 +10795,7 @@ def heat_potreblenie_sayany(request):
     
     parent_name         = request.GET['obj_parent_title']
     meters_name         = request.GET['obj_title']
-    electric_data_start = request.GET['electric_data_end']
+    electric_data_start = request.GET['electric_data_start']
     electric_data_end   = request.GET['electric_data_end']            
     obj_key             = request.GET['obj_key']
     
@@ -10821,6 +10821,74 @@ def heat_potreblenie_sayany(request):
     args['electric_data_start'] = electric_data_start
       
     return render_to_response("data_table/heat/33.html", args)
+
+def pokazaniya_water_hvs_tekon(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):
+        # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1', False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, electric_data_end)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/water/34.html", args)
+
+def water_potreblenie_hvs_tekon(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    if (bool(is_abonent_level.search(obj_key))):
+        # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 1', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 1', False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/water/35.html", args)
 
 def test_test(request):
     args={}

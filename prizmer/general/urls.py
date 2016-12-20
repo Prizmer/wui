@@ -63,6 +63,11 @@ urlpatterns = patterns('',
     
     url(r'^32/$', views.pokazaniya_sayany_last), #показания по теплосчётчикам Саяны последние считанные от требуемой даты
     url(r'^33/$', views.heat_potreblenie_sayany), #потребление по теплосчётчикам Саяны за период
+    
+    url(r'^34/$', views.pokazaniya_water_hvs_tekon), # показания по ХВС -Текон
+    url(r'^35/$', views.water_potreblenie_hvs_tekon), # потребление по ХВС -Текон за период
+    
+    
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

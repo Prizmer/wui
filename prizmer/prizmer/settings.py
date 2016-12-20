@@ -16,7 +16,7 @@ TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 import sys
-sys.path.append("static/common_sql")
+sys.path.append("C:\Work\mitino\prizmer\static\common_sql")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
