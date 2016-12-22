@@ -2709,33 +2709,39 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
     
 def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
     sQuery="""
-    SELECT distinct
+    SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and
-  water_abons.ab_name='%s' and
-   water_abons.obj_name='%s' and
+   resources.name='%s' and
+   abonents.name='%s' and
+   objects.name='%s' and
    daily_values.date='%s' 
     """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
+    print sQuery
     return sQuery
     
 def MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
@@ -2745,34 +2751,40 @@ from public.water_abons
 left join 
 (SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and
-   water_abons.obj_name='%s' and
-   daily_values.date='%s' ) as z1
+   resources.name='%s' and
+   objects.name='%s' and
+   daily_values.date='%s'  ) as z1
    
    on water_abons.ab_name=z1.ab_name
    where water_abons.obj_name='%s' 
+   and water_abons.names_params='%s'   
    order by water_abons.ab_name
-    """%(chanel,my_params[0], obj_title, electric_data_end, obj_title)
+    """%(chanel,my_params[0], obj_title, electric_data_end, obj_title, chanel)
     return sQuery
     
 def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, chanel, isAbon):
@@ -2793,56 +2805,66 @@ def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title,
 from
 (SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and
-   water_abons.ab_name='%s' and
-   water_abons.obj_name='%s' and
+   resources.name='%s' and
+   abonents.name='%s' and
+   objects.name='%s' and
    daily_values.date='%s' 
 ) z1,
 (SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and
-   water_abons.ab_name='%s' and
-   water_abons.obj_name='%s' and
+   resources.name='%s' and
+   abonents.name='%s' and
+   objects.name='%s' and
    daily_values.date='%s' 
 ) z2
 where z1.ab_name=z2.ab_name
@@ -2859,61 +2881,73 @@ left join
 from
 (SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and   
-   water_abons.obj_name='%s' and
-   daily_values.date='%s' 
+   resources.name='%s' and
+   objects.name='%s' and
+   daily_values.date='%s'   
+
 ) z1,
 (SELECT 
   daily_values.date,
-  water_abons.ab_name, 
-  water_abons.factory_number_manual, 
-  daily_values.value,
-  water_abons.name AS resources_name,   
-  names_params.name
+  abonents.name as ab_name, 
+  meters.factory_number_manual ,
+  daily_values.value 
+  
 FROM 
-  public.water_abons, 
+  public.abonents, 
+  public.objects, 
   public.link_abonents_taken_params, 
-  public.daily_values, 
   public.taken_params, 
+  public.daily_values, 
+  public.names_params, 
   public.params, 
-  public.names_params
+  public.resources, 
+  public.meters
 WHERE 
-  link_abonents_taken_params.guid_abonents = water_abons.ab_guid AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
   taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  names_params.guid_resources = resources.guid AND
   params.guid_names_params = names_params.guid
-  And
+  And   
    names_params.name='%s' and
-   water_abons.name='%s' and
-   water_abons.obj_name='%s' and
-   daily_values.date='%s' 
+   resources.name='%s' and
+   objects.name='%s' and
+   daily_values.date='%s'   
 ) z2
 where z1.ab_name=z2.ab_name) z3
 on water_abons.ab_name=z3.ab_name
 where water_abons.obj_name='%s' 
+and water_abons.names_params='%s'
 order by water_abons.ab_name
-    """%(chanel,my_params[0], obj_title, electric_data_start,chanel,my_params[0], obj_title, electric_data_end, obj_title)
+    """%(chanel,my_params[0], obj_title, electric_data_start,chanel,my_params[0], obj_title, electric_data_end, obj_title, chanel)
     
     return sQuery
 
