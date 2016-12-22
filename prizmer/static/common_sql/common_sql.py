@@ -2709,7 +2709,7 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
     
 def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
     sQuery="""
-    SELECT 
+    SELECT distinct
   daily_values.date,
   water_abons.ab_name, 
   water_abons.factory_number_manual, 
@@ -2789,7 +2789,7 @@ def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, ch
     
 def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params):
     sQuery="""
-    Select z1.ab_name, z1.factory_number_manual, z1.value, z2.value, z2.value-z1.value as delta
+    Select distinct z1.ab_name, z1.factory_number_manual, z1.value, z2.value, z2.value-z1.value as delta
 from
 (SELECT 
   daily_values.date,
