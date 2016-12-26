@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^askue/' , include('general.urls')),
     url(r'^report/', include('AskueReports.urls')),
     url(r'^viz/', include('AskueViz.urls')),
+    url(r'^exit/$', general.views.go_out),
 )
 
 urlpatterns += staticfiles_urlpatterns()

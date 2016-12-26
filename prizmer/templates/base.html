@@ -24,7 +24,7 @@
 {% load staticfiles %}	<script src="{%static "flot/jquery.flot.stack.js" %}" type="text/javascript" ></script>
 
 
-<title>ПРИЗМЕР|Автоматизированная Система Комплексного Учёта Энергоресурсов</title>
+<title>ПРИЗМЕР|Автоматизированная Система Комплексного Учёта Энергоресурсов	</title>
 
  <script type="text/javascript">
      
@@ -316,6 +316,8 @@ var hide_loader = function(){
     $( "#datepickerEnd" ).datepicker({ dateFormat: 'dd.mm.yy', defaultDate:+0 });
     $("#QQQ").monthpicker();
   });
+  
+
  </script>
 
 </head>
@@ -336,13 +338,20 @@ var hide_loader = function(){
             <div id="fadingBarsG_8" class="fadingBarsG"></div>
         </div> 
     </div>
-
+	
+  
     <div id="title-structura">
-            {% load staticfiles %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/electric-ico.png" %}" alt="Электроучёт"></a>
-            {% load staticfiles %} <a href="../../askue/water"><img id="water-ico" src="{%static "images/water-ico.png" %}" alt="Водоучёт"></a>
-            {% load staticfiles %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/heat-ico.png" %}" alt="Теплоучёт"></a>
-            {% load staticfiles %} <a href="../../askue/gas" ><img id="gas-ico" src="{%static "images/gas-ico.png" %}" alt="Учёт газа"></a>
-            {% load staticfiles %} <img id="economic-ico" src="{%static "images/economic-ico.png" %}" alt="Экономика">
+            {% load staticfiles %} <a href="../../askue/electric"><img id="electric-ico" src="{{ ico_url_electric }}" alt="Электроучёт"></a>
+            {% load staticfiles %} <a href="../../askue/water"><img id="water-ico" src="{{ ico_url_water }}" alt="Водоучёт"></a>
+            {% load staticfiles %} <a href="../../askue/heat"><img id="heat-ico" src="{{ ico_url_heat }}" alt="Теплоучёт"></a>
+            {% load staticfiles %} <a href="../../askue/gas" ><img id="gas-ico" src="{{ ico_url_gas }}" alt="Учёт газа"></a>
+            {% load staticfiles %} <img id="economic-ico" src="{%static "images/economic-ico36.png" %}" alt="Экономика">            
+<!-- 		
+            {% load staticfiles %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/electric-ico36.png" %}" alt="Электроучёт"></a>
+            {% load staticfiles %} <a href="../../askue/water"><img id="water-ico" src="{%static "images/water-ico36.png" %}" alt="Водоучёт"></a>
+            {% load staticfiles %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/heat-ico36.png" %}" alt="Теплоучёт"></a>
+            {% load staticfiles %} <a href="../../askue/gas" ><img id="gas-ico" src="{%static "images/gas-ico36.png" %}" alt="Учёт газа"></a>
+            {% load staticfiles %} <img id="economic-ico" src="{%static "images/economic-ico36.png" %}" alt="Экономика"> -->
     <br>
     <br>
     <span>Дерево объектов</span>
@@ -352,7 +361,11 @@ var hide_loader = function(){
 </div>
 <div id="right-block">
     <div>
+	<div id="title-exit">
+	{% load staticfiles %} <a href="../../exit"><img id="exit" src="{%static "images/exit-ico.png" %}" alt="Выход"></a>
+	</div>
         <h2 id="system-name">Автоматизированная Система Комплексного Учёта Энергоресурсов</h2>
+    
     </div>
     <div id="control-block">
         {% block control-block %}

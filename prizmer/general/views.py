@@ -1,6 +1,7 @@
 # coding -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
+from django.contrib import auth
 from django.shortcuts import render_to_response, HttpResponse
 from django.core.context_processors import csrf
 import simplejson as json
@@ -12,6 +13,7 @@ import datetime
 #---------
 import calendar
 import common_sql
+from django.shortcuts import redirect
 #---------
 
 from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters
@@ -861,8 +863,17 @@ def default(request):
     else:
         pass
     #-------------- get data new tree end
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args['ico_url_water'] = "/static/images/water-ico36.png"
+    args['ico_url_heat'] = "/static/images/heat-ico36.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico36.png"
+    args['ico_url_economic'] = "/static/images/economic-ico36.png"
     return render_to_response('base.html', args)
 
+def go_out(request):
+    auth.logout(request)
+
+    return redirect(default)
     
 @login_required(login_url='/auth/login/') 
 def tree_data_json(request):
@@ -2607,23 +2618,53 @@ def export_excel_electric(request):
 
 @login_required(login_url='/auth/login/')  
 def electric(request):
-    return render_to_response('control.html')
+    args={}
+    args['ico_url_electric'] = "/static/images/electric-ico42.png"
+    args['ico_url_water'] = "/static/images/water-ico36.png"
+    args['ico_url_heat'] = "/static/images/heat-ico36.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico36.png"
+    args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    return render_to_response('control.html', args)
 
 @login_required(login_url='/auth/login/')
 def economic(request):
-    return render_to_response('economic.html')
+    args={}
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args['ico_url_water'] = "/static/images/water-ico36.png"
+    args['ico_url_heat'] = "/static/images/heat-ico36.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico36.png"
+    args['ico_url_economic'] = "/static/images/economic-ico42.png"
+    return render_to_response('economic.html', args)
 
 @login_required(login_url='/auth/login/')    
 def water(request):
-    return render_to_response('water.html')
+    args={}
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args['ico_url_water'] = "/static/images/water-ico42.png"
+    args['ico_url_heat'] = "/static/images/heat-ico36.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico36.png"
+    args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    return render_to_response('water.html', args)
     
 @login_required(login_url='/auth/login/')    
 def heat(request):
-    return render_to_response('heat.html')
+    args={}
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args['ico_url_water'] = "/static/images/water-ico36.png"
+    args['ico_url_heat'] = "/static/images/heat-ico42.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico36.png"
+    args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    return render_to_response('heat.html', args)
     
 @login_required(login_url='/auth/login/')    
 def gas(request):
-    return render_to_response('gas.html')
+    args={}
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args['ico_url_water'] = "/static/images/water-ico36.png"
+    args['ico_url_heat'] = "/static/images/heat-ico36.png"    
+    args['ico_url_gas'] = "/static/images/gas-ico42.png"
+    args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    return render_to_response('gas.html', args)
       
    
     
