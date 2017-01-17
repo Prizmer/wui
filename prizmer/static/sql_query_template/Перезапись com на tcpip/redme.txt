@@ -1,0 +1,4 @@
+Создаём запрсом tcpip порты (Insert_new_tcpip_port)
+Копируем себе их guid (из 2.sql)
+Создаём правило для первого порта (изменяем guid) (Query_make_rule_for_change_com_to_tcp_ip.sql)
+Удаляем com порты (Del_com_port) - в этот момент срабатывает правило, проверяем запросом (1.sql)

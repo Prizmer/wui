@@ -1196,8 +1196,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'D:\\Work\\mosfilm_teplo\\prizmer\\static\\cfg\\work.xlsx'
-cfg_sheet_name = u'HVS_7k'
+cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\vodniy_load.xlsx'
+cfg_sheet_name = u'progruzka'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1222,6 +1222,7 @@ def add_objects(sender, instance, created, **kwargs): #Добавляем объ
             print u'Фигня какая-то'
         row = row + 1
 #signals.post_save.connect(add_objects, sender=Resources)
+
 
 def add_abonents(sender, instance, created, **kwargs): # Добавляем абонентов при создании объекта
 #***********************
@@ -1467,7 +1468,7 @@ def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #�
             pass
         row = row + 1
         
-#signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
+signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
 
 
 def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
