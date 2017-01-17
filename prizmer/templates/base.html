@@ -55,6 +55,7 @@ $("#choice_report").selectmenu({
         $("#datepickerStart").hide();
         $("#title-date-start").hide();
         $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт Excel</a>')
+		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
     else
@@ -63,6 +64,7 @@ $("#choice_report").selectmenu({
         $("#datepickerStart").show();
         $("#title-date-start").show();
         $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт Excel</a>')
+		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
         }   

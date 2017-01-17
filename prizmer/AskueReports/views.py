@@ -4842,6 +4842,130 @@ def report_pokazaniya_sayany(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
     
+def report_pokazaniya_sayany_archive(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Показания теплосчётчиков Саяны на ' + str(request.session["electric_data_end"])
+    
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Номер счётчика'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Дата'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Показания Q1'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания Q2'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 't1'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 't2'
+    ws['G5'].style = ali_grey
+
+# ниже не переделывала
+    
+#Запрашиваем данные для отчета
+
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+
+    
+    parent_name    = request.session['obj_parent_title']
+    meters_name           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    obj_key             = request.session['obj_key']
+
+    
+    data_table = []
+
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, electric_data_end)
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][0])  # Дата
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу Q1
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу Q2
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Показания по теплу t1
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # Показания по теплу t2
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 17 
+                    
+    
+    
+    import zipfile
+
+    o=StringIO.StringIO()
+    
+    zf = zipfile.ZipFile(response, mode='w', compression=zipfile.ZIP_DEFLATED)
+    zf.writestr('README.txt', 'test msg')
+    wb.save(o)
+    zf.writestr('test.xlsx',o.getvalue())
+    zf.close()
+    response=HttpResponse(response.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    response['Content-Disposition'] = "attachment; filename=\"sayani_test.zip\""
+    
+    return response
+    
 def report_sayany_last(request):
     response = StringIO.StringIO()
     wb = Workbook()
