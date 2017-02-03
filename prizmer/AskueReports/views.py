@@ -4948,9 +4948,7 @@ def report_pokazaniya_sayany_archive(request):
     ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 35
     ws.column_dimensions['B'].width = 17 
-                    
-    
-    
+
     import zipfile
 
     o=StringIO.StringIO()

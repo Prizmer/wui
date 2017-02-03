@@ -1196,8 +1196,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\vodniy_load.xlsx'
-cfg_sheet_name = u'progruzka'
+cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_v2_forLoad.xlsx'
+cfg_sheet_name = u'Heat_1b(2)'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1602,6 +1602,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                 
                 else:
                     guid_ip_port_from_excel = connection.cursor()
+                    
                     guid_ip_port_from_excel.execute("""SELECT 
                                                       tcpip_settings.guid
                                                     FROM 
@@ -1611,6 +1612,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                                                       tcpip_settings.ip_port = %s;""",[unicode(sheet_ranges[u'K%s'%(row)].value), unicode(sheet_ranges[u'L%s'%(row)].value)])
                     guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
             
+                    
                     guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
                     add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
                     add_ip_port_link.save()

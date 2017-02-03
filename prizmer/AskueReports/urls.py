@@ -32,7 +32,7 @@ urlpatterns = patterns('',
     url(r'^26/$', views.pokazaniya_water_current_report),#текущие(последние считанные) показания для Эльфов ГВС и ХВС
     url(r'^28/$', views.pokazaniya_water_daily_report),# показания на дату  для Эльфов ГВС и ХВС
     url(r'^30/$', views.report_pokazaniya_sayany), # показания на дату. Тепло. Саяны
-    url(r'^30_arch/$', views.report_pokazaniya_sayany_archive),
+#    url(r'^30_arch/$', views.report_pokazaniya_sayany_archive),
    
     url(r'^31/$', views.report_electric_potreblenie_2_zones_v2), # Электрика. Отчет по потреблению за период по двум датам. 2 Тарифа.
     
