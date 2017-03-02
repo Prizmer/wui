@@ -10999,6 +10999,29 @@ def water_potreblenie_gvs_tekon(request):
       
     return render_to_response("data_table/water/37.html", args)
 
+def resources_all(request):
+    args= {}
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            data_table = common_sql.get_data_table_report_all_res_period2(electric_data_start, electric_data_end)
+            #data_table = common_sql.get_data_table_report_all_res_period(u'10.02.2017', u'20.02.2017')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/9.html", args)
+
 def test_test(request):
     args={}
     args['test_test'] = 10

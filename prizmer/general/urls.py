@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^6/$', views.hour_increment), #часовые приращения энергии-не переделывала
     url(r'^7/$', views.economic_electric), #удельный расход электроэнергии-не переделывала
     url(r'^8/$', views.rejim_day), #режимный день-не переделывала
+    url(r'^9/$', views.resources_all), #для ФилиГрад, отчёт по всем ресурсам за период
     url(r'^10/$', views.pokazaniya_water), # показания по воде-не переделывала
     url(r'^11/$', views.potreblenie_water), # потребление по воде-не переделывала
     url(r'^12/$', views.pokazaniya_water_identificators), # потребление по воде с идентификаторами-не переделывала

@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^6/$', views.report_hour_increment),
     url(r'^7/$', views.report_economic_electric),
     url(r'^8/$', views.report_rejim_day),
+    url(r'^9/$', views.report_resources_all),
     url(r'^12/$', views.report_pokazaniya_water_identificators),
     url(r'^14/$', views.report_electric_simple_2_zones_v2), # Электрика. Простой отчет по показаниям на дату. 2 Тарифа
     url(r'^16/$', views.report_electric_simple_3_zones_v2), # Электрика. Простой отчет по показаниям на дату. 3 Тарифа

@@ -1976,7 +1976,7 @@ def ChangeNull(data_table, electric_data):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
         for j in range(1,len(data_table[i])):
-            if (data_table[i][j] is None):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
                 data_table[i][j]=u'Н/Д'
         if (electric_data is not None):
             data_table[i][0]=electric_data
@@ -2707,6 +2707,220 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
             
     return data_table
     
+def get_data_table_report_all_res_period2(electric_data_start, electric_data_end):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(
+"""Select account_2,%s::date as date_start, ab_name as meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old,z2.delta,date_install,%s::date as date_end, obj_name as ab_name
+from water_abons_report
+LEFT JOIN (
+with z1 as (SELECT 
+  meters.name, 
+  meters.factory_number_manual,
+  daily_values.date, 
+  daily_values.value, 
+  abonents.name, 
+  abonents.guid
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  meters.name LIKE '%%Пульсар%%'
+  and date=%s)
+SELECT  
+  abonents.name, 
+  abonents.guid,
+  daily_values.date as date_old, 
+  daily_values.value as value_old,  
+  z1.date,
+  z1.value,
+  z1.value-daily_values.value as delta,
+  z1.factory_number_manual
+FROM 
+  z1,
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params
+WHERE 
+  z1.guid=abonents.guid and
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  meters.name LIKE '%%Пульсар%%'
+  and daily_values.date=%s
+)z2
+on z2.name=water_abons_report.ab_name
+union
+Select account_2,%s::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value_old, z2.value,z2.delta,date_install,%s::date as date_end, ab_name
+from heat_abons_report
+LEFT JOIN
+(with z1 as (SELECT 
+  abonents.name, 
+  objects.name, 
+  daily_values.date as date_old, 
+  daily_values.value as value_old, 
+  meters.name as name_meters,
+  meters.factory_number_manual,
+  params.name
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters,
+  params
+WHERE 
+  taken_params.guid_params=params.guid and
+   abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.name LIKE '%%Sayany%%' and
+  daily_values.date = %s and
+   params.name='Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1'
+  group by 
+  abonents.name, 
+  objects.name, 
+  daily_values.date, 
+  daily_values.value, 
+  meters.name,
+  meters.factory_number_manual,
+  params.name)
+  SELECT 
+  abonents.name, 
+  objects.name, 
+  z1.date_old,
+  z1.value_old,
+  daily_values.date, 
+  daily_values.value, 
+  meters.name as name_meters,
+  params.name,
+  z1.factory_number_manual,
+  z1.value_old-daily_values.value as delta
+FROM 
+  z1,
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters,
+  params
+WHERE 
+  taken_params.guid_params=params.guid and
+   abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.name LIKE '%%Sayany%%' and
+  daily_values.date = %s and
+  params.name='Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1'
+  and meters.name = z1.name_meters
+  group by 
+  z1.factory_number_manual,
+  abonents.name, 
+  objects.name, 
+  daily_values.date, 
+  daily_values.value, 
+  meters.name,
+  params.name,
+  z1.date_old,
+  z1.value_old) z2
+  on z2.name_meters=heat_abons_report.meter_name
+union
+Select account_2, %s::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old, z2.delta,date_install,%s::date as date_end, ab_name
+from electric_abons_report
+LEFT JOIN
+(with z1 as 
+(SELECT 
+  abonents.name, 
+  objects.name, 
+  daily_values.date, 
+  daily_values.value, 
+  names_params.name as name_params, 
+  types_meters.name, 
+  meters.factory_number_manual,
+  meters.name as meter_name
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters, 
+  public.meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  types_meters.name LIKE '%%Меркурий%%230%%' AND 
+  daily_values.date = %s
+)
+SELECT 
+  abonents.name, 
+  objects.name, 
+  z1.date,
+  z1.value,
+  daily_values.date as date_old, 
+  daily_values.value as value_old, 
+  names_params.name as params_name, 
+  types_meters.name, 
+  meters.factory_number_manual,
+  meters.name as meter_name,
+  z1.value-daily_values.value as delta
+FROM 
+z1,
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters, 
+  public.meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  types_meters.name LIKE '%%Меркурий%%230%%' AND 
+  daily_values.date = %s and
+  z1.meter_name=meters.name and
+  z1.name_params=names_params.name
+  order by abonents.name, 
+  objects.name, meters.name) z2
+  on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params;
+    """,[electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end, electric_data_end,electric_data_start]
+)
+    data_table = cursor.fetchall()
+
+    return data_table
+
 def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
     sQuery="""
     SELECT 
@@ -2741,7 +2955,7 @@ WHERE
    objects.name='%s' and
    daily_values.date='%s' 
     """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
-    print sQuery
+    #print sQuery
     return sQuery
     
 def MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params):

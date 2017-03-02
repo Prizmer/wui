@@ -1196,8 +1196,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_v2_forLoad.xlsx'
-cfg_sheet_name = u'Heat_1b(2)'
+cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_v3_forLoad.xlsx'
+cfg_sheet_name = u'Heat_2v(5)'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1619,7 +1619,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection

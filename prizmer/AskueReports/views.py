@@ -1,7 +1,8 @@
 # coding -*- coding: utf-8 -*-
 
 #from django.shortcuts import render
-from django.http import HttpResponse
+from __future__ import unicode_literals
+from django.shortcuts import render_to_response, HttpResponse
 from django.db import connection
 import StringIO
 from openpyxl import Workbook
@@ -11,7 +12,9 @@ from openpyxl.styles import Style, PatternFill, Border, Side, Alignment, Font
 from openpyxl.cell import get_column_letter
 import common_sql
 import re
-from datetime import datetime, date, time
+from excel_response import ExcelResponse
+from django.shortcuts import redirect
+#from datetime import datetime, date, time
 
 
 def zagotovka(request):
@@ -5501,6 +5504,152 @@ def pokazaniya_heat_current_report(request):
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
     output_name = u'heat_current_report' 
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+#_________________________________________________________________________
+
+
+def report_resources_all(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Филиград. Показания по энергоресурсам за период'
+    
+    ws['A5'] = 'Лицевой счёт'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Дата начальная'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Номер прибора'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Тип прибора'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания на конечную дату '
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Показания на начальную дату'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Разница' 
+    ws['G5'].style = ali_grey
+    
+    ws['H5'] = 'Дата установки'
+    ws['H5'].style = ali_grey
+
+    ws['I5'] = 'Дата конечная' 
+    ws['I5'].style = ali_grey
+    
+    ws['J5'] = 'Абонент'
+    ws['J5'].style = ali_grey
+    
+#Запрашиваем данные для отчета
+
+    electric_data_start = request.session["electric_data_start"]
+    electric_data_end   = request.session["electric_data_end"]           
+    
+    data_table = []
+    data_table = common_sql.get_data_table_report_all_res_period2(electric_data_start, electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # лицевой счёт
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # начальная дата
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # номер счётчика
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # тип энергоресурса
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][5])  # показания на конченую дату
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][6])  # показания на начальную дату
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][7])  # Дельта
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][8])  # Дата установки приборов
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-6][9])  # Дата конечная
+            ws.cell('I%s'%(row)).style = ali_white
+        except:
+            ws.cell('I%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-6][10])  # Абонент
+            ws.cell('J%s'%(row)).style = ali_white
+        except:
+            ws.cell('J%s'%(row)).style = ali_white
+            next
+
+    ws.row_dimensions[5].height = 41
+#    ws.column_dimensions['A'].width = 10 
+#    ws.column_dimensions['B'].width = 10 
+#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['j'].width = 15
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_all_resources_'+ str(electric_data_start)+'_'+str(electric_data_end)
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
