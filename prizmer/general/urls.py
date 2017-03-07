@@ -70,7 +70,7 @@ urlpatterns = patterns('',
     url(r'^36/$', views.pokazaniya_water_gvs_tekon), # показания по ХВС -Текон
     url(r'^37/$', views.water_potreblenie_gvs_tekon), # потребление по ХВС -Текон за период
     
-    
+    url(r'^38/$', views.water_by_date), # вода, показания на дату
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

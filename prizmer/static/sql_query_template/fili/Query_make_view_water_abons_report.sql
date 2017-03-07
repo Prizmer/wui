@@ -10,6 +10,7 @@ WHERE
   objects.name LIKE '%Корпус%Вода%'
   )
 SELECT 
+  Korp.name,
   abonents.account_2,   
   abonents.name as ab_name,
   case when abonents.name like '%ГВС%' then 'Горячее водоснабжение' else 'Холодное водоснабжение' end as type_energo,

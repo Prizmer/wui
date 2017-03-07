@@ -1196,8 +1196,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_v3_forLoad.xlsx'
-cfg_sheet_name = u'Heat_2v(5)'
+cfg_excel_name = 'C:\\work\\mitino\\prizmer\\static\\cfg\\sviblovo-original.xlsx'
+cfg_sheet_name = u'Electric k1'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1586,14 +1586,14 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
         if sheet_ranges[u'G%s'%(row)].value is not None:
             #print sheet_ranges[u'G%s'%(row)].value
             if unicode(sheet_ranges[u'G%s'%(row)].value) == instance.factory_number_manual :
-                if unicode(sheet_ranges[u'J1'].value) == u'Com-port':
+                if unicode(sheet_ranges[u'M1'].value) == u'Com-port':
                     guid_com_port_from_excel = connection.cursor()
                     guid_com_port_from_excel.execute("""SELECT 
                                                       comport_settings.guid
                                                     FROM 
                                                       public.comport_settings
                                                     WHERE 
-                                                      comport_settings.name = %s;""",[unicode(sheet_ranges[u'J%s'%(row)].value)])
+                                                      comport_settings.name = %s;""",[unicode(sheet_ranges[u'M%s'%(row)].value)])
                     guid_com_port_from_excel = guid_com_port_from_excel.fetchall()
             
                     guid_com_port = ComportSettings.objects.get(guid=guid_com_port_from_excel[0][0])
@@ -1619,7 +1619,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection

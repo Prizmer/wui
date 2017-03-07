@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'^7/$', views.report_economic_electric),
     url(r'^8/$', views.report_rejim_day),
     url(r'^9/$', views.report_resources_all),
+
     url(r'^12/$', views.report_pokazaniya_water_identificators),
     url(r'^14/$', views.report_electric_simple_2_zones_v2), # Электрика. Простой отчет по показаниям на дату. 2 Тарифа
     url(r'^16/$', views.report_electric_simple_3_zones_v2), # Электрика. Простой отчет по показаниям на дату. 3 Тарифа
@@ -44,6 +45,8 @@ urlpatterns = patterns('',
     url(r'^35/$', views.report_water_potreblenie_tekon_hvs), # расход по теплосчётчикам Текон-хвс по двум датам
     url(r'^36/$', views.report_water_tekon_gvs), # показжания на дату по теплосчётчикам Текон-гвс
     url(r'^37/$', views.report_water_potreblenie_tekon_gvs), # расход по теплосчётчикам Текон-гвс по двум датам
+    
+    url(r'^38/$', views.report_water_by_date), #для Фили, выгрузка данных на дату
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),
