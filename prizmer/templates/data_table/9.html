@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Отчёт по всем энергоресурсам</title>
+<!-- Graph plugin-->
+{% load staticfiles %}	<link href="{%static "../../static/flot/examples.css"%}" rel="stylesheet" type="text/css">
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}  <script src="{%static "../../static/flot/jquery.flot.time.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.categories.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.axislabels.js" %}" type="text/javascript" ></script>
+
+</head>
+<body>
+<span>Отчёт по всем энергоресурсам с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+<br>
+<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Лицевой счёт</th>
+<th>Дата начала</th>
+<th>Номер прибора</th>
+<th>Тип прибора</th>
+<th>Показания на {{electric_data_end}}</th>
+<th>Показания на {{electric_data_start}}</th>
+<th>Разница</th>
+<th>Дата установки</th>
+<th>Дата окончания</th>
+<th>Абонент</th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1|date:'d-m-Y'}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td><strong>{{value.5|floatformat:3}}</strong></td>
+<td><strong>{{value.6|floatformat:3}}</strong></td>
+<td>{{value.7}}</td>
+<td>{{value.8|date:'d-m-Y'}}</td>
+<td>{{value.9|date:'d-m-Y'}}</td>
+<td>{{value.10}}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
+</body>
+</html>
