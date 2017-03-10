@@ -2707,11 +2707,259 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
             
     return data_table
     
+    
+def MakeQuery_all_resources(electric_data_start, electric_data_end):
+    my_params=[u'Импульс',u'Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1',u'Электричество']
+    sQuery="""Select account_2,'%s'::date as date_start, z2.factory_number_manual as meter_name,ab_name, type_energo, z2.value, z2.value_old,z2.delta,date_install,'%s'::date as date_end, obj_name as ab_name
+    from water_abons_report
+    LEFT JOIN (
+    with z1 as (SELECT 
+      meters.name, 
+      meters.factory_number_manual,
+      daily_values.date, 
+      daily_values.value, 
+      abonents.name, 
+      abonents.guid
+    FROM 
+      public.meters, 
+      public.taken_params, 
+      public.daily_values, 
+      public.abonents, 
+      public.link_abonents_taken_params,
+      params,
+      names_params,
+      resources
+    WHERE 
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid and
+      params.guid=taken_params.guid_params  and
+      names_params.guid=params.guid_names_params and
+      resources.guid=names_params.guid_resources and
+      resources.name='%s'
+      and date='%s')
+    SELECT  
+      abonents.name, 
+      abonents.guid,
+      daily_values.date as date_old, 
+      daily_values.value as value_old,  
+      z1.date,
+      z1.value,
+      z1.value-daily_values.value as delta,
+      z1.factory_number_manual
+    FROM 
+      z1,
+      public.meters, 
+      public.taken_params, 
+      public.daily_values, 
+      public.abonents, 
+      public.link_abonents_taken_params,
+      params,
+      names_params,
+      resources
+    WHERE 
+      z1.guid=abonents.guid and
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid and
+      params.guid=taken_params.guid_params  and
+      names_params.guid=params.guid_names_params and
+      resources.guid=names_params.guid_resources and
+      resources.name='%s'
+      and daily_values.date='%s'
+    )z2
+    on z2.name=water_abons_report.ab_name
+    
+    union
+    
+    Select account_2,'%s'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value_old, z2.value,z2.delta,date_install,'%s'::date as date_end, ab_name
+    from heat_abons_report
+    LEFT JOIN
+    (with z1 as (SELECT 
+      abonents.name, 
+      objects.name, 
+      daily_values.date as date_old, 
+      daily_values.value as value_old, 
+      meters.name as name_meters,
+      meters.factory_number_manual,
+      params.name
+    FROM 
+      public.abonents, 
+      public.objects, 
+      public.link_abonents_taken_params, 
+      public.taken_params, 
+      public.daily_values, 
+      public.meters,
+      params,
+      names_params,
+      resources
+    WHERE 
+      taken_params.guid_params=params.guid and
+       abonents.guid_objects = objects.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id and
+      params.guid=taken_params.guid_params  and
+      names_params.guid=params.guid_names_params and
+      resources.guid=names_params.guid_resources and
+      daily_values.date = '%s' and
+      params.name='%s'
+      group by 
+      abonents.name, 
+      objects.name, 
+      daily_values.date, 
+      daily_values.value, 
+      meters.name,
+      meters.factory_number_manual,
+      params.name)
+      SELECT 
+      abonents.name, 
+      objects.name, 
+      z1.date_old,
+      z1.value_old,
+      daily_values.date, 
+      daily_values.value, 
+      meters.name as name_meters,
+      params.name,
+      z1.factory_number_manual,
+      z1.value_old-daily_values.value as delta
+    FROM 
+      z1,
+      public.abonents, 
+      public.objects, 
+      public.link_abonents_taken_params, 
+      public.taken_params, 
+      public.daily_values, 
+      public.meters,
+      params,
+      names_params,
+      resources
+    WHERE 
+      taken_params.guid_params=params.guid and
+       abonents.guid_objects = objects.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id and
+      params.guid=taken_params.guid_params  and
+      names_params.guid=params.guid_names_params and
+      resources.guid=names_params.guid_resources and
+      daily_values.date = '%s' and
+      params.name='%s'
+      and meters.name = z1.name_meters
+      group by 
+      z1.factory_number_manual,
+      abonents.name, 
+      objects.name, 
+      daily_values.date, 
+      daily_values.value, 
+      meters.name,
+      params.name,
+      z1.date_old,
+      z1.value_old) z2
+      on z2.name_meters=heat_abons_report.meter_name
+    
+    union
+    
+    Select account_2, '%s'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old, z2.delta,date_install,'%s'::date as date_end, ab_name
+    from electric_abons_report
+    LEFT JOIN
+    (with z1 as 
+    (SELECT 
+      abonents.name, 
+      objects.name, 
+      daily_values.date, 
+      daily_values.value, 
+      names_params.name as name_params, 
+      types_meters.name, 
+      meters.factory_number_manual,
+      meters.name as meter_name
+    FROM 
+      public.abonents, 
+      public.objects, 
+      public.link_abonents_taken_params, 
+      public.taken_params, 
+      public.daily_values, 
+      public.params, 
+      public.names_params, 
+      public.types_meters, 
+      public.meters,
+      resources
+    WHERE 
+      abonents.guid_objects = objects.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      taken_params.guid_params = params.guid AND
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id AND
+      params.guid_names_params = names_params.guid AND
+      params.guid_types_meters = types_meters.guid AND
+    
+      resources.guid=names_params.guid_resources and
+      resources.name='%s' and
+      daily_values.date = '%s'
+    )
+    SELECT 
+      abonents.name, 
+      objects.name, 
+      z1.date,
+      z1.value,
+      daily_values.date as date_old, 
+      daily_values.value as value_old, 
+      names_params.name as params_name, 
+      types_meters.name, 
+      meters.factory_number_manual,
+      meters.name as meter_name,
+      z1.value-daily_values.value as delta
+    FROM 
+    z1,
+      public.abonents, 
+      public.objects, 
+      public.link_abonents_taken_params, 
+      public.taken_params, 
+      public.daily_values, 
+      public.params, 
+      public.names_params, 
+      public.types_meters, 
+      public.meters,
+      resources
+    WHERE 
+      abonents.guid_objects = objects.guid AND
+      link_abonents_taken_params.guid_abonents = abonents.guid AND
+      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+      taken_params.guid_params = params.guid AND
+      taken_params.guid_meters = meters.guid AND
+      daily_values.id_taken_params = taken_params.id AND
+      params.guid_names_params = names_params.guid AND
+      params.guid_types_meters = types_meters.guid AND
+       resources.guid=names_params.guid_resources and
+      resources.name='%s' and
+      daily_values.date = '%s' and
+      z1.meter_name=meters.name and
+      z1.name_params=names_params.name
+      order by abonents.name, 
+      objects.name, meters.name) z2
+      on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params
+      order by  account_2;"""%(electric_data_start,electric_data_end,my_params[0],electric_data_end,my_params[0],electric_data_start, electric_data_start,electric_data_end,electric_data_end,my_params[1],electric_data_start,my_params[1], electric_data_start, electric_data_end, my_params[2], electric_data_end,my_params[2],electric_data_start)
+
+    return sQuery
+    
+def get_data_table_report_all_res_period3(electric_data_start, electric_data_end):
+    cursor = connection.cursor()
+    data_table=[]
+    #my_params=[u'Импульс',u'Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1',u'Электричество']
+    cursor.execute(MakeQuery_all_resources(electric_data_start, electric_data_end))
+    data_table = cursor.fetchall()
+    return data_table
+    
 def get_data_table_report_all_res_period2(electric_data_start, electric_data_end):
     cursor = connection.cursor()
     data_table=[]
     cursor.execute(
-"""Select account_2,%s::date as date_start, ab_name as meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old,z2.delta,date_install,%s::date as date_end, obj_name as ab_name
+"""Select account_2,%s::date as date_start, z2.factory_number_manual, ab_name, type_energo, z2.value, z2.value_old,z2.delta,date_install,%s::date as date_end, obj_name as ab_name
 from water_abons_report
 LEFT JOIN (
 with z1 as (SELECT 
@@ -2914,11 +3162,11 @@ WHERE
   z1.name_params=names_params.name
   order by abonents.name, 
   objects.name, meters.name) z2
-  on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params;
-    """,[electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end, electric_data_end,electric_data_start]
-)
+  on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params
+  order by account_2
+    """,[electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end,electric_data_end,electric_data_start, electric_data_start,electric_data_end, electric_data_end,electric_data_start])
     data_table = cursor.fetchall()
-
+   
     return data_table
 
 def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
@@ -3054,8 +3302,9 @@ WHERE
   order by obj_name, names_params.name ) z2
   on z2.meters=water_abons_report.ab_name
   where z2.name='%s'  
+  order by obj_name, z2.name_params
     """%(my_param[0],electric_data_end, meters_name,meters_name)
-    print sQuery
+    #print sQuery
     return sQuery
     
 def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param):
@@ -3106,6 +3355,159 @@ def get_data_table_water_by_date(meters_name, parent_name, electric_data_end, is
         cursor.execute(MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param))
     else:
         cursor.execute(MakeSqlQuery_water_by_date_for_korp(meters_name, parent_name, electric_data_end, my_param))
+    data_table = cursor.fetchall()
+
+    return data_table
+def MakeSqlQuery_water_period_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
+    sQuery="""
+    Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value, z2.value_old,z2.delta,date_install,z2.date_old
+from water_abons_report
+
+LEFT JOIN (
+with z1 as (SELECT 
+  meters.name, 
+  daily_values.date, 
+  daily_values.value, 
+  abonents.name, 
+  abonents.guid
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid 
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s')
+
+SELECT 
+  meters.name as meter, 
+  daily_values.date as date_old, 
+  daily_values.value as value_old, 
+  abonents.name as ab_name, 
+  abonents.guid,
+  daily_values.value-z1.value as delta,
+  z1.value,
+  z1.date
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources, 
+  z1
+WHERE 
+  z1.guid=abonents.guid and
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid 
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s' 
+  and daily_values.date='%s'
+)z2
+on z2.ab_name=water_abons_report.ab_name
+where water_abons_report.name='%s'
+order by account_2
+    """%(my_param[0],electric_data_start, my_param[0], electric_data_end, meters_name )
+    return sQuery
+def MakeSqlQuery_water_period_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
+    sQuery="""
+    Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value, z2.value_old,z2.delta,date_install,z2.date_old
+from water_abons_report
+
+LEFT JOIN (
+with z1 as (SELECT 
+  meters.name, 
+  daily_values.date, 
+  daily_values.value, 
+  abonents.name, 
+  abonents.guid
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid 
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s')
+
+SELECT 
+  meters.name as meter, 
+  daily_values.date as date_old, 
+  daily_values.value as value_old, 
+  abonents.name as ab_name, 
+  abonents.guid,
+  daily_values.value-z1.value as delta,
+  z1.value,
+  z1.date
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources, 
+  z1
+WHERE 
+  z1.guid=abonents.guid and
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid 
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s' 
+  and daily_values.date='%s'
+)z2
+on z2.ab_name=water_abons_report.ab_name
+where water_abons_report.name='%s'
+and water_abons_report.obj_name='%s'
+order by account_2
+    """%(my_param[0],electric_data_start, my_param[0], electric_data_end,parent_name, meters_name )
+    return sQuery
+def get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_start, electric_data_end, isAbon):
+    cursor = connection.cursor()
+    data_table=[]
+    my_param=[u'Импульс',]
+    #print "meters_name, parent_name, electric_data_end", meters_name, parent_name, electric_data_end
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_period_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
+    else:
+        cursor.execute(MakeSqlQuery_water_period_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
     data_table = cursor.fetchall()
 
     return data_table

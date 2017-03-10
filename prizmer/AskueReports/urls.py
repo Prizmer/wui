@@ -46,7 +46,8 @@ urlpatterns = patterns('',
     url(r'^36/$', views.report_water_tekon_gvs), # показжания на дату по теплосчётчикам Текон-гвс
     url(r'^37/$', views.report_water_potreblenie_tekon_gvs), # расход по теплосчётчикам Текон-гвс по двум датам
     
-    url(r'^38/$', views.report_water_by_date), #для Фили, выгрузка данных на дату
+    url(r'^38/$', views.report_water_by_date), #для Фили, выгрузка данных на дату по воде Импульсные
+    url(r'^39/$', views.report_water_potreblenie_pulsar), #для Фили, выгрузка данных за период по воде Импульсные
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

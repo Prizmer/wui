@@ -10860,6 +10860,7 @@ def heat_potreblenie_sayany(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
       
     return render_to_response("data_table/heat/33.html", args)
     
@@ -10894,6 +10895,51 @@ def water_by_date(request):
     args['electric_data_end'] = electric_data_end
       
     return render_to_response("data_table/water/38.html", args)
+    
+def water_potreblenie_pulsar(request):
+    args= {}
+    is_abonent_level = re.compile(r'level2')
+    is_object_level_2 = re.compile(r'level1')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    electric_data_start   = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_end"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        num=data_table[i][3]
+        if ('ХВС, №' in num) or ('ГВС, №' in num):
+            num=num.replace(u'ХВС, №', ' ')
+            num=num.replace(u'ГВС, №', ' ')
+            data_table[i][3]=num
+            #print num
+        data_table[i]=tuple(data_table[i])
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/water/39.html", args)
 
 
 def pokazaniya_water_hvs_tekon(request):
@@ -11042,12 +11088,23 @@ def resources_all(request):
         if request.method == 'GET':
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
-            data_table = common_sql.get_data_table_report_all_res_period2(electric_data_start, electric_data_end)
+            data_table = common_sql.get_data_table_report_all_res_period3(electric_data_start, electric_data_end)
             #data_table = common_sql.get_data_table_report_all_res_period(u'10.02.2017', u'20.02.2017')
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table, None)
+#        
+#    #удаляем из номеров счётчиков лишнее
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        num=data_table[i][3]
+        if ('ХВС, №' in num) or ('ГВС, №' in num):
+            num=num.replace(u'ХВС, №', ' ')
+            num=num.replace(u'ГВС, №', ' ')
+            data_table[i][3]=num
+            #print num
+        data_table[i]=tuple(data_table[i])
 
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end

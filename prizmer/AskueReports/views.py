@@ -43,6 +43,100 @@ ali_yellow = Style(fill=PatternFill(fill_type='solid', start_color='EEEE00'), bo
 ali_white_size_18  = Style(font=Font(size=18))
 # Конец описания стилей
 
+def translate(name):
+ 
+    #Заменяем пробелы и преобразуем строку к нижнему регистру
+    name = name.replace(' ','-').lower()
+ 
+    #
+    transtable = (
+        ## Большие буквы
+        (u"Щ", u"Sch"),
+        (u"Щ", u"SCH"),
+        # two-symbol
+        (u"Ё", u"Yo"),
+        (u"Ё", u"YO"),
+        (u"Ж", u"Zh"),
+        (u"Ж", u"ZH"),
+        (u"Ц", u"Ts"),
+        (u"Ц", u"TS"),
+        (u"Ч", u"Ch"),
+        (u"Ч", u"CH"),
+        (u"Ш", u"Sh"),
+        (u"Ш", u"SH"),
+        (u"Ы", u"Yi"),
+        (u"Ы", u"YI"),
+        (u"Ю", u"Yu"),
+        (u"Ю", u"YU"),
+        (u"Я", u"Ya"),
+        (u"Я", u"YA"),
+        # one-symbol
+        (u"А", u"A"),
+        (u"Б", u"B"),
+        (u"В", u"V"),
+        (u"Г", u"G"),
+        (u"Д", u"D"),
+        (u"Е", u"E"),
+        (u"З", u"Z"),
+        (u"И", u"I"),
+        (u"Й", u"J"),
+        (u"К", u"K"),
+        (u"Л", u"L"),
+        (u"М", u"M"),
+        (u"Н", u"N"),
+        (u"О", u"O"),
+        (u"П", u"P"),
+        (u"Р", u"R"),
+        (u"С", u"S"),
+        (u"Т", u"T"),
+        (u"У", u"U"),
+        (u"Ф", u"F"),
+        (u"Х", u"H"),
+        (u"Э", u"E"),
+        (u"Ъ", u"`"),
+        (u"Ь", u"'"),
+        ## Маленькие буквы
+        # three-symbols
+        (u"щ", u"sch"),
+        # two-symbols
+        (u"ё", u"yo"),
+        (u"ж", u"zh"),
+        (u"ц", u"ts"),
+        (u"ч", u"ch"),
+        (u"ш", u"sh"),
+        (u"ы", u"yi"),
+        (u"ю", u"yu"),
+        (u"я", u"ya"),
+        # one-symbol
+        (u"а", u"a"),
+        (u"б", u"b"),
+        (u"в", u"v"),
+        (u"г", u"g"),
+        (u"д", u"d"),
+        (u"е", u"e"),
+        (u"з", u"z"),
+        (u"и", u"i"),
+        (u"й", u"j"),
+        (u"к", u"k"),
+        (u"л", u"l"),
+        (u"м", u"m"),
+        (u"н", u"n"),
+        (u"о", u"o"),
+        (u"п", u"p"),
+        (u"р", u"r"),
+        (u"с", u"s"),
+        (u"т", u"t"),
+        (u"у", u"u"),
+        (u"ф", u"f"),
+        (u"х", u"h"),
+        (u"э", u"e"),
+    )
+    #перебираем символы в таблице и заменяем
+    for symb_in, symb_out in transtable:
+        name = name.replace(symb_in, symb_out)
+    #возвращаем переменную
+    return name
+
 def get_k_t_n_by_serial_number(serial_number):
     """Получаем Ктн по серийному номеру счтчика"""
     simpleq = connection.cursor()
@@ -502,7 +596,7 @@ def report_3_tarifa_k(request): # Отчет по А+ и R+ с коэффици�
     response.seek(0)
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
 #    response['Content-Disposition'] = "attachment; filename=electric.xlsx"
-    output_name = u'otchet za period ' + electric_data_start + '-' + electric_data_end
+    output_name = u'otchet za period ' + electric_data_start + '-' + electric_data_end+ translate(obj_title)
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -2190,9 +2284,12 @@ def report_electric_simple_3_zones_v2(request):
     wb = Workbook()
     ws = wb.active
     
+    obj_title           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']    
+    
 # Шапка отчета    
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Срез показаний с коэффициентами на дату' + ' ' + str(request.session["electric_data_end"])
+    ws['A2'] = obj_title+' .Срез показаний с коэффициентами на дату' + ' ' + electric_data_end
     
     ws.merge_cells('A4:A5')
     ws['A4'] = 'Наименование канала'
@@ -2224,10 +2321,10 @@ def report_electric_simple_3_zones_v2(request):
     ws['G4'].style = ali_grey
     ws['H4'].style = ali_grey
     ws['I4'].style = ali_grey
-    ws['F5'] = 'Показания A+ на ' + str(request.session["electric_data_end"])
+    ws['F5'] = 'Показания A+ на ' + electric_data_end
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 'Энергия A+ на ' + str(request.session["electric_data_end"])
+    ws['G5'] = 'Энергия A+ на ' + electric_data_end
     ws['G5'].style = ali_yellow
     
     # Тариф 1
@@ -2237,10 +2334,10 @@ def report_electric_simple_3_zones_v2(request):
     ws['I4'].style = ali_grey
     ws['H4'].style = ali_grey
     ws['I4'].style = ali_grey
-    ws['H5'] = 'Показания A+ на ' + str(request.session["electric_data_end"])
+    ws['H5'] = 'Показания A+ на ' +  electric_data_end
     ws['H5'].style = ali_grey
     
-    ws['I5'] = 'Энергия A+ на ' + str(request.session["electric_data_end"])
+    ws['I5'] = 'Энергия A+ на ' +  electric_data_end
     ws['I5'].style = ali_yellow
     
     # Тариф 2
@@ -2250,10 +2347,10 @@ def report_electric_simple_3_zones_v2(request):
     ws['K4'].style = ali_grey
     ws['J4'].style = ali_grey
     ws['K4'].style = ali_grey
-    ws['J5'] = 'Показания A+ на ' + str(request.session["electric_data_end"])
+    ws['J5'] = 'Показания A+ на ' +  electric_data_end
     ws['J5'].style = ali_grey
     
-    ws['K5'] = 'Энергия A+ на ' + str(request.session["electric_data_end"])
+    ws['K5'] = 'Энергия A+ на ' +  electric_data_end
     ws['K5'].style = ali_yellow
     
     # Тариф 3
@@ -2263,10 +2360,10 @@ def report_electric_simple_3_zones_v2(request):
     ws['M4'].style = ali_grey
     ws['L4'].style = ali_grey
     ws['M4'].style = ali_grey
-    ws['L5'] = 'Показания A+ на ' + str(request.session["electric_data_end"])
+    ws['L5'] = 'Показания A+ на ' +  electric_data_end
     ws['L5'].style = ali_grey
     
-    ws['M5'] = 'Энергия A+ на ' + str(request.session["electric_data_end"])
+    ws['M5'] = 'Энергия A+ на ' +  electric_data_end
     ws['M5'].style = ali_yellow
          
     ws.row_dimensions[5].height = 41
@@ -2280,8 +2377,7 @@ def report_electric_simple_3_zones_v2(request):
     is_group_level = re.compile(r'group')
     
     obj_parent_title    = request.session['obj_parent_title']
-    obj_title           = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']            
+            
     obj_key             = request.session['obj_key']
     is_electric_monthly = request.session['is_electric_monthly']
     is_electric_daily   = request.session['is_electric_daily']
@@ -2416,7 +2512,7 @@ def report_electric_simple_3_zones_v2(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'3_tariffa' 
+    output_name = u'3_tariffa_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)    
@@ -2693,10 +2789,12 @@ def electric_between_3_zones_report(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-    
+    obj_title           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']
 # Шапка отчета    
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Значения профиля показаний за период с' + ' '+str(request.session["electric_data_start"]) +' по '+ str(request.session["electric_data_end"])
+    ws['A2'] = obj_title+'. Значения профиля показаний за период с' + ' '+electric_data_start +' по '+ electric_data_end
     
     ws.merge_cells('A4:A5')
     ws['A4'] = 'Наименование канала'
@@ -2715,49 +2813,49 @@ def electric_between_3_zones_report(request):
     
     # Сумма
     ws.merge_cells('D4:D5')
-    ws['D4'] = 'Сумма - Показания T0 A+ '
+    ws['D4'] = 'Показания T0 A+ '
     ws['D4'].style = ali_grey
     ws['D5'].style = ali_grey
  
     # Дельта
     ws.merge_cells('E4:E5')
-    ws['E4'] = 'Сумма - Расход за прошедшие сутки T0'
+    ws['E4'] = 'Расход за прошедшие сутки T0'
     ws['E4'].style = ali_grey
     ws['E5'].style = ali_grey
     
         # Сумма
     ws.merge_cells('F4:F5')
-    ws['F4'] = 'Сумма - Показания T1 A+ '
+    ws['F4'] = 'Показания T1 A+ '
     ws['F4'].style = ali_grey
     ws['F5'].style = ali_grey
  
     # Дельта
     ws.merge_cells('G4:G5')
-    ws['G4'] = 'Сумма - Расход за прошедшие сутки T1'
+    ws['G4'] = 'Расход за прошедшие сутки T1'
     ws['G4'].style = ali_grey
     ws['G5'].style = ali_grey
     
         # Сумма
     ws.merge_cells('H4:H5')
-    ws['H4'] = 'Сумма - Показания T2 A+ '
+    ws['H4'] = 'Показания T2 A+ '
     ws['H4'].style = ali_grey
     ws['H5'].style = ali_grey
  
     # Дельта
     ws.merge_cells('I4:I5')
-    ws['I4'] = 'Сумма - Расход за прошедшие сутки T2'
+    ws['I4'] = 'Расход за прошедшие сутки T2'
     ws['I4'].style = ali_grey
     ws['I5'].style = ali_grey
     
         # Сумма
     ws.merge_cells('J4:J5')
-    ws['J4'] = 'Сумма - Показания T3 A+ '
+    ws['J4'] = 'Показания T3 A+ '
     ws['J4'].style = ali_grey
     ws['J5'].style = ali_grey
  
     # Дельта
     ws.merge_cells('K4:K5')
-    ws['K4'] = 'Сумма - Расход за прошедшие сутки T3'
+    ws['K4'] = 'Расход за прошедшие сутки T3'
     ws['K4'].style = ali_grey
     ws['K5'].style = ali_grey
     
@@ -2771,9 +2869,7 @@ def electric_between_3_zones_report(request):
     is_abonent_level = re.compile(r'abonent')
     is_electric_daily    = request.session['is_electric_daily']
     obj_parent_title    = request.session['obj_parent_title']
-    obj_title           = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
-    electric_data_start   = request.session['electric_data_start']
+    
     obj_key             = request.session['obj_key']
 
     data_table = []
@@ -2866,7 +2962,7 @@ def electric_between_3_zones_report(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'potreblenie_electric_3_zones_' + str(electric_data_start) + u' - ' + str(electric_data_end)
+    output_name = u'potreblenie_electric_3_zones_'+translate(obj_title)+u'_' + electric_data_start + u' - ' +electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)    
@@ -3709,9 +3805,13 @@ def report_electric_potreblenie_3_zones_v2(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
+    
+    obj_title           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']
 # Шапка отчета    
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Потребление электроэнергии в период с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    ws['A2'] = obj_title+'. Потребление электроэнергии в период с ' + electric_data_start + ' по ' + electric_data_end
     
     ws.merge_cells('A4:A5')
     ws['A4'] = 'Наименование канала'
@@ -3890,9 +3990,7 @@ def report_electric_potreblenie_3_zones_v2(request):
     is_group_level = re.compile(r'group')
     
     obj_parent_title    = request.session['obj_parent_title']
-    obj_title           = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
-    electric_data_start   = request.session['electric_data_start']
+    
     obj_key             = request.session['obj_key']
     is_electric_delta  = request.session['is_electric_delta']
     is_electric_monthly=request.session['is_electric_monthly']
@@ -4132,7 +4230,7 @@ def report_electric_potreblenie_3_zones_v2(request):
     response.seek(0)
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     
-    output_name = u'rashod_3_zones ' + str(electric_data_start) + u' - ' + str(electric_data_end)
+    output_name = u'rashod_3_zones_'+translate(obj_title)+'_' + str(electric_data_start) + u'-' + str(electric_data_end)
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4723,10 +4821,11 @@ def report_pokazaniya_sayany(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-
+    meters_name           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Показания теплосчётчиков Саяны на ' + str(request.session["electric_data_end"])
+    ws['A2'] = meters_name+'. Показания теплосчётчиков Саяны на ' + electric_data_end 
     
     ws['A5'] = 'Абонент'
     ws['A5'].style = ali_grey
@@ -4737,16 +4836,16 @@ def report_pokazaniya_sayany(request):
     ws['C5'] = 'Дата'
     ws['C5'].style = ali_grey
     
-    ws['D5'] = 'Показания Q1'
+    ws['D5'] = 'Показания Q1, Гкал'
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания Q2'
+    ws['E5'] = 'Показания M1, т'
     ws['E5'].style = ali_grey
     
-    ws['F5'] = 't1'
+    ws['F5'] = u't1, C˚'
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 't2'
+    ws['G5'] = u't2, C˚'
     ws['G5'].style = ali_grey
 
 # ниже не переделывала
@@ -4758,8 +4857,7 @@ def report_pokazaniya_sayany(request):
 
     
     parent_name    = request.session['obj_parent_title']
-    meters_name           = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
+    
     obj_key             = request.session['obj_key']
 
     
@@ -4839,7 +4937,7 @@ def report_pokazaniya_sayany(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_sayany_report' 
+    output_name = u'heat_sayany_report_'+translate(meters_name)+'_'+electric_data_end 
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4972,9 +5070,11 @@ def report_sayany_last(request):
     wb = Workbook()
     ws = wb.active
 
+    meters_name           = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Показания теплосчётчиков Саяны на ' + str(request.session["electric_data_end"])
+    ws['A2'] = meters_name+'. Показания теплосчётчиков Саяны на ' + electric_data_end
     
     ws['A5'] = 'Абонент'
     ws['A5'].style = ali_grey
@@ -4985,16 +5085,16 @@ def report_sayany_last(request):
     ws['C5'] = 'Дата'
     ws['C5'].style = ali_grey
     
-    ws['D5'] = 'Показания Q1'
+    ws['D5'] = 'Показания Q1, Гкал'
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания Q2'
+    ws['E5'] = 'Показания М1, т'
     ws['E5'].style = ali_grey
     
-    ws['F5'] = 't1'
+    ws['F5'] = 't1, C˚'
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 't2'
+    ws['G5'] = 't2, C˚'
     ws['G5'].style = ali_grey
 
 # ниже не переделывала
@@ -5097,14 +5197,287 @@ def report_sayany_last(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_sayany_report' 
+    output_name = u'heat_sayany_report_'+translate(meters_name)+'_' +electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
     
 def report_heat_potreblenie_sayany(request):
-    pass
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    meters_name         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']
+#Шапка
+    ws.merge_cells('A2:G2')
+    ws['A2'] = meters_name+'. Потребление по теплосчётчикам Sayany в период с ' + electric_data_start + ' по ' +electric_data_end
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Показания Q1 на '  + electric_data_start+u', Гкал'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Показания Q1 на '  + electric_data_end+u', Гкал'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Потребление Q1, Гкал'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Показания M1 на '  + electric_data_start+u', т'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Показания M1 на '  + electric_data_end+u', т'
+    ws['G5'].style = ali_grey
+    
+    ws['H5'] = 'Потребление M1, т'
+    ws['H5'].style = ali_grey
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+#    is_object_level = re.compile(r'level')
+#    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.session['obj_parent_title']
+                        
+    obj_key             = request.session['obj_key']
+
+    data_table = []
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_data_table_period_heat_sayany(meters_name, parent_name,electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_period_heat_sayany(meters_name, parent_name,electric_data_start, electric_data_end, False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания Q1 на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания Q1 на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление Q1
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Показания M1 на начало
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # Показания M1 на конец
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][7])  # Потребление M1
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+#    ws.column_dimensions['C'].width = 35
+#    ws.column_dimensions['D'].width = 35
+    ws.column_dimensions['E'].width = 18
+    ws.column_dimensions['H'].width = 18
+#    ws.column_dimensions['F'].width = 18
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    
+    output_name = u'potreblenie_heat_report_'+translate(meters_name)+u'_'+electric_data_start+u'-'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def report_water_potreblenie_pulsar(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    
+    meters_name         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']
+    
+#Шапка
+    ws.merge_cells('A2:G2')
+    ws['A2'] = meters_name+'. Потребление по импульсным водосчётчикам в период с ' + electric_data_start + ' по ' +electric_data_end
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Тип ресурса '
+    ws['C5'].style = ali_grey
+    
+    ws['d5'] = 'Показания на '  + electric_data_start+u', м3'
+    ws['d5'].style = ali_grey
+    
+    ws['e5'] = 'Показания на '  + electric_data_end+u', м3'
+    ws['e5'].style = ali_grey
+    
+    ws['f5'] = 'Потребление, м3'
+    ws['f5'].style = ali_grey
+    
+    ws['g5'] = 'Лицевой номер '
+    ws['g5'].style = ali_grey    
+    
+
+
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'level2')
+#    is_object_level = re.compile(r'level')
+#    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level1')
+
+    parent_name         = request.session['obj_parent_title']
+    obj_key             = request.session['obj_key']
+    data_table=[]
+    
+    if (bool(is_abonent_level.search(obj_key))): 
+        print 'test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, False)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        num=data_table[i][3]
+        if ('ХВС, №' in num) or ('ГВС, №' in num):
+            num=num.replace(u'ХВС, №', ' ')
+            num=num.replace(u'ГВС, №', ' ')
+            data_table[i][3]=num
+            #print num
+        data_table[i]=tuple(data_table[i])
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # Тип ресурса
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-6][5])  # Показания на начало
+            ws.cell('d%s'%(row)).style = ali_white
+        except:
+            ws.cell('d%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % (data_table[row-6][6])  # Показания  на конец
+            ws.cell('e%s'%(row)).style = ali_white
+        except:
+            ws.cell('e%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % (data_table[row-6][7])  # Потребление
+            ws.cell('f%s'%(row)).style = ali_white
+        except:
+            ws.cell('f%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('g%s'%(row)).value = '%s' % (data_table[row-6][1])  # Лицевой номер
+            ws.cell('g%s'%(row)).style = ali_white
+        except:
+            ws.cell('g%s'%(row)).style = ali_white
+            next
+
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 25
+    ws.column_dimensions['D'].width = 18
+    ws.column_dimensions['E'].width = 18
+    #ws.column_dimensions['H'].width = 25
+    ws.column_dimensions['F'].width = 18
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    
+    output_name = u'potreblenie_water_report_'+translate(meters_name)+u'_'+electric_data_start+u'-'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
 
 def pokazaniya_water_current_report(request):
     response = StringIO.StringIO()
@@ -5516,10 +5889,11 @@ def report_resources_all(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-
+    electric_data_start = request.session["electric_data_start"]
+    electric_data_end   = request.session["electric_data_end"]
 #Шапка
-    ws.merge_cells('A2:E2')
-    ws['A2'] = 'Филиград. Показания по энергоресурсам за период'
+    ws.merge_cells('A2:G2')
+    ws['A2'] = 'Филиград: 1, 2, 3 корпуса. Показания по энергоресурсам за период c '+electric_data_start +' по '+electric_data_end
     
     ws['A5'] = 'Лицевой счёт'
     ws['A5'].style = ali_grey
@@ -5533,13 +5907,13 @@ def report_resources_all(request):
     ws['D5'] = 'Тип прибора'
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на конечную дату '
+    ws['E5'] = 'Показания на '+electric_data_end
     ws['E5'].style = ali_grey
     
-    ws['F5'] = 'Показания на начальную дату'
+    ws['F5'] = 'Показания на '+electric_data_start
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 'Разница' 
+    ws['G5'] = 'Потребление' 
     ws['G5'].style = ali_grey
     
     ws['H5'] = 'Дата установки'
@@ -5553,15 +5927,25 @@ def report_resources_all(request):
     
 #Запрашиваем данные для отчета
 
-    electric_data_start = request.session["electric_data_start"]
-    electric_data_end   = request.session["electric_data_end"]           
+           
     
     data_table = []
-    data_table = common_sql.get_data_table_report_all_res_period2(electric_data_start, electric_data_end)
+    data_table = common_sql.get_data_table_report_all_res_period3(electric_data_start, electric_data_end)
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table, None)
+#        
+#    #удаляем из номеров счётчиков лишнее
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        num=data_table[i][3]
+        if ('ХВС, №' in num) or ('ГВС, №' in num):
+            num=num.replace(u'ХВС, №', ' ')
+            num=num.replace(u'ГВС, №', ' ')
+            data_table[i][3]=num
+            print num
+        data_table[i]=tuple(data_table[i])
 
 
 # Заполняем отчет значениями
@@ -6587,10 +6971,11 @@ def report_water_by_date(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-
+    meters_name         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Показания по воде на ' + str(request.session["electric_data_end"])
+    ws['A2'] = meters_name+'. Показания по воде на ' + electric_data_end
     
     ws['A5'] = 'Абонент'
     ws['A5'].style = ali_grey
@@ -6674,7 +7059,7 @@ def report_water_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_water_report'+str(electric_data_end)
+    output_name = u'heat_water_report_'+translate(meters_name)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
