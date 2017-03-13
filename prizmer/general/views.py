@@ -10863,7 +10863,17 @@ def heat_potreblenie_sayany(request):
     args['electric_data_start'] = electric_data_start
       
     return render_to_response("data_table/heat/33.html", args)
+
+def electric_check_factory_numbers(request):
+    args= {}
     
+    data_table = []
+    data_table = common_sql.get_data_table_diferent_numbers()
+    
+    args['data_table'] = data_table
+    
+    return render_to_response("data_table/electric/40.html", args)
+
 def water_by_date(request):
     args= {}
     is_abonent_level = re.compile(r'level2')

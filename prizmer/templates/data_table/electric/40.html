@@ -1,0 +1,41 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Список приборов с несоотвествующими заводскими номерами</span>
+<br>
+<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Дом</th>
+<th>Абонент</th>
+<th>Заводской номер внесенный вручную</th>
+<th>Заводской номер считанный при опросе</th>
+<th>Дата последнего обращения к прибору</th>
+
+<!--<th>T0 R+, кВар*ч</th>-->
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td><strong>{{value.3}}</strong></td>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+<!--<td><strong>{{value.8}}</strong></td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
