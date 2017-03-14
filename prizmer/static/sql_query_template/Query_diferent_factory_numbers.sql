@@ -24,7 +24,8 @@ WHERE
   taken_params.guid_params = params.guid AND
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid and
-  is_factory_numbers_equal= False
+  is_factory_numbers_equal= False and
+  resources.name='Электричество'
 group by     
 objects.name, 
   abonents.name, 

@@ -2758,7 +2758,8 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
     
 def MakeQuery_all_resources(electric_data_start, electric_data_end):
     my_params=[u'Импульс',u'Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1',u'Электричество']
-    sQuery="""Select account_2,'%s'::date as date_start, z2.factory_number_manual as meter_name,ab_name, type_energo, z2.value, z2.value_old,z2.delta,date_install,'%s'::date as date_end, obj_name as ab_name
+    sQuery="""    with z3 as
+(Select account_2,'%s'::date as date_start, z2.factory_number_manual as meter_name,ab_name as factory_number_manual, type_energo, z2.value, z2.value_old,z2.delta,date_install,'%s'::date as date_end, obj_name as ab_name
     from water_abons_report
     LEFT JOIN (
     with z1 as (SELECT 
@@ -2991,7 +2992,10 @@ def MakeQuery_all_resources(electric_data_start, electric_data_end):
       order by abonents.name, 
       objects.name, meters.name) z2
       on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params
-      order by  account_2;"""%(electric_data_start,electric_data_end,my_params[0],electric_data_end,my_params[0],electric_data_start, electric_data_start,electric_data_end,electric_data_end,my_params[1],electric_data_start,my_params[1], electric_data_start, electric_data_end, my_params[2], electric_data_end,my_params[2],electric_data_start)
+      ) 
+Select account_2,date_start, meter_name,factory_number_manual, type_energo, z3.value, value_old,delta,date_install,date_end, ab_name
+from z3 
+order by account_2, type_energo"""%(electric_data_start,electric_data_end,my_params[0],electric_data_end,my_params[0],electric_data_start, electric_data_start,electric_data_end,electric_data_end,my_params[1],electric_data_start,my_params[1], electric_data_start, electric_data_end, my_params[2], electric_data_end,my_params[2],electric_data_start)
 
     return sQuery
     

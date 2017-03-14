@@ -5944,7 +5944,7 @@ def report_resources_all(request):
             num=num.replace(u'ХВС, №', ' ')
             num=num.replace(u'ГВС, №', ' ')
             data_table[i][3]=num
-            print num
+            #print num
         data_table[i]=tuple(data_table[i])
 
 
