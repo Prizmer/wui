@@ -27,7 +27,7 @@ $(function(){
     };
 })(jQuery);
     $('.content').liHighLight({
-        words:'Н/Д',
+        words:'Н/Д', 
         class: 'highlight'
     });
 }); 

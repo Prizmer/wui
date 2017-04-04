@@ -1,5 +1,5 @@
 from django.contrib import admin
-from general.models import Objects, Abonents, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters
+from general.models import Objects, Abonents, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters
 
 # Register your models here.
 class LinkAbonentsTakenParamsAdmin(admin.ModelAdmin):
@@ -26,10 +26,12 @@ class ParamsAdmin(admin.ModelAdmin):
 class LinkMetersTcpipSettingsAdmin(admin.ModelAdmin):
     search_fields = [u'guid_meters__factory_number_manual', u'guid_meters__name']
 
-
     
 class LinkMetersComportSettingsAdmin(admin.ModelAdmin):
     search_fields = [u'guid_meters__factory_number_manual']
+    
+class LinkGroups80020MetersAdmin(admin.ModelAdmin):
+    raw_id_fields = ('guid_meters', ) 
 
 admin.site.register(Objects, ObjectsAdmin)
 admin.site.register(Abonents, AbonentsAdmin)
@@ -53,3 +55,5 @@ admin.site.register(LinkMetersTcpipSettings, LinkMetersTcpipSettingsAdmin)
 admin.site.register(ComportSettings)
 admin.site.register(TcpipSettings)
 admin.site.register(LinkBalanceGroupsMeters)
+admin.site.register(Groups80020)
+admin.site.register(LinkGroups80020Meters, LinkGroups80020MetersAdmin)

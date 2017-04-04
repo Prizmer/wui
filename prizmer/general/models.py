@@ -231,15 +231,15 @@ class Resources(models.Model):
         
 class Meters(models.Model):
     guid = UUIDField(primary_key=True, max_length=38)
-    name = models.CharField(unique=True, max_length=50)
-    address = models.IntegerField()
-    password = models.CharField(max_length=100, blank=True)
-    password_type_hex = models.BooleanField(default=True)
-    factory_number_manual = models.CharField(max_length=16)
-    factory_number_readed = models.CharField(max_length=16, blank=True, null=True)
-    is_factory_numbers_equal = models.NullBooleanField(blank=True, null=True)
-    dt_install = models.DateTimeField(blank=True, null=True)
-    dt_last_read = models.DateTimeField(blank=True, null=True)
+    name = models.CharField('Имя', unique=True, max_length=50)
+    address = models.IntegerField('Сетевой адрес')
+    password = models.CharField('Пароль', max_length=100, blank=True)
+    password_type_hex = models.BooleanField('Использовать HEX для пароля?', default=True)
+    factory_number_manual = models.CharField('Заводской номер(вручную)', max_length=16)
+    factory_number_readed = models.CharField('Заводской номер(из прибора)', max_length=16, blank=True, null=True)
+    is_factory_numbers_equal = models.NullBooleanField('Совпадение номеров', blank=True, null=True)
+    dt_install = models.DateTimeField('Дата установки', blank=True, null=True)
+    dt_last_read = models.DateTimeField('Дата последнего удачного чтения данных', blank=True, null=True)
     guid_types_meters = models.ForeignKey('TypesMeters', db_column='guid_types_meters')
     guid_meters = models.ForeignKey('Meters', db_column='guid_meters', blank=True, null=True)
     time_delay_current = models.IntegerField(default=10)
@@ -403,7 +403,38 @@ class ProductTypeKilns(models.Model):
     
     class Meta:
         db_table = 'product_type_kilns'
-        verbose_name = u'Типы продукции'        
+        verbose_name = u'Типы продукции'  
+        
+class Groups80020(models.Model):
+    guid = UUIDField(primary_key=True, max_length=38)
+    name = models.CharField(unique=True, max_length=50)
+    name_sender = models.CharField(max_length=250) 
+    inn_sender  = models.CharField(max_length=250)
+    name_postavshik = models.CharField(max_length=250)
+    inn_postavshik = models.CharField(max_length=250)
+    dogovor_number = models.CharField(default=10, max_length=50)
+    class Meta:
+        db_table = 'groups_80020'
+        verbose_name = u'Группа отчётов 80020'
+        verbose_name_plural = u'Группы отчётов 80020'
+        
+    def __unicode__(self):
+        return self.name
+
+class LinkGroups80020Meters(models.Model):
+    guid = UUIDField(primary_key=True, max_length=38)
+    guid_groups_80020 = models.ForeignKey('Groups80020', db_column = 'guid_groups_80020')
+    guid_meters = models.ForeignKey('Meters', db_column='guid_meters')
+    measuringpoint_code = models.DecimalField(max_digits=18, decimal_places=0)
+    measuringpoint_name = models.CharField(max_length=250)    
+    class Meta:
+        db_table = 'link_groups_80020_meters'
+        verbose_name = u'Связь счётчика и Групп 80020'
+        verbose_name_plural = u'Связи счётчиков и Групп 80020'
+            
+    def __unicode__(self):
+        return u'%s - %s' % (self.guid_groups_80020.name, self.guid_meters.name )
+        
 
 #-------------- Создаем различный набор считываемых парамтров, в зависимости от типа прибора учёта       
 def add_taken_param(sender, instance, created, **kwargs): # Добавляем считываемые параметры при создании счётчика
@@ -1468,7 +1499,7 @@ def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #�
             pass
         row = row + 1
         
-signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
+#signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
 
 
 def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
@@ -1485,7 +1516,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1568,7 +1599,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1619,7 +1650,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1650,7 +1681,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
 
 def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
@@ -1675,7 +1706,7 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
 
 
 

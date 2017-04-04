@@ -73,7 +73,10 @@ urlpatterns = patterns('',
     url(r'^38/$', views.water_by_date), # вода, показания на дату
     url(r'^39/$', views.water_potreblenie_pulsar), # вода, показания за период Импульсные 
     
-    url(r'^40/$', views.electric_check_factory_numbers), # вода, показания за период Импульсные 
+    url(r'^40/$', views.electric_check_factory_numbers), # Сверка заводских номеров приборов
+    url(r'^41/$', views.forma_80020), # Отчёт по форме 80020
+
+    
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

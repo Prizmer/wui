@@ -48,6 +48,8 @@ urlpatterns = patterns('',
     
     url(r'^38/$', views.report_water_by_date), #для Фили, выгрузка данных на дату по воде Импульсные
     url(r'^39/$', views.report_water_potreblenie_pulsar), #для Фили, выгрузка данных за период по воде Импульсные
+    url(r'^41/$', views.report_forma_80020), #Выгрузка архива с файлами xml по форме Мосэнергосбыт 80020
+
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

@@ -16,6 +16,9 @@ from excel_response import ExcelResponse
 from django.shortcuts import redirect
 #from datetime import datetime, date, time
 
+# для работы с xml
+from lxml import etree
+
 
 def zagotovka(request):
     response = StringIO.StringIO()
@@ -5388,7 +5391,7 @@ def report_water_potreblenie_pulsar(request):
     data_table=[]
     
     if (bool(is_abonent_level.search(obj_key))): 
-        print 'test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        #print 'test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
         data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, False)
@@ -7063,4 +7066,229 @@ def report_water_by_date(request):
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+    
+def report_forma_80020(request):
+    import zipfile
+    response = StringIO.StringIO()
+    
+    
+    #Запрашиваем данные для отчета
+    
+    group_80020_name    = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']                        
+   
+
+    # Формируем список дат на основе начальной и конечной даты полученной от web-календарей
+    end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
+    start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
+    list_of_dates = [x for x in common_sql.daterange(start_date,
+                  end_date,
+                  step=datetime.timedelta(days=1),
+                  inclusive=True)]
+    
+    info_group_80020 = common_sql.get_info_group_80020(group_80020_name)
+    inn_sender_from_base      = info_group_80020[0][0]
+    name_sender_from_base     = info_group_80020[0][1]
+    inn_postavshik_from_base  = info_group_80020[0][2]
+    name_postavshik_from_base = info_group_80020[0][3]
+    dogovor_number_from_base  = info_group_80020[0][4]
+    
+    #Узнаем GUID счётчиков, которые входят в группу 80020
+    meters_guid_list = common_sql.get_meters_guid_list_by_group_name(group_80020_name)
+
+   
+    #Создаем архив
+    zf = zipfile.ZipFile(response, mode='w', compression=zipfile.ZIP_DEFLATED)
+    
+    for dates in range(len(list_of_dates)):
+    #Формируем файл xml по форме Мосэнергосбыт 80020   
+        
+        # Создание корневого элемента message
+        root = etree.Element('message', {'class': '80020', 'version': '2', 'number': '1' })
+        
+        # Добавление дочерних элементов - <datetime> <sender> <area> в <root>
+        datetimeElt = etree.SubElement(root, 'datetime')
+        senderElt = etree.SubElement(root, 'sender')
+        areaElt = etree.SubElement(root, 'area')
+        
+        # Присваиваем значения в <day> <timestamp> <daylightsavingtime>
+        day = etree.SubElement(datetimeElt, 'day')
+        timestamp = etree.SubElement(datetimeElt, 'timestamp')
+        daylightsavingtime = etree.SubElement(datetimeElt, 'daylightsavingtime')
+        
+        day.text = unicode(list_of_dates[0].strftime('%Y%m%d'))
+        timestamp.text = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        daylightsavingtime.text = u'0'
+        
+        # Присваиваем значения <name> <inn> для <sender>
+        inn_sender = etree.SubElement(senderElt, 'inn')
+        name_sender = etree.SubElement(senderElt, 'name')
+        
+        inn_sender.text  = inn_sender_from_base
+        name_sender.text = name_sender_from_base
+        
+        # Присваиваем значения для <area>
+        inn_area = etree.SubElement(areaElt, 'inn')
+        name_abonent_area = etree.SubElement(areaElt, 'name_abonent')
+        
+        inn_area.text = inn_postavshik_from_base
+        name_abonent_area.text = name_postavshik_from_base
+        
+        # Добавление дочерних элементов
+        for x in range(len(meters_guid_list)):
+            info_measuring_point = common_sql.get_info_measuring_point_in_group_80020(meters_guid_list[x])
+            my_measure_code = unicode(info_measuring_point[0][0])
+            my_measure_name = unicode(info_measuring_point[0][1])
+            measurepointElt = etree.SubElement(areaElt, 'measuringpoint', code = my_measure_code , name = my_measure_name )
+        
+            list_of_taken_params = []
+            #Получаем считываемые параметры по guid счётчика.
+             #A+
+            guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
+            result = common_sql.get_taken_param_by_guid_meters_and_guid_params(meters_guid_list[x], guid_params)
+            result_list = []
+            result_list.append(unicode(result[0][0]))
+            result_list.append(unicode(result[0][1]))
+            list_of_taken_params.append(result_list)
+            #R+
+            guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
+            result = common_sql.get_taken_param_by_guid_meters_and_guid_params(meters_guid_list[x], guid_params)
+            result_list = []
+            result_list.append(unicode(result[0][0]))
+            result_list.append(unicode(result[0][1]))
+            list_of_taken_params.append(result_list)
+            #print list_of_taken_params
+            
+            for y in range(len(list_of_taken_params)):
+                my_dict_of_profil = {0: [u'0000', u'0030', 0, 1],
+                                     1: [u'0030', u'0100', 0, 1],
+                                     2: [u'0100', u'0130', 0, 1],
+                                     3: [u'0130', u'0200', 0, 1],
+                                     4: [u'0200', u'0230', 0, 1],
+                                     5: [u'0230', u'0300', 0, 1],
+                                     6: [u'0300', u'0330', 0, 1],
+                                     7: [u'0330', u'0400', 0, 1],
+                                     8: [u'0400', u'0430', 0, 1],
+                                     9: [u'0430', u'0500', 0, 1],
+                                     10: [u'0500', u'0530', 0, 1],
+                                     11: [u'0530', u'0600', 0, 1],
+                                     12: [u'0600', u'0630', 0, 1],
+                                     13: [u'0630', u'0700', 0, 1],
+                                     14: [u'0700', u'0730', 0, 1],
+                                     15: [u'0730', u'0800', 0, 1],
+                                     16: [u'0800', u'0830', 0, 1],
+                                     17: [u'0830', u'0900', 0, 1],
+                                     18: [u'0900', u'0930', 0, 1],
+                                     19: [u'0930', u'1000', 0, 1],
+                                     20: [u'1000', u'1030', 0, 1],
+                                     21: [u'1030', u'1100', 0, 1],
+                                     22: [u'1100', u'1130', 0, 1],                                
+                                     23: [u'1130', u'1200', 0, 1],
+                                     24: [u'1200', u'1230', 0, 1],
+                                     25: [u'1230', u'1300', 0, 1],
+                                     26: [u'1300', u'1330', 0, 1],
+                                     27: [u'1330', u'1400', 0, 1],
+                                     28: [u'1400', u'1430', 0, 1],
+                                     29: [u'1430', u'1500', 0, 1],
+                                     30: [u'1500', u'1530', 0, 1],
+                                     31: [u'1530', u'1600', 0, 1],
+                                     32: [u'1600', u'1630', 0, 1],
+                                     33: [u'1630', u'1700', 0, 1],
+                                     34: [u'1700', u'1730', 0, 1],
+                                     35: [u'1730', u'1800', 0, 1],
+                                     36: [u'1800', u'1830', 0, 1],
+                                     37: [u'1830', u'1900', 0, 1],
+                                     38: [u'1900', u'1930', 0, 1],
+                                     39: [u'1930', u'2000', 0, 1],
+                                     40: [u'2000', u'2030', 0, 1],                                
+                                     41: [u'2030', u'2100', 0, 1],
+                                     42: [u'2100', u'2130', 0, 1],
+                                     43: [u'2130', u'2200', 0, 1],
+                                     44: [u'2200', u'2230', 0, 1],
+                                     45: [u'2230', u'2300', 0, 1],
+                                     46: [u'2300', u'2330', 0, 1],
+                                     47: [u'2330', u'0000', 0, 1] }
+                time_table = ['00:00:00', '00:30:00',
+                              '01:00:00', '01:30:00',
+                              '02:00:00', '02:30:00',
+                              '03:00:00', '03:30:00',
+                              '04:00:00', '04:30:00',
+                              '05:00:00', '05:30:00',
+                              '06:00:00', '06:30:00',
+                              '07:00:00', '07:30:00',
+                              '08:00:00', '08:30:00',
+                              '09:00:00', '09:30:00',
+                              '10:00:00', '10:30:00',
+                              '11:00:00', '11:30:00',
+                              '12:00:00', '12:30:00',
+                              '13:00:00', '13:30:00',
+                              '14:00:00', '14:30:00',
+                              '15:00:00', '15:30:00',
+                              '16:00:00', '16:30:00',
+                              '17:00:00', '17:30:00',
+                              '18:00:00', '18:30:00',
+                              '19:00:00', '19:30:00',
+                              '20:00:00', '20:30:00',
+                              '21:00:00', '21:30:00',
+                              '22:00:00', '22:30:00',
+                              '23:00:00', '23:30:00']
+                if list_of_taken_params[y][1] == u'A+ Профиль':
+                    my_measuring_channel_code = u'01'
+                    for time in range(len(time_table)):
+                        result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
+                        if result_30_min:
+                            my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0])*0.5, 0] #Квт.ч
+                            #print u'------ Есть значение',list_of_taken_params[y][1] , my_dict_of_profil[time][0], my_dict_of_profil[time][1]
+                            
+                        else:
+                            #print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
+                            pass
+                    
+                elif list_of_taken_params[y][1] == u'R+ Профиль':
+                    my_measuring_channel_code = u'03'
+                    for time in range(len(time_table)):
+                        result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
+                        if result_30_min:
+                            my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0]), 0] # Квар.ч
+                            #print u'------ Есть значение',list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
+                            
+                        else:
+                           # print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
+                           pass
+                else:
+                    #print u'Нет совпадений параметров'
+                    my_measuring_channel_code = u''
+                       
+                my_measuring_channel_desc = unicode(list_of_taken_params[y][0]) + u' ' + unicode(list_of_taken_params[y][1])            
+                measuringchannelElt = etree.SubElement(measurepointElt, 'measuringchannel', code = my_measuring_channel_code, desc = my_measuring_channel_desc )
+                
+                                                  
+                for z in range (len(my_dict_of_profil)):
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = unicode(my_dict_of_profil[z][0]), end = unicode(my_dict_of_profil[z][1]))
+                    value  = etree.SubElement(periodElt, 'value', status = unicode(my_dict_of_profil[z][3]))
+                    value.text = unicode(my_dict_of_profil[z][2])
+            
+        
+        # Создание и сохранение документа
+        doc = etree.ElementTree(root) 
+        myxml_IO=StringIO.StringIO()   
+        doc.write(myxml_IO, xml_declaration=True, encoding='UTF-8')
+        # Формируем имя документа
+        name_of_document = u'80020'
+        name_of_file_80020 =name_of_document + u'_'+ inn_sender_from_base + u'_' + unicode(list_of_dates[dates].strftime('%Y%m%d')) + u'_1' + u'.xml'
+        zf.writestr(name_of_file_80020, myxml_IO.getvalue())
+       
+    zf.close()
+    
+    response=HttpResponse(response.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    
+    output_name = u'80020_' + unicode(dogovor_number_from_base) + u'_' + start_date.strftime('%Y%m%d') + u'-'+ end_date.strftime('%Y%m%d')
+    file_ext = u'zip'
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+
+   
     return response

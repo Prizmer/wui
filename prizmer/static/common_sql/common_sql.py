@@ -790,6 +790,29 @@ def get_data_table_electric_parametr_by_date_daily(obj_title, obj_parent_title, 
     # 0 - дата, 1 - Имя объекта, 2 - Имя абонента, 3 - заводской номер, 4 - значение
     return data_table
 
+def get_data_table_electric_parametr_daily_by_meters_number(meters_number, electric_data, my_parametr):
+    cursor = connection.cursor()
+    cursor.execute("""SELECT 
+                          daily_values.value
+                        FROM 
+                          public.daily_values, 
+                          public.taken_params, 
+                          public.meters, 
+                          public.params, 
+                          public.names_params
+                        WHERE 
+                          daily_values.id_taken_params = taken_params.id AND
+                          taken_params.guid_meters = meters.guid AND
+                          taken_params.guid_params = params.guid AND
+                          params.guid_names_params = names_params.guid AND
+                          meters.factory_number_manual = %s AND 
+                          names_params.name = %s AND 
+                          daily_values.date = %s
+                          LIMIT 1;""",[meters_number, my_parametr, electric_data])
+    data_table = cursor.fetchall()
+    return data_table
+    
+
 def makeSqlQuery_electric_by_daily_or_monthly_for_group(obj_title, electric_data, params, dm):
     sQuery="""select z2.monthly_date,
  z3.name_abonents, z2.number_manual,
@@ -2166,6 +2189,25 @@ def get_k_t_t(meter_name):
                           LIMIT 1;""", [meter_name])
     simpleq = simpleq.fetchall()
     return simpleq[0][0]
+
+def get_k_t_t_by_factory_number_manual(factory_number_manual):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          link_abonents_taken_params.coefficient
+                        FROM 
+                          public.meters, 
+                          public.link_abonents_taken_params, 
+                          public.taken_params
+                        WHERE 
+                          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+                          taken_params.guid_meters = meters.guid AND
+                          meters.factory_number_manual = %s
+                        ORDER BY
+                          link_abonents_taken_params.coefficient ASC
+                        LIMIT 1;""", [factory_number_manual])
+    simpleq = simpleq.fetchall()
+    return simpleq[0][0]
+
     
 def list_of_abonents_heat(parent_guid, object_name): # Отличие в сортировке
     simpleq = connection.cursor()
@@ -2757,7 +2799,7 @@ def get_data_table_period_heat_sayany(obj_title, obj_parent_title, electric_data
     
     
 def MakeQuery_all_resources(electric_data_start, electric_data_end):
-    my_params=[u'Импульс',u'Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1',u'Электричество']
+    my_params=[u'Импульс',u'Q Система1',u'Электричество', u'Sayany']
     sQuery="""    with z3 as
 (Select account_2,'%s'::date as date_start, z2.factory_number_manual as meter_name,ab_name as factory_number_manual, type_energo, z2.value, z2.value_old,z2.delta,date_install,'%s'::date as date_end, obj_name as ab_name
     from water_abons_report
@@ -2823,93 +2865,95 @@ def MakeQuery_all_resources(electric_data_start, electric_data_end):
     
     union
     
-    Select account_2,'%s'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value_old, z2.value,z2.delta,date_install,'%s'::date as date_end, ab_name
-    from heat_abons_report
-    LEFT JOIN
-    (with z1 as (SELECT 
-      abonents.name, 
-      objects.name, 
-      daily_values.date as date_old, 
-      daily_values.value as value_old, 
-      meters.name as name_meters,
-      meters.factory_number_manual,
-      params.name
-    FROM 
-      public.abonents, 
-      public.objects, 
-      public.link_abonents_taken_params, 
-      public.taken_params, 
-      public.daily_values, 
-      public.meters,
-      params,
-      names_params,
-      resources
-    WHERE 
-      taken_params.guid_params=params.guid and
-       abonents.guid_objects = objects.guid AND
-      link_abonents_taken_params.guid_abonents = abonents.guid AND
-      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-      taken_params.guid_meters = meters.guid AND
-      daily_values.id_taken_params = taken_params.id and
-      params.guid=taken_params.guid_params  and
-      names_params.guid=params.guid_names_params and
-      resources.guid=names_params.guid_resources and
-      daily_values.date = '%s' and
-      params.name='%s'
-      group by 
-      abonents.name, 
-      objects.name, 
-      daily_values.date, 
-      daily_values.value, 
-      meters.name,
-      meters.factory_number_manual,
-      params.name)
-      SELECT 
-      abonents.name, 
-      objects.name, 
-      z1.date_old,
-      z1.value_old,
-      daily_values.date, 
-      daily_values.value, 
-      meters.name as name_meters,
-      params.name,
-      z1.factory_number_manual,
-      z1.value_old-daily_values.value as delta
-    FROM 
-      z1,
-      public.abonents, 
-      public.objects, 
-      public.link_abonents_taken_params, 
-      public.taken_params, 
-      public.daily_values, 
-      public.meters,
-      params,
-      names_params,
-      resources
-    WHERE 
-      taken_params.guid_params=params.guid and
-       abonents.guid_objects = objects.guid AND
-      link_abonents_taken_params.guid_abonents = abonents.guid AND
-      link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-      taken_params.guid_meters = meters.guid AND
-      daily_values.id_taken_params = taken_params.id and
-      params.guid=taken_params.guid_params  and
-      names_params.guid=params.guid_names_params and
-      resources.guid=names_params.guid_resources and
-      daily_values.date = '%s' and
-      params.name='%s'
-      and meters.name = z1.name_meters
-      group by 
-      z1.factory_number_manual,
-      abonents.name, 
-      objects.name, 
-      daily_values.date, 
-      daily_values.value, 
-      meters.name,
-      params.name,
-      z1.date_old,
-      z1.value_old) z2
-      on z2.name_meters=heat_abons_report.meter_name
+    Select z2.account_2,'%s'::date as date_start, z2.meter_name, z2.factory_number_manual,  z2.type_energo,z3.val_end, z2.val_start, z3.val_end-z2.val_start as delta, z2.date_install,'%s'::date as date_end, z2.ab_name
+from
+(Select account_2,factory_number_manual, heat_abons_report.meter_name, type_energo, date_install, heat_abons_report.ab_name, z1.date_start, z1.value as val_start
+from heat_abons_report
+Left join
+(SELECT 
+  daily_values.date as date_start, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+  meters.name as meter_name,
+  daily_values.value
+
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+
+  types_meters.name = '%s' AND 
+  daily_values.date = '%s' and 
+  names_params.name = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name,
+  daily_values.value,
+  meters.name
+  order by objects.name, 
+  abonents.name) z1
+on heat_abons_report.meter_name=z1.meter_name) z2
+Left join 
+(SELECT 
+  daily_values.date as date_end, 
+  objects.name as obj_name, 
+  abonents.name as ab_name,   
+  meters.factory_number_manual as zav_num, 
+  meters.name as meter_name,
+  daily_values.value as val_end
+
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+
+  types_meters.name = '%s' AND 
+  daily_values.date = '%s' and 
+  names_params.name = '%s'
+  group by daily_values.date, 
+  objects.name, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  types_meters.name,
+  daily_values.value,
+  meters.name
+  order by objects.name, 
+  abonents.name) z3
+  on
+  z2.meter_name=z3.meter_name
     
     union
     
@@ -2995,7 +3039,9 @@ def MakeQuery_all_resources(electric_data_start, electric_data_end):
       ) 
 Select account_2,date_start, meter_name,factory_number_manual, type_energo, z3.value, value_old,delta,date_install,date_end, ab_name
 from z3 
-order by account_2, type_energo"""%(electric_data_start,electric_data_end,my_params[0],electric_data_end,my_params[0],electric_data_start, electric_data_start,electric_data_end,electric_data_end,my_params[1],electric_data_start,my_params[1], electric_data_start, electric_data_end, my_params[2], electric_data_end,my_params[2],electric_data_start)
+order by account_2, type_energo"""%(electric_data_start,electric_data_end,my_params[0],electric_data_end,my_params[0],electric_data_start, 
+                                    electric_data_start,electric_data_end,my_params[3], electric_data_start,my_params[1],my_params[3],electric_data_end,my_params[1], 
+                                    electric_data_start, electric_data_end, my_params[2], electric_data_end,my_params[2],electric_data_start)
 
     return sQuery
     
@@ -3870,4 +3916,174 @@ def list_of_objects(parent_guid): #Возвращает список объек�
                           objects.guid_parent = %s;""",[parent_guid])
     simpleq = simpleq.fetchall()
     return simpleq
+
+def get_meters_guid_list_by_group_name(group_name): # Возвращает список GUID счётчиков по названию группы
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          meters.guid
+                        FROM 
+                          public.groups_80020, 
+                          public.link_groups_80020_meters, 
+                          public.meters
+                        WHERE 
+                          link_groups_80020_meters.guid_meters = meters.guid AND
+                          link_groups_80020_meters.guid_groups_80020 = groups_80020.guid AND
+                          groups_80020.name = %s;""",[group_name])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_info_group_80020_meters(group_name):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          groups_80020.name_sender, 
+                          groups_80020.inn_sender, 
+                          groups_80020.dogovor_number, 
+                          meters.factory_number_manual, 
+                          link_groups_80020_meters.measuringpoint_name, 
+                          link_groups_80020_meters.measuringpoint_code, 
+                          meters.dt_last_read
+                        FROM 
+                          public.meters, 
+                          public.groups_80020, 
+                          public.link_groups_80020_meters
+                        WHERE 
+                          link_groups_80020_meters.guid_meters = meters.guid AND
+                          link_groups_80020_meters.guid_groups_80020 = groups_80020.guid AND
+                          groups_80020.name = %s;""",[group_name])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_taken_param_by_meters_number_and_guid_params(meters_number, guid_params):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          meters.factory_number_manual, 
+                          names_params.name
+                        FROM 
+                          public.params, 
+                          public.meters, 
+                          public.taken_params, 
+                          public.names_params
+                        WHERE 
+                          taken_params.guid_meters = meters.guid AND
+                          taken_params.guid_params = params.guid AND
+                          names_params.guid = params.guid_names_params AND
+                          meters.factory_number_manual = %s AND 
+                          params.guid = %s;""",[meters_number, guid_params])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_taken_param_by_guid_meters_and_guid_params(guid_meters, guid_params):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          meters.factory_number_manual, 
+                          names_params.name
+                        FROM 
+                          public.meters, 
+                          public.params, 
+                          public.names_params, 
+                          public.taken_params
+                        WHERE 
+                          params.guid = taken_params.guid_params AND
+                          params.guid_names_params = names_params.guid AND
+                          taken_params.guid_meters = meters.guid AND
+                          meters.guid = %s AND 
+                          params.guid = %s;""",[guid_meters, guid_params])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_count_of_30_profil_by_meter_number(date, meters_number, names_params):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          count(meters.factory_number_manual)
+                        FROM 
+                          public.various_values, 
+                          public.meters, 
+                          public.taken_params, 
+                          public.params, 
+                          public.names_params
+                        WHERE 
+                          various_values.id_taken_params = taken_params.id AND
+                          taken_params.guid_meters = meters.guid AND
+                          taken_params.guid_params = params.guid AND
+                          params.guid_names_params = names_params.guid AND
+                          meters.factory_number_manual = %s AND 
+                          names_params.name = %s AND 
+                          various_values.date = %s;""",[meters_number, names_params, date])
+    simpleq = simpleq.fetchall()
+    return simpleq[0][0]
+
+def get_sum_of_30_profil_by_meter_number(date, meters_number, names_params):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          sum(various_values.value)
+                        FROM 
+                          public.various_values, 
+                          public.meters, 
+                          public.taken_params, 
+                          public.params, 
+                          public.names_params
+                        WHERE 
+                          various_values.id_taken_params = taken_params.id AND
+                          taken_params.guid_meters = meters.guid AND
+                          taken_params.guid_params = params.guid AND
+                          params.guid_names_params = names_params.guid AND
+                          meters.factory_number_manual = %s AND 
+                          names_params.name = %s AND 
+                          various_values.date = %s;""",[meters_number, names_params, date])
+    simpleq = simpleq.fetchall()
+    return simpleq[0][0]
+
+def get_info_group_80020(group_80020_name):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          groups_80020.inn_sender, 
+                          groups_80020.name_sender, 
+                          groups_80020.inn_postavshik, 
+                          groups_80020.name_postavshik, 
+                          groups_80020.dogovor_number
+                        FROM 
+                          public.groups_80020
+                        WHERE 
+                          groups_80020.name = %s;""",[group_80020_name])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_info_measuring_point_in_group_80020(meters_guid):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          link_groups_80020_meters.measuringpoint_code, 
+                          link_groups_80020_meters.measuringpoint_name
+                        FROM 
+                          public.link_groups_80020_meters
+                        WHERE 
+                          link_groups_80020_meters.guid_meters = %s;""",[meters_guid])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_30_min_value_by_meters_number_param_names_and_datetime(meters_number, param_names, date, time):
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          meters.factory_number_manual, 
+                          names_params.name, 
+                          various_values.date, 
+                          various_values."time", 
+                          various_values.value
+                        FROM 
+                          public.meters, 
+                          public.various_values, 
+                          public.names_params, 
+                          public.taken_params, 
+                          public.params
+                        WHERE 
+                          various_values.id_taken_params = taken_params.id AND
+                          taken_params.guid_meters = meters.guid AND
+                          taken_params.guid_params = params.guid AND
+                          params.guid_names_params = names_params.guid AND
+                          meters.factory_number_manual = %s AND 
+                          names_params.name = %s AND 
+                          various_values.date = %s AND 
+                          various_values."time" = %s;""",[meters_number, param_names, date, time])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
     

@@ -933,7 +933,7 @@ def tree_data_json(request):
             list_of_level_0 = {"key":u"level0-"+str(l0), "title": all_level_0[l0].name, "children":children_data_l1, "folder":bool(children_data_l1)}
             tree_data.append(list_of_level_0)
             
-        # Получаем информацию по группам
+        # Получаем информацию по балансным группам
             balance_groups_list = []
             simpleq = connection.cursor()
             simpleq.execute(""" SELECT 
@@ -943,9 +943,21 @@ def tree_data_json(request):
             simpleq = simpleq.fetchall()
             for x in range (len(simpleq)):
                 balance_groups_list.append({"key": u"group-"+str(x), "title": simpleq[x][0]})
+             
+        # Получаем информацию по группам 80020
+            groups_80020_list = []
+            simpleq = connection.cursor()
+            simpleq.execute(""" SELECT 
+                                  groups_80020.name
+                                FROM 
+                                  public.groups_80020;
+                                """)
+            simpleq = simpleq.fetchall()
+            for x in range (len(simpleq)):
+                groups_80020_list.append({"key": u"group80020-"+str(x), "title": simpleq[x][0]})
         
-        tree_data.append({"key": u"group'" + str(1000), "title": u"Группы", "children":balance_groups_list , "folder":bool(True)})
-
+        tree_data.append({"key": u"group" + str(1000), "title": u"Группы 80020", "children":groups_80020_list , "folder":bool(True)})
+        tree_data.append({"key": u"group" + str(1000), "title": u"Группы", "children":balance_groups_list , "folder":bool(True)})
         
         # Создаем json данные для дерева объектов
         tree_data_json = json.dumps(tree_data, )
@@ -4870,7 +4882,9 @@ def profil_30_aplus(request):
         if request.method == 'GET':
             request.session["obj_title"]           = meters_name           = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']                     
-        
+            print u'мы где-то тут'
+            print electric_data_end
+            print meters_name
             
             a_plus = connection.cursor()
             a_plus.execute("""SELECT 
@@ -4895,6 +4909,7 @@ def profil_30_aplus(request):
                                   meters.name = %s AND 
                                   names_params.name = 'A+ Профиль';""",[electric_data_end, meters_name])
             a_plus = a_plus.fetchall()
+            print a_plus
             val_table_a_plus = []
            
             for x in range(len(a_plus)):
@@ -11129,3 +11144,119 @@ def test_test(request):
     
     
     return render_to_response("data_table/test/23.html", args)
+
+def forma_80020(request):
+    args= {}
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    data_table_check_data_header = []
+    data_table_check_data = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]    = electric_data_end    = request.GET['electric_data_end']
+            request.session["electric_data_start"]  = electric_data_start  = request.GET['electric_data_start']
+            request.session["obj_title"]            = group_name           = request.GET['obj_title']
+            
+            # Формируем список дат на основе начальной и конечной даты полученной от web-календарей
+            end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
+            start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
+            list_of_dates = [x for x in common_sql.daterange(start_date,
+                          end_date,
+                          step=datetime.timedelta(days=1),
+                          inclusive=True)]
+
+            # Делаем информационную табличку со счётчиками входящими в данную группу
+            data_table = common_sql.get_info_group_80020_meters(group_name)
+           
+        # Делаем проверку на сумму профилей мощности и размности показаний счётчика
+            # Узнаем начальные и конечные показания по счётчику
+            # T0 A+ Начальная дата
+            for y in range(len(data_table)):
+                data_table[y] = list(data_table[y])
+                my_parametr = u'T0 A+'
+                result = common_sql.get_data_table_electric_parametr_daily_by_meters_number(data_table[y][3], electric_data_start, my_parametr)
+               
+                if result:
+                    data_table[y].append(result[0][0])
+                else:
+                    data_table[y].append(u'Н/Д')
+            # T0 A+ Конечная  дата
+            for z in range(len(data_table)):
+                data_table[z] = list(data_table[z])
+                my_parametr = u'T0 A+'
+                result = common_sql.get_data_table_electric_parametr_daily_by_meters_number(data_table[z][3], electric_data_end, my_parametr)
+               
+                if result:
+                    data_table[z].append(result[0][0])
+                else:
+                    data_table[z].append(u'Н/Д')
+                    
+            for w in range(len(data_table)):
+                try:
+                    data_table[w].append(data_table[w][8]-data_table[w][7])
+                except:
+                    data_table[w].append(u'Н/Д')
+                    
+            #считаем сумму получасовок А+
+            for m in range(len(data_table)):
+                sum_of_30_min_a = 0
+                for date in range(len(list_of_dates)-1):
+                    try:
+                        sum_of_30_min_a = sum_of_30_min_a + common_sql.get_sum_of_30_profil_by_meter_number(list_of_dates[date], data_table[m][3], u'A+ Профиль')
+                    except:
+                        pass
+                try:
+                    data_table[m].append(sum_of_30_min_a)
+                except:
+                    data_table[m].append(u'Н/Д')
+                
+                # Вычисляем процент сбора получасовок
+                sum_of_count_30_min = 0
+                for j in range (len(list_of_dates)-1):
+                    sum_of_count_30_min = sum_of_count_30_min + common_sql.get_count_of_30_profil_by_meter_number(list_of_dates[j], data_table[m][3], u'A+ Профиль')
+                data_table[m].append((sum_of_count_30_min*100.0)/((len(list_of_dates)-1)*48))
+                    
+                                         
+                    
+            #Заполняем list со значениями нужных параметров
+            list_of_taken_params = []
+            for x in range(len(data_table)):
+                #Получаем считываемые параметры по заводскому номеру прибора.
+                 #A+
+                 guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
+                 result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
+                 list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
+                 #R+
+                 guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
+                 result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
+                 list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
+                                
+            # Добавляем дату в лист с параметрами и делаем таблицу для шапки таблицы 
+            list_of_taken_params.insert(0, u'Дата')
+            data_table_check_data_header = list_of_taken_params
+            
+                     
+        
+        #Проверяем сколько получасовок имеем за каждые сутки промежутка по каждому считываемому параметру
+            for x in range(len(list_of_dates)):
+                list_of_one_date_check = []
+                list_of_one_date_check.append(list_of_dates[x])
+                for y in range(1, len(list_of_taken_params)):
+                    my_split_params = list_of_taken_params[y].split()
+                    my_names_param = my_split_params[1] + u' ' + my_split_params[2]
+                    
+                    list_of_one_date_check.append(common_sql.get_count_of_30_profil_by_meter_number(list_of_dates[x], my_split_params[0], my_names_param))
+                data_table_check_data.append(list_of_one_date_check)
+            
+            data_table_check_data.pop()
+                                                
+            
+    args['data_table'] = data_table
+    args['data_table_check_data_header'] = data_table_check_data_header
+    args['data_table_check_data'] = data_table_check_data
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+      
+    return render_to_response("data_table/electric/41.html", args)
