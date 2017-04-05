@@ -5886,7 +5886,613 @@ def pokazaniya_heat_current_report(request):
     return response
 
 #_________________________________________________________________________
+def report_all_res_by_date(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
 
+#Шапка
+    
+    ws['A1'] = 'Лицевой счет'
+    ws['A1'].style = ali_grey
+    
+    ws['B1'] = 'Дата начала работы'
+    ws['B1'].style = ali_grey
+    
+    ws['C1'] = 'Номер прибора'
+    ws['C1'].style = ali_grey
+    
+    ws['D1'] = 'тип прибора'
+    ws['D1'].style = ali_grey
+    
+    ws['E1'] = 'Наименование ПУ'
+    ws['E1'].style = ali_grey
+    
+    ws['F1'] = 'Показания'
+    ws['F1'].style = ali_grey
+    
+    ws['G1'] = 'Дата Окончания' 
+    ws['G1'].style = ali_grey
+    
+    ws['H1'] = 'Дата'
+    ws['H1'].style = ali_grey
+
+    ws['I1'] = 'Квартирный' 
+    ws['I1'].style = ali_grey
+    
+    ws['J1'] = 'Адрес'
+    ws['J1'].style = ali_grey
+    
+    ws['K1'] = 'Операция'
+    ws['K1'].style = ali_grey
+    
+    ws['L1'] = 'Заменяемый счетчик'
+    ws['L1'].style = ali_grey
+    
+    ws['M1'] = 'Показания заменяемого счетчика'
+    ws['M1'].style = ali_grey
+
+    ws['N1'] = 'Улица'
+    ws['N1'].style = ali_grey
+
+    ws['O1'] = 'Дом'
+    ws['O1'].style = ali_grey
+
+    ws['P1'] = 'Квартира'
+    ws['P1'].style = ali_grey
+#Запрашиваем данные для отчета
+
+           
+    
+    data_table = []
+    data_table = common_sql.get_data_table_report_all_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  # лицевой счёт
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  # номер счётчика
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3])  # тип энергоресурса
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4])  # наименование ПУ
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])  # показания на начальную дату
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-2][8])  # Дом-корпус
+            ws.cell('O%s'%(row)).style = ali_white
+        except:
+            ws.cell('O%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % (data_table[row-2][7])  # № квартиры
+            ws.cell('P%s'%(row)).style = ali_white
+        except:
+            ws.cell('P%s'%(row)).style = ali_white
+            next
+            
+
+    ws.row_dimensions[5].height = 41
+#    ws.column_dimensions['A'].width = 10 
+#    ws.column_dimensions['B'].width = 10 
+#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['j'].width = 15
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_all_resources_'+str(electric_data_end)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def report_electric_all_by_date(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    
+    ws['A1'] = 'Лицевой счет'
+    ws['A1'].style = ali_grey
+    
+    ws['B1'] = 'Дата начала работы'
+    ws['B1'].style = ali_grey
+    
+    ws['C1'] = 'Номер прибора'
+    ws['C1'].style = ali_grey
+    
+    ws['D1'] = 'тип прибора'
+    ws['D1'].style = ali_grey
+    
+    ws['E1'] = 'Наименование ПУ'
+    ws['E1'].style = ali_grey
+    
+    ws['F1'] = 'Показания'
+    ws['F1'].style = ali_grey
+    
+    ws['G1'] = 'Дата Окончания' 
+    ws['G1'].style = ali_grey
+    
+    ws['H1'] = 'Дата'
+    ws['H1'].style = ali_grey
+
+    ws['I1'] = 'Квартирный' 
+    ws['I1'].style = ali_grey
+    
+    ws['J1'] = 'Адрес'
+    ws['J1'].style = ali_grey
+    
+    ws['K1'] = 'Операция'
+    ws['K1'].style = ali_grey
+    
+    ws['L1'] = 'Заменяемый счетчик'
+    ws['L1'].style = ali_grey
+    
+    ws['M1'] = 'Показания заменяемого счетчика'
+    ws['M1'].style = ali_grey
+
+    ws['N1'] = 'Улица'
+    ws['N1'].style = ali_grey
+
+    ws['O1'] = 'Дом'
+    ws['O1'].style = ali_grey
+
+    ws['P1'] = 'Квартира'
+    ws['P1'].style = ali_grey
+#Запрашиваем данные для отчета
+
+           
+    
+    data_table = []
+    data_table = common_sql.get_data_table_report_electric_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  # лицевой счёт
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  # номер счётчика
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3])  # тип энергоресурса
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4])  # наименование ПУ
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])  # показания на начальную дату
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-2][8])  # Дом-корпус
+            ws.cell('O%s'%(row)).style = ali_white
+        except:
+            ws.cell('O%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % (data_table[row-2][7])  # № квартиры
+            ws.cell('P%s'%(row)).style = ali_white
+        except:
+            ws.cell('P%s'%(row)).style = ali_white
+            next
+            
+
+    ws.row_dimensions[5].height = 41
+#    ws.column_dimensions['A'].width = 10 
+#    ws.column_dimensions['B'].width = 10 
+#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['j'].width = 15
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_electric_resources_'+str(electric_data_end)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def report_water_all_by_date(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    
+    ws['A1'] = 'Лицевой счет'
+    ws['A1'].style = ali_grey
+    
+    ws['B1'] = 'Дата начала работы'
+    ws['B1'].style = ali_grey
+    
+    ws['C1'] = 'Номер прибора'
+    ws['C1'].style = ali_grey
+    
+    ws['D1'] = 'тип прибора'
+    ws['D1'].style = ali_grey
+    
+    ws['E1'] = 'Наименование ПУ'
+    ws['E1'].style = ali_grey
+    
+    ws['F1'] = 'Показания'
+    ws['F1'].style = ali_grey
+    
+    ws['G1'] = 'Дата Окончания' 
+    ws['G1'].style = ali_grey
+    
+    ws['H1'] = 'Дата'
+    ws['H1'].style = ali_grey
+
+    ws['I1'] = 'Квартирный' 
+    ws['I1'].style = ali_grey
+    
+    ws['J1'] = 'Адрес'
+    ws['J1'].style = ali_grey
+    
+    ws['K1'] = 'Операция'
+    ws['K1'].style = ali_grey
+    
+    ws['L1'] = 'Заменяемый счетчик'
+    ws['L1'].style = ali_grey
+    
+    ws['M1'] = 'Показания заменяемого счетчика'
+    ws['M1'].style = ali_grey
+
+    ws['N1'] = 'Улица'
+    ws['N1'].style = ali_grey
+
+    ws['O1'] = 'Дом'
+    ws['O1'].style = ali_grey
+
+    ws['P1'] = 'Квартира'
+    ws['P1'].style = ali_grey
+#Запрашиваем данные для отчета
+
+           
+    
+    data_table = []
+    data_table = common_sql.get_data_table_report_water_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  # лицевой счёт
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  # номер счётчика
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3])  # тип энергоресурса
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4])  # наименование ПУ
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])  # показания на начальную дату
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-2][8])  # Дом-корпус
+            ws.cell('O%s'%(row)).style = ali_white
+        except:
+            ws.cell('O%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % (data_table[row-2][7])  # № квартиры
+            ws.cell('P%s'%(row)).style = ali_white
+        except:
+            ws.cell('P%s'%(row)).style = ali_white
+            next
+            
+
+    ws.row_dimensions[5].height = 41
+#    ws.column_dimensions['A'].width = 10 
+#    ws.column_dimensions['B'].width = 10 
+#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['j'].width = 15
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_water_resources_'+str(electric_data_end)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_heat_all_by_date(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    
+    ws['A1'] = 'Лицевой счет'
+    ws['A1'].style = ali_grey
+    
+    ws['B1'] = 'Дата начала работы'
+    ws['B1'].style = ali_grey
+    
+    ws['C1'] = 'Номер прибора'
+    ws['C1'].style = ali_grey
+    
+    ws['D1'] = 'тип прибора'
+    ws['D1'].style = ali_grey
+    
+    ws['E1'] = 'Наименование ПУ'
+    ws['E1'].style = ali_grey
+    
+    ws['F1'] = 'Показания'
+    ws['F1'].style = ali_grey
+    
+    ws['G1'] = 'Дата Окончания' 
+    ws['G1'].style = ali_grey
+    
+    ws['H1'] = 'Дата'
+    ws['H1'].style = ali_grey
+
+    ws['I1'] = 'Квартирный' 
+    ws['I1'].style = ali_grey
+    
+    ws['J1'] = 'Адрес'
+    ws['J1'].style = ali_grey
+    
+    ws['K1'] = 'Операция'
+    ws['K1'].style = ali_grey
+    
+    ws['L1'] = 'Заменяемый счетчик'
+    ws['L1'].style = ali_grey
+    
+    ws['M1'] = 'Показания заменяемого счетчика'
+    ws['M1'].style = ali_grey
+
+    ws['N1'] = 'Улица'
+    ws['N1'].style = ali_grey
+
+    ws['O1'] = 'Дом'
+    ws['O1'].style = ali_grey
+
+    ws['P1'] = 'Квартира'
+    ws['P1'].style = ali_grey
+#Запрашиваем данные для отчета
+
+           
+    
+    data_table = []
+    data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  # лицевой счёт
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  # номер счётчика
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3])  # тип энергоресурса
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4])  # наименование ПУ
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])  # показания на начальную дату
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-2][8])  # Дом-корпус
+            ws.cell('O%s'%(row)).style = ali_white
+        except:
+            ws.cell('O%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % (data_table[row-2][7])  # № квартиры
+            ws.cell('P%s'%(row)).style = ali_white
+        except:
+            ws.cell('P%s'%(row)).style = ali_white
+            next
+            
+
+    ws.row_dimensions[5].height = 41
+#    ws.column_dimensions['A'].width = 10 
+#    ws.column_dimensions['B'].width = 10 
+#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['j'].width = 15
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_heat_resources_'+str(electric_data_end)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
 
 def report_resources_all(request):
     response = StringIO.StringIO()
@@ -5940,15 +6546,15 @@ def report_resources_all(request):
         data_table=common_sql.ChangeNull(data_table, None)
 #        
 #    #удаляем из номеров счётчиков лишнее
-    for i in range(len(data_table)):
-        data_table[i]=list(data_table[i])
-        num=data_table[i][3]
-        if ('ХВС, №' in num) or ('ГВС, №' in num):
-            num=num.replace(u'ХВС, №', ' ')
-            num=num.replace(u'ГВС, №', ' ')
-            data_table[i][3]=num
-            #print num
-        data_table[i]=tuple(data_table[i])
+#    for i in range(len(data_table)):
+#        data_table[i]=list(data_table[i])
+#        num=data_table[i][3]
+#        if ('ХВС, №' in num) or ('ГВС, №' in num):
+#            num=num.replace(u'ХВС, №', ' ')
+#            num=num.replace(u'ГВС, №', ' ')
+#            data_table[i][3]=num
+#            #print num
+#        data_table[i]=tuple(data_table[i])
 
 
 # Заполняем отчет значениями

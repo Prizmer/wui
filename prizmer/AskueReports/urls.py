@@ -49,6 +49,11 @@ urlpatterns = patterns('',
     url(r'^38/$', views.report_water_by_date), #для Фили, выгрузка данных на дату по воде Импульсные
     url(r'^39/$', views.report_water_potreblenie_pulsar), #для Фили, выгрузка данных за период по воде Импульсные
     url(r'^41/$', views.report_forma_80020), #Выгрузка архива с файлами xml по форме Мосэнергосбыт 80020
+    
+    url(r'^42/$', views.report_all_res_by_date), #отчёт по всем ресурсам на дату
+    url(r'^44/$', views.report_electric_all_by_date), #отчёт электрике ресурсам на дату
+    url(r'^46/$', views.report_water_all_by_date), #отчёт воде ресурсам на дату
+    url(r'^48/$', views.report_heat_all_by_date), #отчёт по теплу ресурсам на дату
 
     #---- Test urls
 

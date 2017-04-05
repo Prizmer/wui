@@ -27,7 +27,7 @@ and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
   resources.name='Импульс'
-  and date='10/02/2017')
+  and date='09/03/2017')
 
 SELECT 
   meters.name as meter, 
@@ -59,7 +59,7 @@ and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
   resources.name='Импульс' 
-  and daily_values.date='19/02/2017'
+  and daily_values.date='31/03/2017'
 )z2
 on z2.ab_name=water_abons_report.ab_name
 order by account_2

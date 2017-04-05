@@ -75,7 +75,11 @@ urlpatterns = patterns('',
     
     url(r'^40/$', views.electric_check_factory_numbers), # Сверка заводских номеров приборов
     url(r'^41/$', views.forma_80020), # Отчёт по форме 80020
-
+    
+    url(r'^42/$', views.resources_all_by_date), # Отчёт по всем ресурсам на дату
+    url(r'^44/$', views.resources_electric_by_date), # Отчёт по электрике
+    url(r'^46/$', views.resources_water_by_date), # Отчёт по воде
+    url(r'^48/$', views.resources_heat_by_date), # Отчёт по теплу
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),

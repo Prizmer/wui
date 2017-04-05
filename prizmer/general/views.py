@@ -11136,6 +11136,82 @@ def resources_all(request):
     args['electric_data_start'] = electric_data_start
       
     return render_to_response("data_table/9.html", args)
+    
+def resources_all_by_date(request):
+    args= {}
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            data_table = common_sql.get_data_table_report_all_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/42.html", args)
+    
+def resources_electric_by_date(request):
+    args= {}
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            data_table = common_sql.get_data_table_report_electric_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/44.html", args)
+    
+def resources_water_by_date(request):
+    args= {}
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            data_table = common_sql.get_data_table_report_water_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/46.html", args)
+    
+def resources_heat_by_date(request):
+    args= {}
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+      
+    return render_to_response("data_table/48.html", args)
 
 def test_test(request):
     args={}
