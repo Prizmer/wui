@@ -31,7 +31,7 @@ WHERE
   params.guid_names_params = names_params.guid AND
   params.guid_types_meters = types_meters.guid AND
   types_meters.name LIKE '%Меркурий%230%' AND 
-  daily_values.date = '20.02.2017'
+  daily_values.date = '31.03.2017'
 )
 
 SELECT 
@@ -66,7 +66,7 @@ WHERE
   params.guid_names_params = names_params.guid AND
   params.guid_types_meters = types_meters.guid AND
   types_meters.name LIKE '%Меркурий%230%' AND 
-  daily_values.date = '10.02.2017' and
+  daily_values.date = '09.03.2017' and
   z1.meter_name=meters.name and
   z1.name_params=names_params.name
   order by abonents.name, 

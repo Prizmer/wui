@@ -3255,7 +3255,6 @@ def MakeQuery_water_resources_by_date( electric_data_end):
     sQuery="""
 Select account_2,date_install, substring(water_abons_report.ab_name from 7 for char_length(water_abons_report.ab_name)) as factory_number,type_energo,z1.meters_name, z1.value, z1.date,substring(obj_name from 10 for char_length(obj_name)), water_abons_report.name as obj_name
 from water_abons_report
-
 LEFT JOIN 
 (SELECT 
   meters.name as meters_name, 
@@ -3700,7 +3699,7 @@ WHERE
   water_abons_report.name='%s'
   order by obj_name, names_params.name ) z2
   on z2.meters=water_abons_report.ab_name
-  where z2.name='%s'  
+  where water_abons_report.name='%s'  
   order by obj_name, z2.name_params
     """%(my_param[0],electric_data_end, meters_name,meters_name)
     #print sQuery
