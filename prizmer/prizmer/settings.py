@@ -13,10 +13,14 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),                    
+					) 
 
 import sys
-sys.path.append("D:\Work\sad\prizmer\static\common_sql")
+#sys.path.append("C:\Work\mitino\prizmer\static\common_sql")
+sys.path.append(os.path.join(BASE_DIR, "static\common_sql"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -47,6 +51,7 @@ INSTALLED_APPS = (
     'loginsys',
     'AskueReports',
     'AskueViz',
+    #'common_sql',
 
 )
 
@@ -74,7 +79,7 @@ DATABASES = {
         'NAME': 'prizmer',
         #'NAME': 'test',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': '1',
         'HOST': '127.0.0.1',
         'PORT': '5432',
         'OPTIONS': {
