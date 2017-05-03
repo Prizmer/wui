@@ -1243,8 +1243,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\lev 22_2.xlsx'
-cfg_sheet_name = u'report'
+cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\fili-water-new_for_load.xlsx'
+cfg_sheet_name = u'1a'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1262,13 +1262,13 @@ def add_objects(sender, instance, created, **kwargs): #Добавляем объ
     while (bool(sheet_ranges[u'B%s'%(row)].value) ):
         if sheet_ranges[u'A%s'%(row)].value is not None:
             print sheet_ranges[u'A%s'%(row)].value
-            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u"888986b7-5fe8-4a6a-9892-833a1cd9872c"))
+            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u"2e071f39-5024-4d1e-8739-e46155f270d1"))
             add_object.save()
             print u'OK'
         else:
             print u'Фигня какая-то'
         row = row + 1
-signals.post_save.connect(add_objects, sender=Resources)
+#signals.post_save.connect(add_objects, sender=Resources)
 
 
 def add_abonents(sender, instance, created, **kwargs): # Добавляем абонентов при создании объекта
@@ -1302,7 +1302,7 @@ def add_abonents(sender, instance, created, **kwargs): # Добавляем аб
         else:
             next
         row = row + 1
-signals.post_save.connect(add_abonents, sender=Objects)
+#signals.post_save.connect(add_abonents, sender=Objects)
 
 #def add_abonents_from_excel_cfg_water(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
 #    from openpyxl import load_workbook
@@ -1372,7 +1372,7 @@ def add_meters(sender, instance, created, **kwargs): #Добавляем пул�
             pass
         row = row + 1
        
-signals.post_save.connect(add_meters, sender=BalanceGroups)
+#signals.post_save.connect(add_meters, sender=BalanceGroups)
 
 #def add_link_meter_port(sender, instance, created, **kwargs): #Создаем привязку пульсара к com-порту
 #    guid_com_port = ComportSettings.objects.get(guid=u'2376a4a5-a19a-4a1d-9417-7f65014961e1')
@@ -1442,7 +1442,7 @@ def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs
     add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
     add_ip_port_link.save()
 
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_water, sender=Meters)
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_water, sender=Meters)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -1491,7 +1491,7 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
     else:
         pass
                  
-signals.post_save.connect(add_link_abonents_taken_params, sender=TakenParams)
+#signals.post_save.connect(add_link_abonents_taken_params, sender=TakenParams)
 
 
 
@@ -1515,7 +1515,7 @@ def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #�
             pass
         row = row + 1
         
-#signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
+signals.post_save.connect(add_objects_from_excel_cfg_electric, sender=Resources)
 
 
 def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем абонентов из файла excel ведомости по электрике:
@@ -1532,7 +1532,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1620,7 +1620,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1671,7 +1671,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1702,7 +1702,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
 
 def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
@@ -1727,7 +1727,7 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
 
 
 

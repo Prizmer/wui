@@ -5136,8 +5136,8 @@ def load_balance_groups(request):
     obj_key             = request.GET['obj_key']
     
                 # Добавляем привязку к балансной группе 
-    cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/kB_balance_for_load.xlsx'
-    cfg_sheet_name = u'ВРУ-1'
+    cfg_excel_name = 'C:/work/mitino/prizmer/static/cfg/fili-water-new_for_load.xlsx'
+    cfg_sheet_name = u'1a'
     is_electic_cfg = True
     is_water_cfg = False
     is_heat_cfg = False
