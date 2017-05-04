@@ -51,7 +51,7 @@ INSTALLED_APPS = (
     'loginsys',
     'AskueReports',
     'AskueViz',
-    #'common_sql',
+	'service',
 
 )
 

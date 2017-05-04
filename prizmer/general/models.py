@@ -1243,8 +1243,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\fili-water-new_for_load.xlsx'
-cfg_sheet_name = u'1a'
+cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\leviy-original_v2.xlsx'
+cfg_sheet_name = u'Electr 26g_for_load'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1262,7 +1262,7 @@ def add_objects(sender, instance, created, **kwargs): #Добавляем объ
     while (bool(sheet_ranges[u'B%s'%(row)].value) ):
         if sheet_ranges[u'A%s'%(row)].value is not None:
             print sheet_ranges[u'A%s'%(row)].value
-            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u"2e071f39-5024-4d1e-8739-e46155f270d1"))
+            add_object = Objects( name=unicode(sheet_ranges[u'A%s'%(row)].value), level=2, guid_parent = Objects.objects.get(guid=u"2136ad23-659c-4e55-9e3e-32f804a14e90"))
             add_object.save()
             print u'OK'
         else:
