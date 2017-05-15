@@ -12,8 +12,14 @@ urlpatterns = patterns('',
 
 
     url(r'^test/$', views.choose_service), # Выберите отчет
+    url(r'^service_file/$', views.service_file), # форма для загрузки файла на сервер
+    url(r'^service_file_loading/$', views.service_file_loading), # загрузка файла на сервер
     url(r'^service_electric/$', views.service_electric), # электрика, загрузка нужных полейъ
     url(r'^service_electric_load/$', views.service_electric_load), # электрика прогрузка
+    url(r'^load_tcp_ip/$', views.load_tcp_ip), # загрузка портов
+    url(r'^make_sheet/$', views.MakeSheet),
+    url(r'^load_electric_objects/$', views.load_electric_objects), # загрузка объектов и абонентов
+    url(r'^load_electric_counters/$', views.load_electric_counters), # загрузка счётчиков
 #    url(r'^electric/$', views.electric),
    
 

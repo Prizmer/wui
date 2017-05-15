@@ -1,21 +1,28 @@
 
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
 <script src="/static/liHighLight.js" type=text/javascript></script>
 
 <br>
 <span><strong> Электрика | Прогрузка</strong> </span>
 <br><br>
 
-<form enctype="multipart/form-data" method="post"  action="/service/service_electric_load/" > 
- {% csrf_token %}
-<span> Прогрузочный файл: </span>  <input type="file" accept=".xls,.xlsx" id="id_path" name="path">
-<br>
-<br>
-<!-- <input id="id_title" name="title" type="text"> -->
-<input type="submit" id="electric-load" name="electric-load" value=Загрузить>
-<br>
-<input type='hidden' id="isLoad" value=$isLoaded> 
-<br>
-<strong>{{status}}</strong>
+<p>
+ <div>
+        <span><strong>Загрузка TCP/IP портов &nbsp;</strong></span>
+        <span onclick="load_service('load_tcp_ip')" class="button" id="tcp-ip-port-button">Загрузить</span> &nbsp;{{tcp_ip_status}}
+		<br>
+        <br><br>
+		<span><strong>Загрузка Объектов и Абонентов &nbsp;</strong></span>
+        <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> &nbsp;{{object_status}}
+		<br>
+        <br><br>
+		<span><strong>Загрузка  счётчиков&nbsp;</strong></span>
+        <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> &nbsp;{{counter_status}}
+    </div>
 
 </form>
 <br>

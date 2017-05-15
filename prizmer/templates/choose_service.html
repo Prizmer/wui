@@ -6,27 +6,62 @@
 {% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
 {% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
 
+
     <title> ПАК ПРИЗМЕР| Сервисные настройки |</title>
  <script type="text/javascript">
  $("#electric-ico").click(function(){
         load_service("service_electric");
 		});
+		
+ $("#download-ico").click(function(){
+        load_service("service_file");
+		});
 
 var isLoaded=0;
-		
+var isFirst=1;
+var sPath="";
+var choice_file="";
+var choice_sheet="";
+var tcp_ip_status="";
+var object_status="";
+var counter_status="";
+			
 var load_service = function(page){
+        isFirst=1;
+		choice_file=$("#choice_file").val();
         $.ajax({
         type: "GET",
         url: "/service/"+page,
-        beforeSend: function(){show_loader();}        
+        beforeSend: function(){show_loader();},
+        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status},        
        })
 	   
 	   .done(function( msg ) {
+	    tcp_ip_status="{{tcp_ip_status}}";
+		object_status="{{object_status}}";
+		counter_status="{{counter_status}}";
         $('#data-table').html(msg); // Пишем в div ответ от страницы 
             hide_loader();
         });
     };
-	
+
+function change_wb(){
+     choice_file=$("#choice_file").val();
+	 $.ajax({
+        type: "GET",
+        url: "/service/make_sheet",
+        beforeSend: function(){show_loader();},
+        data:{isFirst:isFirst, choice_file:choice_file},        
+       })
+	   
+	   .done(function( msg ) {
+        $('#sheets-block').html(msg); // Пишем в div ответ от страницы 
+            hide_loader();
+        });
+	 };
+
+	 
+	 
 var show_loader = function(){
     $("#fadingBarsG_1").show();
     $("#fadingBarsG_2").show();
@@ -48,20 +83,29 @@ var hide_loader = function(){
     $("#fadingBarsG_7").hide();
     $("#fadingBarsG_8").hide();
     };
-/*	
-$("#electric-load").click(function(){    
-        $.ajax({
-        type: "POST",
-        url: "/service/service_electric_load",
-        beforeSend: function(){show_loader();}        
-       })
-	   
-	   .done(function( msg ) {
-        $('#result').html(msg); // Пишем в div ответ от страницы 
-            hide_loader();
-        });    
-      });
-	*/	
+
+function upload(event) {
+event.preventDefault();
+var data = new FormData($('form').get(0));
+
+$.ajax({
+    url: $(this).attr('action'),
+    type: $(this).attr('method'),
+    data: data,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function(data) {
+        alert('success');
+    }	
+});		
+return false;
+}
+
+$(function() {
+    $('form').submit(upload);
+});	
+
 
 </script>
     </head>
@@ -77,16 +121,31 @@ $("#electric-load").click(function(){
 		<br>
 		<br>
 		<div>
+		{% load staticfiles %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download-ico64.png" %}" alt="Загрузить файл">
 		{% load staticfiles %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/electric-ico64.png" %}" alt="Электрика">
 		{% load staticfiles %} <a href="../../service/water"><img id="water-ico" src="{%static "images/water-ico64.png" %}" alt="Вода"></a>
+		<p>
+		<span><strong>Выберите файл &nbsp;</strong></span>
+			<select onchange="change_wb();" name="choice_file" id="choice_file">
+			<option value="0"><strong>Выберите файл...</strong></option>
+			{% for f in filesFF %}
+			<option value={{f}}>{{f}}</option>
+			{% endfor %}           
+			</select>
+			
+			<div id="sheets-block" >
+			<span>Выберите лист </span>
+
+			</div>
+			{% endblock %}
 		<div>
-		{% endblock %}
+		
 		</div>
 	</div>
-	
+	<strong>{{status}}</strong>
 	<div id="data-block-service">
         <div id="data-table" ></div>
-		<div id="result" ></div>
+		
         <span id="QQQ"></span>        
     </div>
 </div>

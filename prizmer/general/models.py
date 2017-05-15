@@ -1243,8 +1243,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\leviy-original_v2.xlsx'
-cfg_sheet_name = u'Electr 26g_for_load'
+cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_1b-540_forLoad.xlsx'
+cfg_sheet_name = u'Heat_1b(2)'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
