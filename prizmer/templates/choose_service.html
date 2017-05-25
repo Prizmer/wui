@@ -29,6 +29,7 @@ var counter_status="";
 var load_service = function(page){
         isFirst=1;
 		choice_file=$("#choice_file").val();
+		choice_sheet=$("#choice_sheet").val();
         $.ajax({
         type: "GET",
         url: "/service/"+page,
@@ -123,13 +124,13 @@ $(function() {
 		<div>
 		{% load staticfiles %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download-ico64.png" %}" alt="Загрузить файл">
 		{% load staticfiles %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/electric-ico64.png" %}" alt="Электрика">
-		{% load staticfiles %} <a href="../../service/water"><img id="water-ico" src="{%static "images/water-ico64.png" %}" alt="Вода"></a>
+		{% load staticfiles %} <img  onclick="load_service('service_water')" id="water-ico" src="{%static "images/water-ico64.png" %}" alt="Вода">
 		<p>
 		<span><strong>Выберите файл &nbsp;</strong></span>
 			<select onchange="change_wb();" name="choice_file" id="choice_file">
 			<option value="0"><strong>Выберите файл...</strong></option>
 			{% for f in filesFF %}
-			<option value={{f}}>{{f}}</option>
+			<option value='{{f}}'>{{f}}</option>
 			{% endfor %}           
 			</select>
 			

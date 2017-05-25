@@ -3195,8 +3195,8 @@ def get_data_table_report_all_res_by_date(electric_data_end):
 def MakeQuery_electric_resources_by_date( electric_data_end):
     my_params=[u'Меркурий 230']
     sQuery="""
-    Select account_2,date_install,factory_number_manual,type_energo,electric_abons_report.name_meter, z1.value,z1.date_start, substring(electric_abons_report.ab_name from 10 for char_length(electric_abons_report.ab_name)), electric_abons_report.obj_name
-from electric_abons_report
+    Select account_2,date_install,factory_number_manual,type_energo,electric_abons_without_sum_report.name_meter, z1.value,z1.date_start, substring(electric_abons_without_sum_report.ab_name from 10 for char_length(electric_abons_without_sum_report.ab_name)), electric_abons_without_sum_report.obj_name
+from electric_abons_without_sum_report
 Left join
 (
 SELECT 
@@ -3238,7 +3238,7 @@ WHERE
   names_params.name
   order by objects.name, 
   abonents.name) z1
-on electric_abons_report.name_meter=z1.meter_name and z1.names_params=electric_abons_report.name_params
+on electric_abons_without_sum_report.name_meter=z1.meter_name and z1.names_params=electric_abons_without_sum_report.name_params
 order by account_2, type_energo
     """%(my_params[0], electric_data_end)
     return sQuery
@@ -3823,7 +3823,7 @@ and
 )z2
 on z2.ab_name=water_abons_report.ab_name
 where water_abons_report.name='%s'
-order by account_2
+order by account_2, obj_name
     """%(my_param[0],electric_data_start, my_param[0], electric_data_end, meters_name )
     return sQuery
 def MakeSqlQuery_water_period_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
@@ -3894,7 +3894,7 @@ and
 on z2.ab_name=water_abons_report.ab_name
 where water_abons_report.name='%s'
 and water_abons_report.obj_name='%s'
-order by account_2
+order by account_2, obj_name
     """%(my_param[0],electric_data_start, my_param[0], electric_data_end,parent_name, meters_name )
     return sQuery
 def get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_start, electric_data_end, isAbon):

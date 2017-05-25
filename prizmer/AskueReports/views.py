@@ -5893,7 +5893,6 @@ def report_all_res_by_date(request):
     electric_data_end   = request.session["electric_data_end"]
 
 #Шапка
-    
     ws['A1'] = 'Лицевой счет'
     ws['A1'].style = ali_grey
     
@@ -5948,9 +5947,11 @@ def report_all_res_by_date(request):
     data_table = []
     data_table = common_sql.get_data_table_report_all_res_by_date(electric_data_end)
 
-    #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
+                data_table[i][j]=u''
 
 
 # Заполняем отчет значениями
@@ -5963,7 +5964,10 @@ def report_all_res_by_date(request):
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            a=str(data_table[row-2][1])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('B%s'%(row)).value = '%s' % d  # начальная дата
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
@@ -5998,10 +6002,17 @@ def report_all_res_by_date(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).value = '%s' % electric_data_end  # дата снятия показаний
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
+            next
+                        
+        try:
+            ws.cell('K%s'%(row)).value = 'ВводПоказаний'
+            ws.cell('K%s'%(row)).style = ali_white
+        except:
+            ws.cell('K%s'%(row)).style = ali_white
             next
             
         try:
@@ -6019,13 +6030,15 @@ def report_all_res_by_date(request):
             next
             
 
-    ws.row_dimensions[5].height = 41
+#    ws.row_dimensions[5].height = 41
 #    ws.column_dimensions['A'].width = 10 
 #    ws.column_dimensions['B'].width = 10 
 #    ws.column_dimensions['C'].width = 17
-    ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['O'].width = 20
+    ws.column_dimensions['D'].width = 30
+    ws.column_dimensions['E'].width = 20
     ws.column_dimensions['j'].width = 15
+    ws.column_dimensions['k'].width = 15
                     
     
     wb.save(response)
@@ -6101,8 +6114,14 @@ def report_electric_all_by_date(request):
     data_table = common_sql.get_data_table_report_electric_res_by_date(electric_data_end)
 
     #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+#    if len(data_table)>0: 
+#        data_table=common_sql.ChangeNull(data_table, None)
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
+                data_table[i][j]=u''
+        data_table[i]=tuple(data_table[i])
 
 
 # Заполняем отчет значениями
@@ -6115,7 +6134,11 @@ def report_electric_all_by_date(request):
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            a=str(data_table[row-2][1])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+
+            ws.cell('B%s'%(row)).value = '%s' %d  # начальная дата
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
@@ -6150,10 +6173,21 @@ def report_electric_all_by_date(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            #a=str(data_table[row-2][6])
+            a=str(electric_data_end)
+            #b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            #d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('H%s'%(row)).value = '%s' % a  # дата снятия показаний
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = 'ВводПоказаний'
+            ws.cell('K%s'%(row)).style = ali_white
+        except:
+            ws.cell('K%s'%(row)).style = ali_white
             next
             
         try:
@@ -6171,13 +6205,14 @@ def report_electric_all_by_date(request):
             next
             
 
-    ws.row_dimensions[5].height = 41
+#    ws.row_dimensions[5].height = 41
 #    ws.column_dimensions['A'].width = 10 
 #    ws.column_dimensions['B'].width = 10 
 #    ws.column_dimensions['C'].width = 17
-    ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['E'].width = 20
     ws.column_dimensions['j'].width = 15
+    ws.column_dimensions['k'].width = 15
                     
     
     wb.save(response)
@@ -6252,10 +6287,11 @@ def report_water_all_by_date(request):
     data_table = []
     data_table = common_sql.get_data_table_report_water_res_by_date(electric_data_end)
 
-    #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
-
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
+                data_table[i][j]=u''
 
 # Заполняем отчет значениями
     for row in range(2, len(data_table)+2):
@@ -6267,7 +6303,10 @@ def report_water_all_by_date(request):
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            a=str(data_table[row-2][1])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('B%s'%(row)).value = '%s' % d  # начальная дата
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
@@ -6302,10 +6341,18 @@ def report_water_all_by_date(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            d=electric_data_end
+            ws.cell('H%s'%(row)).value = '%s' % d  # дата снятия показаний
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
+            next
+                        
+        try:
+            ws.cell('K%s'%(row)).value = 'ВводПоказаний'
+            ws.cell('K%s'%(row)).style = ali_white
+        except:
+            ws.cell('K%s'%(row)).style = ali_white
             next
             
         try:
@@ -6323,13 +6370,14 @@ def report_water_all_by_date(request):
             next
             
 
-    ws.row_dimensions[5].height = 41
+#    ws.row_dimensions[5].height = 41
 #    ws.column_dimensions['A'].width = 10 
-#    ws.column_dimensions['B'].width = 10 
-#    ws.column_dimensions['C'].width = 17
-    ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['E'].width = 30
+#    ws.column_dimensions['D'].width = 30 
+    ws.column_dimensions['O'].width = 20
+    ws.column_dimensions['D'].width = 30
+    ws.column_dimensions['E'].width = 20
     ws.column_dimensions['j'].width = 15
+    ws.column_dimensions['k'].width = 15
                     
     
     wb.save(response)
@@ -6404,9 +6452,11 @@ def report_heat_all_by_date(request):
     data_table = []
     data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
 
-    #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
+                data_table[i][j]=u''
 
 
 # Заполняем отчет значениями
@@ -6419,7 +6469,10 @@ def report_heat_all_by_date(request):
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  # начальная дата
+            a=str(data_table[row-2][1])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('B%s'%(row)).value = '%s' % d  # начальная дата
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
@@ -6454,10 +6507,17 @@ def report_heat_all_by_date(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6])  # дата снятия показаний
+            ws.cell('H%s'%(row)).value = '%s' % electric_data_end  # дата снятия показаний
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
+            next
+                        
+        try:
+            ws.cell('K%s'%(row)).value = 'ВводПоказаний'
+            ws.cell('K%s'%(row)).style = ali_white
+        except:
+            ws.cell('K%s'%(row)).style = ali_white
             next
             
         try:
@@ -6475,13 +6535,14 @@ def report_heat_all_by_date(request):
             next
             
 
-    ws.row_dimensions[5].height = 41
+#    ws.row_dimensions[5].height = 41
 #    ws.column_dimensions['A'].width = 10 
 #    ws.column_dimensions['B'].width = 10 
 #    ws.column_dimensions['C'].width = 17
-    ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['E'].width = 20
     ws.column_dimensions['j'].width = 15
+    ws.column_dimensions['k'].width = 15
                     
     
     wb.save(response)

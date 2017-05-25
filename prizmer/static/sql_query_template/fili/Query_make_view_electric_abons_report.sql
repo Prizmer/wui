@@ -6,10 +6,10 @@ CREATE OR REPLACE VIEW electric_abons_report AS
  SELECT abonents.account_2, '2015-01-01'::date AS date_install, 
     meters.name AS name_meter, 
         CASE
-            WHEN names_params.name::text ~~ '%T0%'::text THEN 'Электричество Сумма'::text
-            WHEN names_params.name::text ~~ '%T1%'::text THEN 'Электричество Тариф 1'::text
-            WHEN names_params.name::text ~~ '%T2%'::text THEN 'Электричество Тариф 2'::text
-            WHEN names_params.name::text ~~ '%T3%'::text THEN 'Электричество Тариф 3'::text
+           -- WHEN names_params.name::text ~~ '%T0%'::text THEN 'элво Сумма'::text
+            WHEN names_params.name::text ~~ '%T1%'::text THEN 'элво кпу1'::text
+            WHEN names_params.name::text ~~ '%T2%'::text THEN 'элво кпу2'::text
+            WHEN names_params.name::text ~~ '%T3%'::text THEN 'элво кпу3'::text
             ELSE 'Электричество'::text
         END AS type_energo, 
     abonents.name AS ab_name, objects.name AS obj_name, 

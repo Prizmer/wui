@@ -11167,8 +11167,8 @@ def resources_electric_by_date(request):
             data_table = common_sql.get_data_table_report_electric_res_by_date(electric_data_end)
 
     #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+#    if len(data_table)>0: 
+#        data_table=common_sql.ChangeNull(data_table, None)
 
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end

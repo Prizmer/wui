@@ -1,0 +1,30 @@
+
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
+<script src="/static/liHighLight.js" type=text/javascript></script>
+
+<br>
+<span><strong> Вода | Прогрузка</strong> </span>
+<br><br>
+
+<p>
+ <div>
+        <span><strong>Загрузка портов &nbsp;</strong></span>
+        <!-- <span onclick="load_service('load_tcp_ip')" class="button" id="tcp-ip-port-button">Загрузить</span> &nbsp;{{tcp_ip_status}} -->
+		<br>
+        <br><br>
+		<span><strong>Загрузка Абонентов и счётчиков &nbsp;</strong></span>
+        <span onclick="load_service('load_water_objects')" class="button" id="object_load_button">Загрузить</span> &nbsp;{{object_status}}
+		<br>
+        <br><br>
+		<span><strong>Загрузка  Пульсаров&nbsp;</strong></span>
+        <!-- <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> &nbsp;{{counter_status}} -->
+    </div>
+
+</form>
+<br>
+<br>
+<br>
