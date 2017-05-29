@@ -20,7 +20,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),
 
 import sys
 #sys.path.append("C:\Work\mitino\prizmer\static\common_sql")
-sys.path.append(os.path.join(BASE_DIR, "static\common_sql"))
+sys.path.append(os.path.join(BASE_DIR, "static/common_sql"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/

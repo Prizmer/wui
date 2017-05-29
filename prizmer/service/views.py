@@ -504,6 +504,44 @@ def service_water(request):
     args={}
     return render_to_response("service/service_water.html", args)
     
+def add_link_meter(sender, instance, created, **kwargs):
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    print unicode(dtAll[1][1])
+    if (dtAll[1][1] == u'Объект'): #вода
+        print u'Добавляем связь портов по воде'
+        add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs)
+    else:# электрика
+        print u'Добавляем связь портов по электрике'
+        add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs)
+
+def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
+    """Делаем привязку счётчика к порту по excel файлу ведомости"""
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    i=3
+#    abon=dtAll[i][2] #абонент он же счётчик по воде
+#    chanel=dtAll[i][4] # канал пульсара
+#    numPulsar=dtAll[i][5] #номер пульсара
+#    typePulsar=dtAll[i][5] #тип пульсара
+
+    ip_adr=unicode(dtAll[i][7]).strip()
+    ip_port=unicode(dtAll[i][8]).strip()
+# Привязка к tpc порту
+    guid_ip_port_from_excel = connection.cursor()
+    sQuery="""SELECT 
+                                      tcpip_settings.guid
+                                    FROM 
+                                      public.tcpip_settings
+                                    WHERE 
+                                      tcpip_settings.ip_address = '%s' AND 
+                                      tcpip_settings.ip_port = '%s';"""%(unicode(ip_adr), unicode(ip_port))
+    #print sQuery
+    guid_ip_port_from_excel.execute(sQuery)
+    guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+
+    guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+    add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+    add_ip_port_link.save()
+
 def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""    
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
@@ -551,8 +589,61 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)
+signals.post_save.connect(add_link_meter, sender=Meters)
+
+
+def add_link_abonents_taken_params(sender, instance, created, **kwargs):
+    def get_taken_param_by_abonent_from_excel_cfg(input_taken_param):
+        """Функция, которая читает excel файл. Составляет имя считываемого параметра типа "Пульсар 16M 33555 Пульсар 16M Канал 11". В случае совпадения должна привязать этот параметр к абоненту. Абоненты должны быть предварительно созданы."""    
+        dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    
+        def shrink_taken_param_name(taken_param_name):
             
+            if taken_param_name.find(u'Текущий') != -1: # Ищем слово "Текущий"
+                nn = taken_param_name.find(u'Текущий')  # Если нашли. то Записываем позицию где.
+        
+            elif taken_param_name.find(u'Суточный') != -1:
+                nn = taken_param_name.find(u'Суточный')
+            
+            else:
+                pass
+        
+            return taken_param_name[:nn -1]
+    
+        for i in range(2,len(dtAll)):
+            print unicode(dtAll[i][3])[17:20], unicode(dtAll[i][3])[2:8], unicode(dtAll[i][3])[17:20], unicode(dtAll[i][4])
+            taken_param = u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + unicode(dtAll[i][3])[2:8] + u' ' + u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
+            print taken_param
+            if taken_param == shrink_taken_param_name(input_taken_param):
+                try:
+                    return unicode(dtAll[i][2])
+                except:
+                    return None
+                
+            else:
+                pass
+    
+    print u'--------'
+    print instance.name
+    print u'==>', get_taken_param_by_abonent_from_excel_cfg(instance.name)
+    if get_taken_param_by_abonent_from_excel_cfg(instance.name) is not None:
+        print u'Совпадение'
+        try:
+            add_link_abonents_taken_param = LinkAbonentsTakenParams (name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name ,coefficient=1, coefficient_2 = 1, guid_abonents = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(unicode(instance.name))) , guid_taken_params = instance )
+            add_link_abonents_taken_param.save()
+        except:
+            pass
+    else:
+        pass
+
+def add_link_taken_params(sender, instance, created, **kwargs):
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    if (dtAll[1][1] == u'Объект'): #вода
+        add_link_abonents_taken_params(sender, instance, created, **kwargs)
+    else:# электрика
+        add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs)
+
+
 def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs):
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     #print dtAll[0][0]
@@ -579,7 +670,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             else:
                 pass
     
-signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+signals.post_save.connect(add_link_taken_params, sender=TakenParams)
 
 def load_water_objects(request):
     args={}
@@ -611,12 +702,35 @@ def load_water_objects(request):
     args["counter_status"]=counter_status
     return render_to_response("service/service_water.html", args)
     
+def CheckIfExistInObjects(name_parent, name_child):
+    dt=[]
+    cursor = connection.cursor()
+    sQuery="""
+    With obj as 
+(Select guid as guid_child, objects.name as name_child, objects.level as level_child, guid_parent
+ from objects)
+Select guid as grand_parent, objects.name as name_parent, objects.level, objects.guid_parent, 
+obj.guid_child,obj.name_child, obj.level_child, obj.guid_parent
+FROM 
+  public.objects, obj
+where obj.guid_parent=objects.guid
+and objects.name='%s' 
+and obj.name_child='%s'
+order by name_parent    """%(name_parent, name_child)
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+
+    if not dt:  
+        return None
+    else: 
+        return dt[0][4]# возвращаем guid квариры
+    
+    
 def LoadObjectsAndAbons_water(sPath, sheet):
     result=""
     dtAll=GetTableFromExcel(sPath,sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     kv=0
     for i in range(2,len(dtAll)):
-        print u'Обрабатываем строку ' + dtAll[i][2]+' - '+dtAll[i][3]
         obj_l0=u'Вода' # всегда будет Вода как объект-родитель
         obj_l1=dtAll[i][0] #корпус
         obj_l2=dtAll[i][1] #квартира
@@ -625,41 +739,45 @@ def LoadObjectsAndAbons_water(sPath, sheet):
             while not obj_l2 or obj_l2==None:
                 j-=1
                 obj_l2=dtAll[j][1]
-        print obj_l2
-        abon=dtAll[i][2] #абонент он же счётчик  воде
+        abon=dtAll[i][2] #абонент он же счётчик по воде
 #        chanel=dtAll[i][4] # канал пульсара
 #        numPulsar=dtAll[i][5] #номер пульсара
 #        typePulsar=dtAll[i][5] #тип пульсара
-        isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")
-        isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")
-        isNewObj_l2=SimpleCheckIfExist('objects','name',obj_l2,"","","")
+        isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")#вода
+        isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")#корпус
+        
+        guid_obj2=CheckIfExistInObjects(obj_l1, obj_l2)#возвращает guid квартиры или None
+        
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         
+        #print 'isNewObj_l0 ', not isNewObj_l0,'isNewObj_l1 ', not isNewObj_l1, 'guid_obj2 ', str(guid_obj2), ' IsNewAbon', not isNewAbon 
+        print i, obj_l1, obj_l2, abon
         if not (isNewObj_l0):
-            print 'create object '+obj_l0
+            print 'Level 0 create object '+obj_l0
             add_parent_object = Objects(name=obj_l0, level=0) 
             add_parent_object.save()
+            print " Ok"
             print 'create object '+obj_l1
             #print add_parent_object
             add_object1=Objects(name=obj_l1, level=1, guid_parent = add_parent_object)
             add_object1.save()
             print 'create object '+obj_l2
             add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
-            add_object2.save()
-            
+            add_object2.save()            
             print 'create abonent '+abon
             add_abonent = Abonents(name = abon, guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
             add_abonent.save()
             kv+=1
             result=u"Объекты: "+obj_l0+", "+obj_l1+u", "+obj_l2+u","+abon+u" созданы"
             continue
-        if not (isNewObj_l1):
-            print 'create object '+obj_l1
+        if not (isNewObj_l1):#новый корпус
+            print 'Level 1 create object '+obj_l1
             dtParent=GetSimpleTable('objects','name',obj_l0)
-            if dtParent: #родительский объект есть
+            if dtParent: #родительский объект есть - корпус
                 guid_parent=dtParent[0][0]
                 add_object1=Objects(name=obj_l1, level=1, guid_parent = Objects.objects.get(guid=guid_parent))
                 add_object1.save()                
+                print 'create object '+obj_l2
                 add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
                 add_object2.save()
                 print 'create abonent '+abon
@@ -668,23 +786,97 @@ def LoadObjectsAndAbons_water(sPath, sheet):
                 kv+=1
                 result+=u"Объекты: "+obj_l1+u", "+obj_l2+u","+abon+u" созданы"
                 continue
-        if not (isNewObj_l2):
-            print 'create object '+obj_l2
+            else: 
+                print u'Не удалось создать объект '+obj_l1
+                continue
+            
+        if bool(not guid_obj2): #новая квартира
+            #переделать добавление на добавление по гуиду
+            print 'Level 2 create object '+obj_l2
             dtParent=GetSimpleTable('objects','name',obj_l1)
             if dtParent: #родительский объект есть
-                guid_parent=dtParent[0][0]                
+                guid_parent=dtParent[0][0]
                 add_object = Objects(name=obj_l2, level=2, guid_parent = Objects.objects.get(guid=guid_parent))
                 add_object.save()
                 result+=u"Объект: "+obj_l2+u" создан"
-        if not (isNewAbon):
-            print 'create abonent '+ abon
-            dtObj=GetSimpleTable('objects','name',obj_l2)
-            if dtObj: #родительский объект есть
-                guid_object=dtObj[0][0]
-                add_abonent = Abonents(name = abon, guid_objects = Objects.objects.get(guid=guid_object), guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+                add_abonent = Abonents(name = abon, guid_objects = add_object, guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
                 add_abonent.save()
                 kv+=1
+        if not (isNewAbon):
+            print 'Just create abonent '+ abon
+            if bool(guid_obj2): #родительский объект есть
+                add_abonent = Abonents(name = abon, guid_objects = Objects.objects.get(guid=guid_obj2), guid_types_abonents = TypesAbonents.objects.get(guid= u"e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+                add_abonent.save()
+                kv+=1            
+#            else: 
+#                print u'Не удалось создать объект '+abon
+                continue
 
     result+=u" Прогружено "+str(kv)+u" водо-счётчиков"
-
+    return result
+    
+def load_water_pulsar(request):
+    args={}
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["choice_file"]    = fileName    = request.GET['choice_file']
+            request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
+            request.session["tcp_ip_status"]    = tcp_ip_status    = request.GET['tcp_ip_status']
+            request.session["object_status"]    = object_status    = request.GET['object_status']
+            request.session["counter_status"]    = counter_status    = request.GET['counter_status']
+            directory=os.path.join(BASE_DIR,'static/cfg/')
+            sPath=directory+fileName
+            result=LoadWaterPulsar(sPath, sheet)
+    counter_status=result#"Загрузка счётчиков условно прошла"
+        
+    #print fileName
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["tcp_ip_status"]=tcp_ip_status
+    args["object_status"]=object_status
+    args["counter_status"]=counter_status
+    return render_to_response("service/service_water.html", args)
+    
+def LoadWaterPulsar(sPath, sSheet):
+    global cfg_excel_name
+    cfg_excel_name=sPath
+    global cfg_sheet_name
+    cfg_sheet_name=sSheet
+    result=u""
+    dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    met=0
+    for i in range(2,len(dtAll)):
+        obj_l0=u'Вода' # всегда будет Вода как объект-родитель
+        obj_l1=dtAll[i][0] #корпус
+        obj_l2=dtAll[i][1] #квартира
+        if not dtAll[i][1] or dtAll[i][1]==None:
+            j=i
+            while not obj_l2 or obj_l2==None:
+                j-=1
+                obj_l2=dtAll[j][1]
+        abon=dtAll[i][2] #абонент он же счётчик по воде
+        numPulsar=unicode(dtAll[i][5]) #номер пульсара
+        typePulsar=unicode(dtAll[i][6]) #тип пульсара
+        
+        isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
+        isNewPulsar=SimpleCheckIfExist('meters','address', numPulsar,'','','')
+        print u'пульсар существует ', isNewPulsar, typePulsar, numPulsar
+        if not (isNewAbon):
+            return u"Сначала создайте стурктуру объектов и счётчиков"
+        if not (isNewPulsar):
+            print u'Обрабатываем строку '+unicode(obj_l2) +' '+ unicode(numPulsar)
+            if unicode(typePulsar) == u'Пульсар 10M':
+                    add_meter = Meters(name = unicode(typePulsar) + u' ' + unicode(numPulsar), address = unicode(numPulsar), factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
+                    add_meter.save()
+                    print u'OK', u'Прибор добавлен в базу'
+                    met+=1
+            elif unicode(typePulsar) == u'Пульсар 16M':
+                   add_meter = Meters(name = unicode(unicode(typePulsar) + u' ' + unicode(numPulsar)), address = unicode(numPulsar),  factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
+                   add_meter.save()
+                   print u'OK', u'Прибор добавлен в базу'
+                   met+=1
+            else:
+                print u'Такой Пульсар уже есть'
+        else:pass
+    result=u'Прогружено пульсаров '+unicode(met)
     return result

@@ -6565,10 +6565,10 @@ def report_resources_all(request):
     ws.merge_cells('A2:G2')
     ws['A2'] = 'Филиград: 1, 2, 3 корпуса. Показания по энергоресурсам за период c '+electric_data_start +' по '+electric_data_end
     
-    ws['A5'] = 'Лицевой счёт'
+    ws['A5'] = 'Лицевой'
     ws['A5'].style = ali_grey
     
-    ws['B5'] = 'Дата начальная'
+    ws['B5'] = 'Дата начала'
     ws['B5'].style = ali_grey
     
     ws['C5'] = 'Номер прибора'
@@ -6577,23 +6577,34 @@ def report_resources_all(request):
     ws['D5'] = 'Тип прибора'
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '+electric_data_end
+    #ws['E5'] = 'Показания на '+electric_data_end
+    ws['E5'] = 'текущие'
     ws['E5'].style = ali_grey
     
-    ws['F5'] = 'Показания на '+electric_data_start
+    #ws['F5'] = 'Показания на '+electric_data_start
+    ws['F5'] = 'предыдущие'
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 'Потребление' 
+    ws['G5'] = 'разница' 
     ws['G5'].style = ali_grey
     
-    ws['H5'] = 'Дата установки'
+    ws['H5'] = 'Дата'#установки
     ws['H5'].style = ali_grey
 
-    ws['I5'] = 'Дата конечная' 
+    ws['I5'] = 'Дата' # съёма
     ws['I5'].style = ali_grey
     
-    ws['J5'] = 'Абонент'
+    ws['J5'] = 'Квар'
     ws['J5'].style = ali_grey
+
+    ws['K5'] = 'Адр'
+    ws['K5'].style = ali_grey
+
+    ws['L5'] = 'Операция'
+    ws['L5'].style = ali_grey
+    
+    ws['M5'] = 'Квар'
+    ws['M5'].style = ali_grey
     
 #Запрашиваем данные для отчета
 
@@ -6603,19 +6614,12 @@ def report_resources_all(request):
     data_table = common_sql.get_data_table_report_all_res_period3(electric_data_start, electric_data_end)
 
     #zamenyem None na N/D vezde
-    if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
-#        
-#    #удаляем из номеров счётчиков лишнее
-#    for i in range(len(data_table)):
-#        data_table[i]=list(data_table[i])
-#        num=data_table[i][3]
-#        if ('ХВС, №' in num) or ('ГВС, №' in num):
-#            num=num.replace(u'ХВС, №', ' ')
-#            num=num.replace(u'ГВС, №', ' ')
-#            data_table[i][3]=num
-#            #print num
-#        data_table[i]=tuple(data_table[i])
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None):
+                data_table[i][j]=u''
+        data_table[i]=tuple(data_table[i])
 
 
 # Заполняем отчет значениями
@@ -6628,7 +6632,10 @@ def report_resources_all(request):
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # начальная дата
+            a=str(data_table[row-6][1])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('B%s'%(row)).value = '%s' %d  # начальная дата
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
@@ -6670,32 +6677,44 @@ def report_resources_all(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][8])  # Дата установки приборов
+            a=str(data_table[row-6][8])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('H%s'%(row)).value = '%s' %d  # Дата установки приборов
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-6][9])  # Дата конечная
+            a=str(data_table[row-6][9])
+            b=datetime.datetime.strptime(a,'%Y-%m-%d')
+            d=datetime.datetime.strftime(b,"%d.%m.%Y")
+            ws.cell('I%s'%(row)).value = '%s' %d  # Дата конечная
             ws.cell('I%s'%(row)).style = ali_white
         except:
             ws.cell('I%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-6][10])  # Абонент
-            ws.cell('J%s'%(row)).style = ali_white
+            ws.cell('L%s'%(row)).value = 'ВводПоказаний'  # Операция
+            ws.cell('L%s'%(row)).style = ali_white
         except:
-            ws.cell('J%s'%(row)).style = ali_white
+            ws.cell('L%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % (data_table[row-6][10])  # Абонент
+            ws.cell('M%s'%(row)).style = ali_white
+        except:
+            ws.cell('M%s'%(row)).style = ali_white
             next
 
     ws.row_dimensions[5].height = 41
 #    ws.column_dimensions['A'].width = 10 
-#    ws.column_dimensions['B'].width = 10 
-#    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['L'].width = 20 
+    ws.column_dimensions['C'].width = 20
     ws.column_dimensions['D'].width = 25
-    ws.column_dimensions['j'].width = 15
+#    ws.column_dimensions['j'].width = 15
                     
     
     wb.save(response)

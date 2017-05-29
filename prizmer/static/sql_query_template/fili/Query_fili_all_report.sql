@@ -1,7 +1,7 @@
 ﻿
 with z3 as
 (
-Select account_2,'09.02.2017'::date as date_start, z2.factory_number_manual as meter_name,ab_name as factory_number_manual, type_energo, z2.value, z2.value_old,z2.delta,date_install,'20.02.2017'::date as date_end, obj_name as ab_name
+Select account_2,'09.02.2017'::date as date_start, z2.factory_number_manual as meter_name,ab_name as factory_number_manual, type_energo, z2.value, z2.value_old,z2.delta,date_install,'20.02.2017'::date as date_end, obj_name as ab_name, water_abons_report.name as obj_name
 from water_abons_report
 
 LEFT JOIN (
@@ -67,9 +67,9 @@ on z2.name=water_abons_report.ab_name
 
 union
 
-Select z2.account_2,'09.02.2017'::date as date_start, z2.meter_name, z2.factory_number_manual,  z2.type_energo,z3.val_end, z2.val_start, z3.val_end-z2.val_start as delta, z2.date_install,'20.02.2017'::date as date_end, z2.ab_name
+Select z2.account_2,'09.02.2017'::date as date_start, z2.meter_name, z2.factory_number_manual,  z2.type_energo,z3.val_end, z2.val_start, z3.val_end-z2.val_start as delta, z2.date_install,'20.02.2017'::date as date_end, z2.ab_name, z2.obj_name
 from
-(Select account_2,factory_number_manual, heat_abons_report.meter_name, type_energo, date_install, heat_abons_report.ab_name, z1.date_start, z1.value as val_start
+(Select account_2,factory_number_manual, heat_abons_report.meter_name, type_energo, date_install, heat_abons_report.ab_name, z1.date_start, z1.value as val_start, z1.obj_name
 from heat_abons_report
 Left join
 (SELECT 
@@ -161,8 +161,8 @@ WHERE
 
 union
 
-Select account_2, '09.02.2017'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old, z2.delta,date_install,'20.02.2017'::date as date_end, ab_name
-from electric_abons_report
+Select account_2, '09.02.2017'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old, z2.delta,date_install,'20.02.2017'::date as date_end, ab_name, obj_name
+from electric_abons_without_sum_report
 
 LEFT JOIN
 (with z1 as 
@@ -241,8 +241,8 @@ WHERE
   z1.name_params=names_params.name
   order by abonents.name, 
   objects.name, meters.name) z2
-  on electric_abons_report.name_meter=z2.meter_name and z2.params_name=electric_abons_report.name_params
+  on electric_abons_without_sum_report.name_meter=z2.meter_name and z2.params_name=electric_abons_without_sum_report.name_params
 ) 
-Select account_2,date_start, meter_name,factory_number_manual, type_energo, z3.value, value_old,delta,date_install,date_end, ab_name
+Select account_2,date_start, meter_name,factory_number_manual, type_energo, z3.value, value_old,delta,date_install,date_end,substring(ab_name from 10 for char_length(ab_name)) as ab_name, obj_name
 from z3 
-order by account_2, type_energo
+order by account_2, obj_name, ab_name, type_energo

@@ -23,5 +23,6 @@ urlpatterns = patterns('',
 #    url(r'^electric/$', views.electric),
     url(r'^service_water/$', views.service_water), # электрика, загрузка нужных полей
     url(r'^load_water_objects/$', views.load_water_objects), # вода, загрузка нужных полей
+    url(r'^load_water_pulsar/$', views.load_water_pulsar), # вода, загрузка пульсаров и создание связей с абонентами
     
 )
