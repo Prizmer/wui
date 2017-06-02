@@ -3339,7 +3339,7 @@ and
 
 union
 
-Select account_2,date_install,factory_number_manual,type_energo,electric_abons_without_sum_report.report_factory_number_manual, z1.value,z1.date_start, substring(electric_abons_without_sum_report.ab_name from 10 for char_length(electric_abons_without_sum_report.ab_name)) as abonent, electric_abons_without_sum_report.obj_name
+Select account_2,date_install,report_num_meter,type_energo,electric_abons_without_sum_report.report_factory_number_manual, z1.value,z1.date_start, substring(electric_abons_without_sum_report.ab_name from 10 for char_length(electric_abons_without_sum_report.ab_name)) as abonent, electric_abons_without_sum_report.obj_name
 from electric_abons_without_sum_report
 Left join
 (
@@ -3444,7 +3444,7 @@ def get_data_table_report_all_res_by_date(electric_data_end):
 def MakeQuery_electric_resources_by_date( electric_data_end):
     my_params=[u'Меркурий 230']
     sQuery="""
-    Select account_2,date_install,factory_number_manual,type_energo,electric_abons_without_sum_report.report_factory_number_manual, z1.value,z1.date_start, substring(electric_abons_without_sum_report.ab_name from 10 for char_length(electric_abons_without_sum_report.ab_name)) as ab_name, electric_abons_without_sum_report.obj_name, electric_abons_without_sum_report.report_factory_number_manual
+    Select account_2,date_install,report_num_meter,type_energo,electric_abons_without_sum_report.report_factory_number_manual, z1.value,z1.date_start, substring(electric_abons_without_sum_report.ab_name from 10 for char_length(electric_abons_without_sum_report.ab_name)) as ab_name, electric_abons_without_sum_report.obj_name, electric_abons_without_sum_report.report_factory_number_manual
 from electric_abons_without_sum_report
 Left join
 (
