@@ -3204,7 +3204,7 @@ WHERE
 
 union
 
-Select account_2, '%s'::date as date_start, meter_name,z2.factory_number_manual,type_energo, z2.value, z2.value_old, z2.delta,date_install,'%s'::date as date_end, ab_name, obj_name
+Select account_2, '%s'::date as date_start, meter_name,report_num_meter,type_energo, z2.value, z2.value_old, z2.delta,date_install,'%s'::date as date_end, ab_name, obj_name
 from electric_abons_without_sum_report
 
 LEFT JOIN
