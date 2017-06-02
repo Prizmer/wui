@@ -225,12 +225,12 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
 def SimpleCheckIfExist(table1,fieldName1, value1, table2, fieldName2, value2):
     dt=[]
     cursor = connection.cursor()
-    if len(table2)==0: #проверка для двух сводных таблиц
+    if len(table2)==0: #проверка для одной таблицы
         sQuery="""
         Select *
         from %s
         where %s.%s='%s'"""%(table1, table1, fieldName1, value1)
-    else:#проверка для одной таблицы
+    else:#проверка для двух сводных таблиц
         sQuery="""
         Select *
         from %s, %s
@@ -518,11 +518,6 @@ def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     i=3
-#    abon=dtAll[i][2] #абонент он же счётчик по воде
-#    chanel=dtAll[i][4] # канал пульсара
-#    numPulsar=dtAll[i][5] #номер пульсара
-#    typePulsar=dtAll[i][5] #тип пульсара
-
     ip_adr=unicode(dtAll[i][7]).strip()
     ip_port=unicode(dtAll[i][8]).strip()
 # Привязка к tpc порту
@@ -538,9 +533,11 @@ def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs
     guid_ip_port_from_excel.execute(sQuery)
     guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
 
-    guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
-    add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
-    add_ip_port_link.save()
+    if guid_ip_port_from_excel:
+        guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+        add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+        add_ip_port_link.save()
+    else: print u'Нет tcp-ip порта, создайте его!'
 
 def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""    
@@ -598,28 +595,24 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
         dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
         def shrink_taken_param_name(taken_param_name):
-            
             if taken_param_name.find(u'Текущий') != -1: # Ищем слово "Текущий"
-                nn = taken_param_name.find(u'Текущий')  # Если нашли. то Записываем позицию где.
-        
+                nn = taken_param_name.find(u'Текущий')  # Если нашли. то Записываем позицию где.        
             elif taken_param_name.find(u'Суточный') != -1:
                 nn = taken_param_name.find(u'Суточный')
-            
             else:
                 pass
-        
             return taken_param_name[:nn -1]
-    
+
         for i in range(2,len(dtAll)):
-            print unicode(dtAll[i][3])[17:20], unicode(dtAll[i][3])[2:8], unicode(dtAll[i][3])[17:20], unicode(dtAll[i][4])
-            taken_param = u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + unicode(dtAll[i][3])[2:8] + u' ' + u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
+            #taken_param = u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + unicode(dtAll[i][3])[2:8] + u' ' + u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
+            taken_param = unicode(dtAll[i][6]) + u' ' + unicode(dtAll[i][5]) + u' '+ unicode(dtAll[i][6]) + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
             print taken_param
+            print shrink_taken_param_name(input_taken_param)
             if taken_param == shrink_taken_param_name(input_taken_param):
                 try:
                     return unicode(dtAll[i][2])
                 except:
                     return None
-                
             else:
                 pass
     
@@ -635,11 +628,70 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
             pass
     else:
         pass
+    
+            
+def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
+    print instance.name
+    isExistTakenParam=SimpleCheckIfExist('taken_params','name',instance.name,"","","")
+    if not isExistTakenParam:
+        print u'Параметра не существует!!! Связать невозможно'
+        return None
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    for i in range(2,len(dtAll)):
+        abon=unicode(dtAll[i][2])
+        type_pulsar=unicode(dtAll[i][6])
+        channel=unicode(dtAll[i][4])
+        num_pulsar=unicode(dtAll[i][5])
+        taken_param = type_pulsar+u' '+num_pulsar+u' '+type_pulsar+u' Канал '+channel+u' Суточный -- adress: '+channel+u'  channel: 0'
+        #print taken_param
+        if (taken_param==instance.name):
+            isExistAbonent=SimpleCheckIfExist('abonents','name',abon,'','','')
+            if isExistAbonent:
+                print u'Совпадение'
+                #"ХВС, №47622 Канал 4 Суточный"
+                guidAbon=GetSimpleTable('abonents','name',abon)[0][0]
+                print guidAbon
+                linkName=abon+u' Канал '+channel+' Суточный'
+                print linkName
+                try:
+                    add_link_abonents_taken_param = LinkAbonentsTakenParams (name = linkName,coefficient=1, coefficient_2 = 1, guid_abonents = Abonents.objects.get(guid=guidAbon) , guid_taken_params = instance )
+                    add_link_abonents_taken_param.save()
+                    print u'Связь добавлена: '+abon+u' -- '+taken_param
+                except:
+                    print u'ошибка'
+                else:
+                    pass
+    
+#    
+#    
+#    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+#    for i in range(2,len(dtAll)):
+#            #taken_param = u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + unicode(dtAll[i][3])[2:8] + u' ' + u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
+#            # "Пульсар 2M 062726 Пульсар 2M Канал 1 Суточный -- adress: 1  channel: 0"
+#            # "Пульсар 10M 203677 Пульсар 10M Канал 7 Суточный -- adress: 7  channel: 0"
+#        type_pulsar=unicode(dtAll[i][6])
+#        channel=unicode(dtAll[i][4])
+#        num_pulsar=unicode(dtAll[i][5])
+#        taken_param = type_pulsar+u' '+num_pulsar+u' '+type_pulsar+u' Канал '+channel+u' Суточный -- adress: '+channel+u'  channel: 0'
+#        print taken_param
+#    
+#    print u'--------'
+#    print instance.name
+#    print u'==>', get_taken_param_by_abonent_from_excel_cfg(instance.name)
+#    if get_taken_param_by_abonent_from_excel_cfg(instance.name) is not None:
+#        print u'Совпадение'
+#        try:
+#            add_link_abonents_taken_param = LinkAbonentsTakenParams (name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name ,coefficient=1, coefficient_2 = 1, guid_abonents = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(unicode(instance.name))) , guid_taken_params = instance )
+#            add_link_abonents_taken_param.save()
+#        except:
+#            pass
+#    else:
+#        pass
 
 def add_link_taken_params(sender, instance, created, **kwargs):
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     if (dtAll[1][1] == u'Объект'): #вода
-        add_link_abonents_taken_params(sender, instance, created, **kwargs)
+        add_link_abonents_taken_params2(sender, instance, created, **kwargs)
     else:# электрика
         add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs)
 
@@ -817,6 +869,7 @@ def LoadObjectsAndAbons_water(sPath, sheet):
     
 def load_water_pulsar(request):
     args={}
+    result=""
     if request.is_ajax():
         if request.method == 'GET':
             request.session["choice_file"]    = fileName    = request.GET['choice_file']
@@ -845,6 +898,7 @@ def LoadWaterPulsar(sPath, sSheet):
     result=u""
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     met=0
+    con=0
     for i in range(2,len(dtAll)):
         obj_l0=u'Вода' # всегда будет Вода как объект-родитель
         obj_l1=dtAll[i][0] #корпус
@@ -875,8 +929,52 @@ def LoadWaterPulsar(sPath, sSheet):
                    add_meter.save()
                    print u'OK', u'Прибор добавлен в базу'
                    met+=1
+            elif unicode(typePulsar) == u'Пульсар 2M':
+                   add_meter = Meters(name = unicode(unicode(typePulsar) + u' ' + unicode(numPulsar)), address = unicode(numPulsar),  factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"6599be9a-1f4d-4a6e-a3d9-fb054b8d44e8") )
+                   add_meter.save()
+                   print u'OK', u'Прибор добавлен в базу'
+                   met+=1
             else:
                 print u'Такой Пульсар уже есть'
-        else:pass
-    result=u'Прогружено пульсаров '+unicode(met)
+        else:
+            # надо проверить каналы и подсоединить их 
+            #Пульсар 16M 029571 Пульсар 16M Канал 16 Суточный -- adress: 16  channel: 0
+            chanel=unicode(dtAll[i][4])
+            pulsarName=unicode(dtAll[i][6])
+            abonent_name=unicode(dtAll[i][2])
+            taken_param = pulsarName + u' ' + unicode(dtAll[i][5]) + u' '+ pulsarName + u' ' + u'Канал ' + chanel+ u' Суточный -- adress: ' +chanel+u'  channel: 0'
+            print taken_param
+            #Sravnenie(taken_param)
+            dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
+            print bool(dtTakenParam)
+            if dtTakenParam:                
+                print u'taken param найден'
+                guid_taken_param=dtTakenParam[0][1]
+                dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
+                if (dtLink):
+                    result+=u"\n Привязка канала "+chanel+u" Пульсара "+pulsarName+u" уже существует. Перезапись НЕ произведена для счётчика "+abonent_name
+                    continue
+                dtAbon=GetSimpleTable('abonents','name', abonent_name)
+                guidAbon=dtAbon[0][0]
+                #print guidAbon
+                #print guid_taken_param
+                #print TakenParams.objects.get(guid=guid_taken_param) 
+                #"миномес ГВС, №68208 Канал 5 Суточный"
+                add_link_abonents_taken_param = LinkAbonentsTakenParams (name = abonent_name+u' Канал '+chanel+u' Суточный',coefficient=1, coefficient_2 = 1, guid_abonents = Abonents.objects.get(guid =guidAbon), guid_taken_params = TakenParams.objects.get(guid=guid_taken_param) )
+                add_link_abonents_taken_param.save()
+                print u'Abonent connected with taken param'
+                con+=1
+    result=u'Прогружено новых пульсаров '+unicode(met)
+    if con>0:
+        result+=u'Созданы новые связи'
     return result
+
+def Sravnenie(takenParam):
+    str_bd='Пульсар 2М 062726 Пульсар 2M Канал 1 Суточный -- adress: 1 channel: 0'
+    i=0
+    print str_bd
+    while i!=len(takenParam):
+        if ord(takenParam[i])!=ord(str_bd[i]):
+            print i, takenParam[i]
+        i+=1
+

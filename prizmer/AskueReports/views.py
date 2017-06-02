@@ -6159,7 +6159,7 @@ def report_electric_all_by_date(request):
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4])  # наименование ПУ
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][9])  # наименование ПУ
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
