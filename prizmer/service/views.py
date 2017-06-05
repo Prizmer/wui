@@ -165,7 +165,7 @@ def checkPortIsExist(ip_adr,ip_port):
     SELECT guid, ip_address, ip_port, write_timeout, read_timeout, attempts, 
        delay_between_sending
   FROM tcpip_settings
-  where ip_address='%s' and  ip_port='%s'"""%(str(ip_adr).rstrip(),str(ip_port).rstrip())
+  where ip_address='%s' and  ip_port='%s'"""%(unicode(ip_adr).rstrip(),unicode(ip_port).rstrip())
     #print sQuery
     cursor.execute(sQuery)
     dt_ports = cursor.fetchall()
@@ -199,7 +199,7 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
                     result+="Отсутствует значение для com-порта в строке"+str(row)+". Заполните все ячейки excel таблицы."
                     break
                 if not (SimpleCheckIfExist('comport_settings','name', com_port, "", "", "")):
-                    add_port=ComportSettings(name=str(com_port).rstrip(),baudrate=9600,data_bits=8,parity=0,stop_bits=1, write_timeout=100, read_timeout=100, attempts=2, delay_between_sending=100)
+                    add_port=ComportSettings(name=unicode(com_port).rstrip(),baudrate=9600,data_bits=8,parity=0,stop_bits=1, write_timeout=100, read_timeout=100, attempts=2, delay_between_sending=100)
                     add_port.save()
                     result+=u"Новый com-порт добавлен"
                     IsAdded=True
@@ -211,7 +211,7 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
                     break
                 else:
                     if (checkPortIsExist(ip_adr,ip_port)):
-                        add_port=TcpipSettings(ip_address = str(ip_adr).rstrip(), ip_port =int(ip_port), write_timeout =300 , read_timeout =700 , attempts =3 , delay_between_sending =400)
+                        add_port=TcpipSettings(ip_address = unicode(ip_adr).rstrip(), ip_port =int(ip_port), write_timeout =300 , read_timeout =700 , attempts =3 , delay_between_sending =400)
                         add_port.save()
                         result =u'Новый tcp/ip порт добавлен'
                         IsAdded=True
@@ -978,3 +978,63 @@ def Sravnenie(takenParam):
             print i, takenParam[i]
         i+=1
 
+def load_water_port(request):
+    args={}
+
+    fileName=""
+    sheet    = ""
+    tcp_ip_status    = ""
+    result=""
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["choice_file"]    = fileName    = request.GET['choice_file']
+            request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
+            request.session["tcp_ip_status"]    = tcp_ip_status    = request.GET['tcp_ip_status']
+            
+            #print fileName
+            directory=os.path.join(BASE_DIR,'static/cfg/')
+            sPath=directory+fileName
+            #print sPath, sheet
+            result=load_tcp_ip_water_ports_from_excel(sPath, sheet)
+    print result
+    if result:
+        tcp_ip_status=u"Порт/ы был успешно добавлен"
+    else:
+        tcp_ip_status=u"Порт не был загружен, он уже существует в БД"
+    
+    
+    #print fileName
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["tcp_ip_status"]=tcp_ip_status
+
+    return render_to_response("service/service_water.html", args)
+    
+def load_tcp_ip_water_ports_from_excel(sPath, sheet):
+    #Добавление tcp_ip портов
+
+    wb = load_workbook(filename = sPath)
+    sheet_ranges = wb[sheet]
+    row = 3
+    IsAdded=False
+    result=""
+    while (bool(sheet_ranges[u'H%s'%(row)].value)):
+        if sheet_ranges[u'H%s'%(row)].value is not None:
+            ip_adr=unicode(sheet_ranges[u'H%s'%(row)].value)
+            ip_port=unicode(sheet_ranges[u'I%s'%(row)].value)
+            print u'Обрабатываем адрес ' +ip_adr + ip_port
+            
+            # проверка есть ли уже такой порт, запрос в БД с адресом и портом, если ответ пустой-добавляем, в противном случае continue
+            if not ip_adr or not ip_port or ip_adr==None or ip_port==None: 
+                result+=u"Отсутствует значение/я для tcp/ip-порта в строке"+unicode(row)+". Заполните все ячейки excel таблицы."
+                break
+            else:
+                if (checkPortIsExist(ip_adr,ip_port)):
+                    add_port=TcpipSettings(ip_address = ip_adr, ip_port =int(ip_port), write_timeout =300 , read_timeout =700 , attempts =3 , delay_between_sending =400)
+                    add_port.save()
+                    result =u'Новый tcp/ip порт добавлен'
+                    IsAdded=True
+                else: result+= u'Порт '+unicode(ip_adr)+": "+unicode(ip_port)+u" уже существует"
+        print result
+        row+=1
+    return IsAdded

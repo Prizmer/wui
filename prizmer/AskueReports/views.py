@@ -7805,7 +7805,7 @@ def report_forma_80020(request):
         timestamp = etree.SubElement(datetimeElt, 'timestamp')
         daylightsavingtime = etree.SubElement(datetimeElt, 'daylightsavingtime')
         
-        day.text = unicode(list_of_dates[0].strftime('%Y%m%d'))
+        day.text = unicode(list_of_dates[dates].strftime('%Y%m%d'))
         timestamp.text = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         daylightsavingtime.text = u'0'
         
