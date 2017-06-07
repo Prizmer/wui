@@ -10987,9 +10987,9 @@ def pokazaniya_water_hvs_tekon(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
     if (bool(is_abonent_level.search(obj_key))):
         # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
-        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1', True)
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1',  u'Tekon_hvs',True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1', False)
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 1',  u'Tekon_hvs', False)
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
@@ -11021,9 +11021,9 @@ def water_potreblenie_hvs_tekon(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
     if (bool(is_abonent_level.search(obj_key))):
         # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
-        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 1', True)
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 1',  u'Tekon_hvs', True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 1', False)
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 1',  u'Tekon_hvs', False)
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
@@ -11055,9 +11055,9 @@ def pokazaniya_water_gvs_tekon(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
     if (bool(is_abonent_level.search(obj_key))):
         # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
-        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2', True)
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2',  u'Tekon_gvs', True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2', False)
+        data_table = common_sql.get_data_table_tekon_daily(meters_name, parent_name, electric_data_end, u'Канал 2',  u'Tekon_gvs', False)
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
@@ -11089,9 +11089,9 @@ def water_potreblenie_gvs_tekon(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
     if (bool(is_abonent_level.search(obj_key))):
         # Edinaya f-ya dliya HVS (kanal 1) i GVS (kanal 2), peredaem imiya kanala
-        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 2', True)
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name, electric_data_start, electric_data_end, u'Канал 2',  u'Tekon_gvs', True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 2', False)
+        data_table = common_sql.get_data_table_tekon_period(meters_name, parent_name,electric_data_start, electric_data_end, u'Канал 2',  u'Tekon_gvs', False)
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 

@@ -3816,13 +3816,13 @@ WHERE
    
     return data_table
 
-def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
+def MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter):
     sQuery="""
-    SELECT 
+SELECT 
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -3833,8 +3833,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -3846,14 +3847,15 @@ WHERE
   And   
    names_params.name='%s' and
    resources.name='%s' and
-   abonents.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s' 
-    """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
+   abonents.name='%s' and
+   daily_values.date='%s'  
+   and types_meters.name='%s' 
+    """%(chanel,my_params[0], obj_parent_title, obj_title, electric_data_end, type_meter)
     #print sQuery
     return sQuery
     
-def MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params):
+def MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter):
     sQuery="""
     Select z1.date, water_abons.ab_name, water_abons.factory_number_manual, z1.value
 from public.water_abons
@@ -3862,7 +3864,7 @@ left join
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -3873,8 +3875,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -3887,23 +3890,25 @@ WHERE
    names_params.name='%s' and
    resources.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s'  ) as z1
+   daily_values.date='%s'  
+   and types_meters.name='%s' ) as z1
    
    on water_abons.ab_name=z1.ab_name
    where water_abons.obj_name='%s' 
-   and water_abons.names_params='%s'   
+   and water_abons.params_name='%s'   
+  
    order by water_abons.ab_name
-    """%(chanel,my_params[0], obj_title, electric_data_end, obj_title, chanel)
+    """%(chanel,my_params[0], obj_title, electric_data_end,type_meter, obj_title, chanel)
     return sQuery
     
-def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, chanel, isAbon):
+def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, chanel, type_meter, isAbon):
     my_params=[u'Импульс']
     cursor = connection.cursor()
     data_table=[]
     if (isAbon):
-        cursor.execute(MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params))
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter))
     else:
-        cursor.execute(MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params))
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter))
     data_table = cursor.fetchall()
     
     return data_table
@@ -4159,15 +4164,15 @@ def get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_s
 
     return data_table
 
-def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params):
+def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params, type_meter):
     sQuery="""
-    Select distinct z1.ab_name, z1.factory_number_manual, z1.value, z2.value, z2.value-z1.value as delta
+Select z1.ab_name, z1.factory_number_manual, z1.value, z2.value, z2.value-z1.value as delta
 from
 (SELECT 
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -4178,8 +4183,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -4191,15 +4197,16 @@ WHERE
   And   
    names_params.name='%s' and
    resources.name='%s' and
-   abonents.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s' 
+    abonents.name='%s' and 
+   daily_values.date='%s'  
+   and types_meters.name='%s'  
 ) z1,
 (SELECT 
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -4210,8 +4217,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -4223,15 +4231,18 @@ WHERE
   And   
    names_params.name='%s' and
    resources.name='%s' and
-   abonents.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s' 
+    abonents.name='%s' and 
+   daily_values.date='%s'  
+   and types_meters.name='%s'  
 ) z2
 where z1.ab_name=z2.ab_name
-    """%(chanel,my_params[0], obj_title,obj_parent_title, electric_data_start, chanel,my_params[0], obj_title,obj_parent_title, electric_data_end)
+
+    """%(chanel,my_params[0], obj_parent_title,obj_title, electric_data_start, type_meter, chanel,my_params[0],obj_parent_title, obj_title, electric_data_end, type_meter)
+    #print sQuery
     return sQuery
 
-def MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params):
+def MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params, meter_type):
 
     sQuery="""
     Select water_abons.ab_name, water_abons.factory_number_manual, z3.val_start, z3.val_end, z3.delta
@@ -4243,7 +4254,7 @@ from
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -4254,8 +4265,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -4268,14 +4280,15 @@ WHERE
    names_params.name='%s' and
    resources.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s'   
+   daily_values.date='%s'  
+   and types_meters.name='%s'   
 
 ) z1,
 (SELECT 
   daily_values.date,
   abonents.name as ab_name, 
   meters.factory_number_manual ,
-  daily_values.value 
+  daily_values.value, types_meters.name as meter_type
   
 FROM 
   public.abonents, 
@@ -4286,8 +4299,9 @@ FROM
   public.names_params, 
   public.params, 
   public.resources, 
-  public.meters
+  public.meters , types_meters
 WHERE 
+types_meters.guid=params.guid_types_meters and
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -4300,26 +4314,27 @@ WHERE
    names_params.name='%s' and
    resources.name='%s' and
    objects.name='%s' and
-   daily_values.date='%s'   
+   daily_values.date='%s'  
+   and types_meters.name='%s'    
 ) z2
 where z1.ab_name=z2.ab_name) z3
 on water_abons.ab_name=z3.ab_name
 where water_abons.obj_name='%s' 
-and water_abons.names_params='%s'
+and water_abons.params_name='%s'
 order by water_abons.ab_name
-    """%(chanel,my_params[0], obj_title, electric_data_start,chanel,my_params[0], obj_title, electric_data_end, obj_title, chanel)
+    """%(chanel,my_params[0], obj_title, electric_data_start,meter_type,chanel,my_params[0], obj_title, electric_data_end,meter_type, obj_title, chanel)
     
     return sQuery
 
 
-def get_data_table_tekon_period(obj_title,obj_parent_title, electric_data_start, electric_data_end, chanel, isAbon):
+def get_data_table_tekon_period(obj_title,obj_parent_title, electric_data_start, electric_data_end, chanel,  meter_type, isAbon):
     my_params=[u'Импульс']
     cursor = connection.cursor()
     data_table=[]
     if (isAbon):
-        cursor.execute(MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params))
+        cursor.execute(MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params, meter_type))
     else:
-        cursor.execute(MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, chanel, my_params))
+        cursor.execute(MakeSqlQuery_water_tekon_for_object_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, chanel, my_params, meter_type))
     data_table = cursor.fetchall()
     
     return data_table
