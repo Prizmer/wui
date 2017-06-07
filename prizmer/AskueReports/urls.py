@@ -55,6 +55,8 @@ urlpatterns = patterns('',
     url(r'^46/$', views.report_water_all_by_date), #отчёт воде ресурсам на дату
     url(r'^48/$', views.report_heat_all_by_date), #отчёт по теплу ресурсам на дату
 
+    url(r'^50/$', views.report_tekon_heat_by_date), # показания по теплу -Текон 
+    url(r'^51/$', views.report_tekon_heat_potreblenie), # потребление по теплу -Текон 
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),
