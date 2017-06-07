@@ -3913,6 +3913,20 @@ def get_data_table_tekon_daily(obj_title,obj_parent_title, electric_data_end, ch
     
     return data_table
     
+
+
+def get_data_table_tekon_heat_daily(obj_title,obj_parent_title, electric_data_end, chanel, type_meter, isAbon):
+    my_params=[u'Импульс']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter))
+    else:
+        cursor.execute(MakeSqlQuery_water_tekon_daily_for_object(obj_parent_title, obj_title, electric_data_end, chanel, my_params, type_meter))
+    data_table = cursor.fetchall()
+    
+    return data_table
+
 def MakeSqlQuery_water_by_date_for_korp(meters_name, parent_name, electric_data_end, my_param):
     sQuery="""
 Select z2.date, obj_name as ab_name, water_abons_report.ab_name as meter_name,  z2.meter_name, z2.name_params, z2.value 

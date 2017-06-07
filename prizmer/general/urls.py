@@ -81,6 +81,8 @@ urlpatterns = patterns('',
     url(r'^46/$', views.resources_water_by_date), # Отчёт по воде
     url(r'^48/$', views.resources_heat_by_date), # Отчёт по теплу
     
+    url(r'^50/$', views.tekon_heat_by_date), # показания по теплу -Текон 
+    url(r'^51/$', views.tekon_heat_potreblenie), # потребление по теплу -Текон 
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

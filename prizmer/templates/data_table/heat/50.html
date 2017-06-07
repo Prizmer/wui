@@ -1,0 +1,35 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания по импульсным теплосчётчикам Текон на  <strong>{{electric_data_end}}</strong> </span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+
+<th>Дата</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Показания</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<!-- <td>{{value.0}}</td> -->
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td><strong>{{value.3}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>
