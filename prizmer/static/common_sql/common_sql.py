@@ -1131,6 +1131,260 @@ def get_current_water_gvs_hvs(obj_title, obj_parent_title , electric_data, isAbo
             data_table=ChangeNull(data_table, electric_data)
     return data_table
 
+def makeSqlQuery_water_for_abon_gvs_hvs_elf_for_period(abon,obj_title, electric_data_end, electric_data_start, channel,attr):
+    sQuery="""
+    Select z1.name,z1.factory_number_manual,z1.%s,z1.value,z2.value, z1.value-z2.value as delta
+from
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  abonents.name = '%s' and
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1,
+  
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  abonents.name = '%s' and
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z2
+  where z1.ab_guid=z2.ab_guid
+    """%(attr,attr,obj_title,channel,abon, electric_data_end,attr, obj_title,channel,abon, electric_data_start)
+    print sQuery
+    return sQuery
+
+def makeSqlQuery_water_for_obj_gvs_hvs_elf_for_period(obj_title, electric_data_end, electric_data_start,channel,attr):
+    sQuery="""
+    Select ab_name, water_abons.factory_number_manual, z3.%s,z3.val_start,z3.val_end,z3.delta
+from water_abons
+left join 
+(Select z1.name,z1.factory_number_manual,z1.%s,z1.value as val_start,z2.value as val_end, z1.value-z2.value as delta, z1.ab_guid
+from
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1,
+  
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z2
+  where z1.ab_guid=z2.ab_guid
+  ) as z3
+on water_abons.ab_guid=z3.ab_guid
+where water_abons.obj_name='%s'
+    """%(attr,attr,attr,obj_title,channel, electric_data_end,attr, obj_title,channel, electric_data_start,obj_title)
+    return sQuery
+
+def get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,electric_data_start, channel,attr, isAbon):
+    cursor = connection.cursor()
+    if isAbon:
+        print attr
+        cursor.execute(makeSqlQuery_water_for_abon_gvs_hvs_elf_for_period(obj_title, obj_parent_title, electric_data_end, electric_data_start, channel,attr))
+    else: 
+        cursor.execute(makeSqlQuery_water_for_obj_gvs_hvs_elf_for_period(obj_title, electric_data_end, electric_data_start,channel,attr))
+    data_table = cursor.fetchall()
+    
+    if len(data_table)>0: 
+        if isAbon:
+            data_table=ChangeNull(data_table, None)
+        else:
+            data_table=ChangeNull(data_table, electric_data_end)
+    return data_table
+
+def makeSqlQuery_water_for_abon_gvs_hvs_elf(obj_title, obj_parent_title , electric_data_end, channel, attr):
+    sQuery="""
+    SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id, 
+  params.channel,
+  abonents.guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  abonents.name = '%s' and
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC;"""%(attr,obj_parent_title,channel,obj_title,electric_data_end)
+    return sQuery
+
+def makeSqlQuery_water_for_obj_gvs_hvs_elf(obj_title, obj_parent_title , electric_data_end, channel,attr):
+    sQuery="""
+    Select z1.date,ab_name,water_abons.factory_number_manual, z1.%s, z1.value
+from water_abons
+left join
+(
+SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s and 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.ab_guid=water_abons.ab_guid
+  where water_abons.obj_name = '%s' """%(attr, attr,obj_title,channel,electric_data_end,obj_title)
+    return sQuery
+
+def get_daily_water_elf(obj_title, obj_parent_title , electric_data_end, channel,attr, isAbon):
+    cursor = connection.cursor()
+    if isAbon:
+        cursor.execute(makeSqlQuery_water_for_abon_gvs_hvs_elf(obj_title, obj_parent_title , electric_data_end, channel,attr))
+    else: 
+        cursor.execute(makeSqlQuery_water_for_obj_gvs_hvs_elf(obj_title, obj_parent_title , electric_data_end, channel,attr))
+    data_table = cursor.fetchall()
+    
+    if len(data_table)>0: 
+        if isAbon:
+            data_table=ChangeNull(data_table, None)
+        else:
+            data_table=ChangeNull(data_table, electric_data_end)
+    return data_table
+
+
 def makeSqlQuery_check_numbers(params):
     sQuery="""
     SELECT 

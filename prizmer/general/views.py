@@ -5352,7 +5352,127 @@ def pokazaniya_water_gvs_hvs_current(request):
     args['electric_data_end'] = electric_data_end
 
     return render_to_response("data_table/water/26.html", args)     
+
+def water_elf_hvs_by_date(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
     
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_daily_water_elf(obj_title, obj_parent_title , electric_data_end, '1','attr1', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_daily_water_elf(obj_title, obj_parent_title , electric_data_end, '1', 'attr1',False)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['res'] = u'ХВС'
+    return render_to_response("data_table/water/52.html", args)     
+
+def water_elf_gvs_by_date(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_daily_water_elf(obj_title, obj_parent_title , electric_data_end, '2','attr2', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_daily_water_elf(obj_title, obj_parent_title , electric_data_end, '2', 'attr2',False)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['res'] = u'ГВС'
+
+    return render_to_response("data_table/water/52.html", args)
+
+def water_elf_hvs_potreblenie(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    electric_data_start = request.GET['electric_data_start']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end, electric_data_start,'1','attr1', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end, electric_data_start,'1','attr1', False)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+    args['res'] = u'ХВС'
+
+    return render_to_response("data_table/water/53.html", args)
+    
+def water_elf_gvs_potreblenie(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    electric_data_start = request.GET['electric_data_start']
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+                     
+    if (bool(is_abonent_level.search(obj_key))):        
+        data_table = common_sql.get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,electric_data_start, '2','attr2', True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,electric_data_start, '2','attr2', False)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['res'] = u'ГВС'
+    args['electric_data_start'] = electric_data_start
+
+    return render_to_response("data_table/water/53.html", args)
+
 def potreblenie_water(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')

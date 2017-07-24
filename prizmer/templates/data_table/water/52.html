@@ -1,0 +1,39 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по <strong>{{res}}</strong>-воде за <strong>{{electric_data_end}}</strong></span>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>Абонент</th>
+<th>Счётчик Эльф</th>
+<th>Счётчик {{res}}</th>
+<th>Значение</th>
+
+
+<!--<th>Дата</th>-->
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4}}</strong></td>
+
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

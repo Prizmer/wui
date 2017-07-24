@@ -83,6 +83,11 @@ urlpatterns = patterns('',
     
     url(r'^50/$', views.tekon_heat_by_date), # показания по теплу -Текон 
     url(r'^51/$', views.tekon_heat_potreblenie), # потребление по теплу -Текон 
+    
+    url(r'^52/$', views.water_elf_hvs_by_date), # показания по хвс -Эльф 
+    url(r'^53/$', views.water_elf_hvs_potreblenie), # потребление по хвс -Эльф 
+    url(r'^54/$', views.water_elf_gvs_by_date), # показания по гвс -Эльф 
+    url(r'^55/$', views.water_elf_gvs_potreblenie), # потребление по гвс -Эльф 
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 
