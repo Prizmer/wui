@@ -586,7 +586,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             
-signals.post_save.connect(add_link_meter, sender=Meters)
+#signals.post_save.connect(add_link_meter, sender=Meters)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -722,7 +722,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             else:
                 pass
     
-signals.post_save.connect(add_link_taken_params, sender=TakenParams)
+#signals.post_save.connect(add_link_taken_params, sender=TakenParams)
 
 def load_water_objects(request):
     args={}

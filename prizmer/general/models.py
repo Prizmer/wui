@@ -234,6 +234,10 @@ class Meters(models.Model):
     name = models.CharField('Имя', unique=True, max_length=50)
     address = models.IntegerField('Сетевой адрес')
     password = models.CharField('Пароль', max_length=100, blank=True)
+    attr1 = models.CharField('Атрибут 1', max_length=20, blank=True)
+    attr2 = models.CharField('Атрибут 2', max_length=20, blank=True)
+    attr3 = models.CharField('Атрибут 3', max_length=20, blank=True)
+    attr4 = models.CharField('Атрибут 4', max_length=20, blank=True)
     password_type_hex = models.BooleanField('Использовать HEX для пароля?', default=True)
     factory_number_manual = models.CharField('Заводской номер(вручную)', max_length=16)
     factory_number_readed = models.CharField('Заводской номер(из прибора)', max_length=16, blank=True, null=True)
@@ -839,8 +843,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"01487323-a28f-419e-9589-2563d785ab2a"))
         add_param.save()
         # "Канал 1"      Импульсный вход 1 текущий
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6e7f0d37-df5c-4850-991e-b5d7cb793924"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6e7f0d37-df5c-4850-991e-b5d7cb793924"))
+        #add_param.save()
         # "Канал 1"      Импульсный вход 1 суточный
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9af27a62-d6c8-4b67-bd36-da7103e0b1f1"))
         add_param.save()
@@ -848,8 +852,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"86acc33d-7bea-4977-a5b5-c5858ce9a09d"))
         add_param.save()
         # "Канал 2"      Импульсный вход 2 текущий
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"de7bfdfd-c17f-4a7c-942d-b28e85db33cb"))
-        add_param.save()
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"de7bfdfd-c17f-4a7c-942d-b28e85db33cb"))
+        #add_param.save()
         #-------------Архивные
         # "Энергия"
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"ae439e1f-5c4b-494c-8a53-a61b85c804a0"))
@@ -1243,8 +1247,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'c:\\work\\mitino\\prizmer\\static\\cfg\\filigrad_1b-540_forLoad.xlsx'
-cfg_sheet_name = u'Heat_1b(2)'
+cfg_excel_name = 'D:\\Work\\230717\\prizmer\\static\\cfg\\mosfilm-teplo-original_tcp_work.xlsx'
+cfg_sheet_name = u'Корпус 1'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1532,7 +1536,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1564,7 +1568,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
                 print u'Прибор добавлен' + ' --->   ' + u'М-230-УМ'
                 
             elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Эльф 1.08':
-                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"1c5a8a80-1c51-4733-8332-4ed8d510a650") )
+                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), attr1 = unicode(sheet_ranges[u'N%s'%(row)].value), attr2 = unicode(sheet_ranges[u'O%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"1c5a8a80-1c51-4733-8332-4ed8d510a650") )
                 add_meter.save()
                 print u'Прибор добавлен' + ' --->   ' + u'Эльф 1.08'
             elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'СПГ762-1':
@@ -1620,7 +1624,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1671,7 +1675,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1702,7 +1706,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
 
 def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
@@ -1727,7 +1731,7 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
 
 
 
