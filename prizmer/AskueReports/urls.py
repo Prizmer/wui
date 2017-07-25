@@ -57,6 +57,12 @@ urlpatterns = patterns('',
 
     url(r'^50/$', views.report_tekon_heat_by_date), # показания по теплу -Текон 
     url(r'^51/$', views.report_tekon_heat_potreblenie), # потребление по теплу -Текон 
+    
+    url(r'^52/$', views.report_elf_hvs_by_date), # показания по хвс -Эльф 
+    url(r'^53/$', views.report_elf_hvs_potreblenie), # потребление по хвс -Эльф 
+    url(r'^54/$', views.report_elf_gvs_by_date), # показания по гвс -Эльф 
+    url(r'^55/$', views.report_elf_gvs_potreblenie), # потребление по гвс -Эльф 
+    
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),
