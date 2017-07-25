@@ -8288,10 +8288,10 @@ def report_elf_hvs_potreblenie(request):
     ws['C5'] = 'Счётчик ХВС'
     ws['C5'].style = ali_grey
         
-    ws['D5'] = 'Показания на '  + str(request.session["electric_data_start"])
+    ws['D5'] = 'Показания на ' + str(request.session["electric_data_end"])
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_start"]) 
     ws['E5'].style = ali_grey
     
     ws['F5'] = 'Потребление'
@@ -8401,10 +8401,10 @@ def report_elf_gvs_potreblenie(request):
     ws['C5'] = 'Счётчик ГВС'
     ws['C5'].style = ali_grey
         
-    ws['D5'] = 'Показания на '  + str(request.session["electric_data_start"])
+    ws['D5'] = 'Показания на '  + str(request.session["electric_data_end"])
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])
+    ws['E5'] = 'Показания на '  +  str(request.session["electric_data_start"])
     ws['E5'].style = ali_grey
     
     ws['F5'] = 'Потребление'
