@@ -1536,7 +1536,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1624,7 +1624,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1675,7 +1675,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1706,7 +1706,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
 
 def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
@@ -1731,7 +1731,7 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
 
 
 
