@@ -1239,7 +1239,41 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param.save() 
         # "Показание". T3 A+
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"4e20bda9-6e75-4b0f-a99a-0e4c1cd07d3b"))
-        add_param.save() 
+        add_param.save()
+        
+    elif instance.guid_types_meters.name == u'Пульсар Теплосчётчик':
+        #Добавляем параметры для Теплосчётчика Пульсар.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"24ae9f51-40a4-4758-a826-a5f8286e1a2e"))
+        add_param.save()
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"a3da78fb-b07b-4d53-a980-54b51e26819a"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"de66ecd2-b243-467c-8d1a-cfcb42377300"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"d3433b80-cb8c-4038-a682-947e6d05955e"))
+        add_param.save()
+
+        
+    elif instance.guid_types_meters.name == u'Пульсар ХВС':
+        #Добавляем параметры для водосчётчика Пульсар ХВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"209894a8-8d19-4e4d-bad8-1767eec4fedf"))
+        add_param.save()
+
+    
+    elif instance.guid_types_meters.name == u'Пульсар ГВС':
+        #Добавляем параметры для водосчётчика Пульсар ГВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5fc2ff3b-999e-4154-ba49-84d3971369b0"))
+        add_param.save()
+        
+    
     else:
         print u'Тип счётчика не определен'
     
@@ -1247,8 +1281,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-cfg_excel_name = 'D:\\Work\\230717\\prizmer\\static\\cfg\\mosfilm-teplo-original_tcp_work.xlsx'
-cfg_sheet_name = u'Корпус 1'
+cfg_excel_name = 'D:\\Work\\08082017\\prizmer\\static\\cfg\\fili2_electric_work.xlsx'
+cfg_sheet_name = u'k5'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False
@@ -1536,7 +1570,7 @@ def add_abonents_from_excel_cfg_electric(sender, instance, created, **kwargs): #
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
+signals.post_save.connect(add_abonents_from_excel_cfg_electric, sender=Objects)
 
                     
 
@@ -1554,8 +1588,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
             if unicode(sheet_ranges[u'I%s'%(row)].value) == u'М-200':
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"6224d20b-1781-4c39-8799-b1446b60774d") )
                 add_meter.save()
-                print u'Прибор добавлен' + ' --->   ' + u'М-200'
-                
+                print u'Прибор добавлен' + ' --->   ' + u'М-200'              
                 
             elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'М-230':
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), password = 111111 , factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"423b33a7-2d68-47b6-b4f6-5b470aedc4f4") )
@@ -1601,6 +1634,22 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
                 add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), password = unicode(sheet_ranges[u'M%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"b53173f2-2307-4b70-b84c-61b634521e87") )
                 add_meter.save()
                 print u'Прибор добавлен' + ' --->   ' + u'Tekon_heat'
+
+            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Пульсар ХВС':
+                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), attr1 = unicode(sheet_ranges[u'N%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"f1789bb7-7fcd-4124-8432-40320559890f") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар ХВС'
+            
+            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Пульсар ГВС':
+                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), attr1 = unicode(sheet_ranges[u'N%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"a1a349ba-e070-4ec9-975d-9f39e61c34da") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар ГВС'
+
+            elif unicode(sheet_ranges[u'I%s'%(row)].value) == u'Пульсар Теплосчётчик':
+                add_meter = Meters(name = unicode(sheet_ranges[u'I%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'G%s'%(row)].value), address = unicode(sheet_ranges[u'H%s'%(row)].value), factory_number_manual = unicode(sheet_ranges[u'G%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар Теплосчётчик'
+                
             else:
                 print u'Не найдено совпадение с существующим типом прибора'
    
@@ -1624,7 +1673,7 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
+signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
 
 
 
@@ -1675,7 +1724,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             row = row + 1
-#signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
+signals.post_save.connect(add_link_meter_port_from_excel_cfg_electric, sender=Meters)   
 
 def return_id_abonent_by_name_and_parent_name(name, parent_name):
     from django.db import connection
@@ -1706,7 +1755,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
             row = row + 1    
     
-#signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
+signals.post_save.connect(add_link_abonent_taken_params_from_excel_cfg_electric, sender=TakenParams)
 
 def add_link_meter_port_by_type_meter(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту. Привязать все счётчики одного типа к порту."""
@@ -1731,7 +1780,7 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
+signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
 
 
 

@@ -1,0 +1,41 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания по цифровым счётчикам Пульсар на  <strong>{{electric_data_end}}</strong> </span>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+
+<th>Дата</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Энергия, Гкал</th>
+<th>Объем, м3</th>
+<th>Температура входа, С</th>
+<th>Температура выхода, С</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<!-- <td>{{value.0}}</td> -->
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td><strong>{{value.3}}</strong></td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>
