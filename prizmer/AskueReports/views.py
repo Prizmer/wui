@@ -42,6 +42,9 @@ def zagotovka(request):
 # Стили
 ali_grey   = Style(fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white  = Style(border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_blue   = Style(fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_pink   = Style(fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+
 ali_yellow = Style(fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_size_18  = Style(font=Font(size=18))
 # Конец описания стилей
@@ -8585,5 +8588,443 @@ def report_elf_gvs_by_date(request):
     output_name = u'elf_gvs_report_'+electric_data_end
     file_ext = u'xlsx'
     
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_pulsar_water_period(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар. Потребление воды на ' + unicode(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Тип счётчика'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Стояк'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Счётчик'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Показания на '  + str(request.session["electric_data_start"])+', м3'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Разница, м3'
+    ws['G5'].style = ali_grey
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         =  request.session['obj_parent_title']
+    obj_title         =  request.session['obj_title']
+    electric_data_end   =  request.session['electric_data_end']   
+    electric_data_start  =  request.session['electric_data_start']            
+    obj_key             =  request.session['obj_key']
+    
+    data_table = []
+                     
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # тип
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # стояк
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # счётчик 
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # значения на начало
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # значения на конец
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # дельта
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+
+
+    ws.row_dimensions[5].height = 63
+#    ws.column_dimensions['A'].width = 17 
+#    ws.column_dimensions['B'].width = 17 
+#    ws.column_dimensions['C'].width = 17
+#    ws.column_dimensions['D'].width = 17
+
+#------------
+
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'pulsar_water_period_report_'+electric_data_start+'-'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_pulsar_water_daily(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар. Потребление воды на ' + unicode(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Тип счётчика'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Стояк'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Счётчик'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
+    ws['E5'].style = ali_grey
+    
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         =  request.session['obj_parent_title']
+    obj_title         =  request.session['obj_title']
+    electric_data_end   =  request.session['electric_data_end']            
+    obj_key             =  request.session['obj_key']
+    
+    data_table = []
+                     
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False)
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # тип
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # стояк
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # счётчик
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][5])  # показаня
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+
+
+    ws.row_dimensions[5].height = 63
+#    ws.column_dimensions['A'].width = 17 
+#    ws.column_dimensions['B'].width = 17 
+#    ws.column_dimensions['C'].width = 17
+#    ws.column_dimensions['D'].width = 17
+
+#------------
+                   
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'pulsar_water_report_'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_pulsar_water_daily_row(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    ws['A1'] = 'Абонент'
+    ws['A1'].style = ali_grey
+    ws.merge_cells('A1:A2')
+    
+    ws['B1'] = 'Стояк 1'
+    ws['B1'].style = ali_grey
+    ws.merge_cells('B1:E1')
+    
+    ws['B2'] = 'Счётчик ХВС'
+    ws['B2'].style = ali_grey
+    
+    ws['C2'] = 'Значение ХВС, м3'
+    ws['C2'].style = ali_grey   
+    
+    
+    ws['D2'] = 'Счётчик ГВС'
+    ws['D2'].style = ali_grey
+    
+    ws['E2'] = 'Значение ГВС, м3'
+    ws['E2'].style = ali_grey
+    
+    
+    ws['F1'] = 'Стояк 2'
+    ws['F1'].style = ali_grey
+    ws.merge_cells('F1:I1')
+    
+    ws['F2'] = 'Счётчик ХВС'
+    ws['F2'].style = ali_grey
+    
+    ws['G2'] = 'Значение ХВС, м3'
+    ws['G2'].style = ali_grey   
+    
+    
+    ws['H2'] = 'Счётчик ГВС'
+    ws['H2'].style = ali_grey
+    
+    ws['I2'] = 'Значение ГВС, м3'
+    ws['I2'].style = ali_grey
+    
+    
+    ws['J1'] = 'Стояк 3'
+    ws['J1'].style = ali_grey
+    ws.merge_cells('J1:M1')
+    
+    ws['J2'] = 'Счётчик ХВС'
+    ws['J2'].style = ali_grey
+    
+    ws['K2'] = 'Значение ХВС, м3'
+    ws['K2'].style = ali_grey   
+    
+    
+    ws['L2'] = 'Счётчик ГВС'
+    ws['L2'].style = ali_grey
+    
+    ws['M2'] = 'Значение ГВС, м3'
+    ws['M2'].style = ali_grey
+    
+    ws['N1'] = 'Сумма ХВС, м3'
+    ws['N1'].style = ali_grey
+    ws.merge_cells('N1:N2')
+    
+    ws['O1'] = 'Сумма ГВС, м3'
+    ws['O1'].style = ali_grey
+    ws.merge_cells('O1:O2')
+#Запрашиваем данные для отчета
+
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']            
+    obj_key             = request.session['obj_key']
+             
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_for_pulsar(data_table)
+
+    
+# Заполняем отчет значениями
+    for row in range(3, len(data_table)+3):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-3][1])  # абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-3][2])  # nomer hvs
+            ws.cell('B%s'%(row)).style = ali_blue
+        except:
+            ws.cell('B%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][3])  # value hvs
+            ws.cell('C%s'%(row)).style = ali_blue
+        except:
+            ws.cell('C%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-3][4])  # gvs num
+            ws.cell('D%s'%(row)).style = ali_pink
+        except:
+            ws.cell('D%s'%(row)).style = ali_pink
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-3][5])  # value gvs
+            ws.cell('E%s'%(row)).style = ali_pink
+        except:
+            ws.cell('E%s'%(row)).style = ali_pink
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-3][6])  # num hvs
+            ws.cell('F%s'%(row)).style = ali_blue
+        except:
+            ws.cell('F%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-3][7]) # val hvs
+            ws.cell('G%s'%(row)).style = ali_blue
+        except:
+            ws.cell('G%s'%(row)).style = ali_blue
+            next
+                        
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-3][8])  # gvs num
+            ws.cell('H%s'%(row)).style = ali_pink
+        except:
+            ws.cell('H%s'%(row)).style = ali_pink
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-3][9])  # gvs val
+            ws.cell('I%s'%(row)).style = ali_pink
+        except:
+            ws.cell('I%s'%(row)).style = ali_pink
+            next
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-3][10])  # hvs num
+            ws.cell('J%s'%(row)).style = ali_blue
+        except:
+            ws.cell('J%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % (data_table[row-3][11])  # hvs val
+            ws.cell('K%s'%(row)).style = ali_blue
+        except:
+            ws.cell('K%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % (data_table[row-3][12])  # hvs num
+            ws.cell('L%s'%(row)).style = ali_pink
+        except:
+            ws.cell('L%s'%(row)).style = ali_pink
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % (data_table[row-3][13])  # hvs val
+            ws.cell('M%s'%(row)).style = ali_pink
+        except:
+            ws.cell('M%s'%(row)).style = ali_pink
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % (data_table[row-3][14])  # hvs num
+            ws.cell('N%s'%(row)).style = ali_blue
+        except:
+            ws.cell('N%s'%(row)).style = ali_blue
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-3][15])  # hvs val
+            ws.cell('O%s'%(row)).style = ali_pink
+        except:
+            ws.cell('O%s'%(row)).style = ali_pink
+            next
+
+#    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+        
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_water_pulsar_row_'+str(electric_data_end)
+    file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response

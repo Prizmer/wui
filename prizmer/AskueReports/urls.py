@@ -63,6 +63,11 @@ urlpatterns = patterns('',
     url(r'^54/$', views.report_elf_gvs_by_date), # показания по гвс -Эльф 
     url(r'^55/$', views.report_elf_gvs_potreblenie), # потребление по гвс -Эльф 
     
+    url(r'^57/$', views.report_pulsar_water_period), # Показание за период с водосчётчиков Пульсар
+    url(r'^58/$', views.report_pulsar_water_daily), # Показание на дату с водосчётчиков Пульсар
+    
+    url(r'^60/$', views.report_pulsar_water_daily_row),# Показания по стоякам в одну строку на дату с водосчётчиков Пульсар   
+    
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

@@ -1,0 +1,66 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по воде на <strong>{{electric_data_end}}</strong></span>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+
+<th rowspan="2">Абонент</th>
+<th colspan="4">Стояк 1</th>
+<th colspan="4">Стояк 2</th>
+<th colspan="4">Стояк 3</th>
+<th rowspan="2" class="th_hvs">Сумма ХВС, м3</th>
+<th rowspan="2" class="th_gvs">Сумма ГВС, м3</th>
+</tr>
+<tr>
+
+<th class="th_hvs">Счётчик ХВС</th>
+<th class="th_hvs">Значение ХВС, м3</th>
+<th class="th_gvs">Счётчик ГВС</th>
+<th class="th_gvs">Значение ГВС, м3</th>
+<th class="th_hvs">Счётчик ХВС</th>
+<th class="th_hvs">Значение ХВС, м3</th>
+<th class="th_gvs">Счётчик ГВС</th>
+<th class="th_gvs">Значение ГВС, м3</th>
+<th class="th_hvs">Счётчик ХВС</th>
+<th class="th_hvs">Значение ХВС, м3</th>
+<th class="th_gvs">Счётчик ГВС</th>
+<th class="th_gvs">Значение ГВС, м3</th>
+
+
+</tr>
+
+{% for value in data_table %}
+<tr>
+
+<td>{{value.1}}</td>
+<td class="th_hvs">{{value.2}}</td>
+<td class="th_hvs"><strong>{{value.3}}</strong></td>
+<td class="th_gvs">{{value.4}}</td>
+<td class="th_gvs"><strong>{{value.5}}</strong></td>
+<td class="th_hvs">{{value.6}}</td>
+<td class="th_hvs"><strong>{{value.7}}</strong></td>
+<td class="th_gvs">{{value.8}}</td>
+<td class="th_gvs"><strong>{{value.9}}</strong></td>
+<td class="th_hvs">{{value.10}}</td>
+<td class="th_hvs"><strong>{{value.11}}</strong></td>
+<td class="th_gvs">{{value.12}}</td>
+<td class="th_gvs"><strong>{{value.13}}</strong></td>
+<td class="th_hvs"><strong>{{value.14}}</strong></td>
+<td class="th_gvs"><strong>{{value.15}}</strong></td>
+
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

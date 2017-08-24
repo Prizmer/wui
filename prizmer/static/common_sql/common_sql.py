@@ -2308,6 +2308,30 @@ def ChangeNull(data_table, electric_data):
         data_table[i]=tuple(data_table[i])
     return data_table
 
+def ChangeNull_for_pulsar(data_table):
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        if (data_table[i][2] == None) or (data_table[i][3] is None):
+            data_table[i][3]=u'-'            
+            data_table[i][2]=u'нет'
+        if (data_table[i][4] == None) or (data_table[i][3] is None):
+            data_table[i][5]=u'-'  
+            data_table[i][4]=u'нет'
+        if (data_table[i][6] == None) or (data_table[i][3] is None):
+            data_table[i][7]=u'-'  
+            data_table[i][6]=u'нет'
+        if (data_table[i][8] == None) or (data_table[i][3] is None):
+            data_table[i][9]=u'-'  
+            data_table[i][8]=u'нет'
+        if (data_table[i][10] == None) or (data_table[i][3] is None):
+            data_table[i][11]=u'-'  
+            data_table[i][10]=u'нет'
+        if (data_table[i][12] == None) or (data_table[i][3] is None):
+            data_table[i][13]=u'-'  
+            data_table[i][12]=u'нет'
+        data_table[i]=tuple(data_table[i])
+    return data_table
+
 def get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data, dm):
     data_table = []
     params=[u'T0 A+',u'T1 A+',u'T2 A+',u'T3 A+']
@@ -4986,4 +5010,404 @@ def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, electric_data):
     params=[u'Энергия',u'Объем',u'Ti',u'To']
     data_table=get_data_table_pulsar_teplo_parametr_by_date(obj_parent_title, electric_data, params)
     if len(data_table)>0: data_table=ChangeNull(data_table, electric_data)
+    return data_table
+
+def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11),
+   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  abonents.name='%s' and
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC;
+    """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1])
+
+    return sQuery
+    
+def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, z1.value,water_pulsar_abons.ab_guid
+from water_pulsar_abons
+left join 
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11) as type_meter,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC) as z1
+on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  order by water_pulsar_abons.ab_name, z1.type_meter, z1.attr1
+    """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title)
+    #print sQuery
+    return sQuery
+    
+def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+    my_params=[u'Пульсар ГВС', u'Пульсар ХВС']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+    
+def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+    #print obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1]
+    #print obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1]    
+    sQuery="""
+    Select z1.name, z1.type_meters, z1.attr1, z1.factory_number_manual,z1.value,z2.value, z2.value-z1.value as delta
+from
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11) as type_meters,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  abonents.name='%s' and
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC
+) as z1,
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11)as type_meters,
+   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  abonents.name='%s' and
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC
+) as z2
+where z1.factory_number_manual=z2.factory_number_manual
+    """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1])
+    print sQuery
+    return sQuery
+    
+def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select water_pulsar_abons.ab_name, z3.type_meters, z3.attr1, water_pulsar_abons.factory_number_manual, z3.val_start,z3.val_end, z3.delta
+from water_pulsar_abons
+Left Join
+(Select z1.name, z1.type_meters, z1.attr1, z1.factory_number_manual,z1.value as val_start,z2.value as val_end, z2.value-z1.value as delta
+from
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11) as type_meters,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC
+) as z1,
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11)as type_meters,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+ORDER BY
+  abonents.name ASC
+) as z2
+where z1.factory_number_manual=z2.factory_number_manual) as z3
+on water_pulsar_abons.factory_number_manual=z3.factory_number_manual
+where water_pulsar_abons.obj_name='%s'
+order by water_pulsar_abons.ab_name, z3.type_meters, z3.attr1
+    """%(obj_title, electric_data_start, my_params[0], my_params[1], obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
+    return sQuery
+    
+def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
+    my_params=[u'Пульсар ГВС', u'Пульсар ХВС']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+    
+def MakeSqlQuery_water_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select z2.date,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
+z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
+z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
+(z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
+(z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
+from 
+(
+Select z1.date,z1.name,z1.guid, 
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
+from
+(
+SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11) as type_meter,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,  
+   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  abonents.name='%s' and
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+) as z1
+group by z1.date,z1.name,z1.guid
+) as z2
+    """%(my_params[4],my_params[2],my_params[4],my_params[2],my_params[4],my_params[3],my_params[4],my_params[3],
+         my_params[5],my_params[2],my_params[5],my_params[2],my_params[5],my_params[3],my_params[5],my_params[3],
+         my_params[6],my_params[2],my_params[6],my_params[2],my_params[6],my_params[3],my_params[6],my_params[3],
+         obj_parent_title, obj_title, electric_data_end, my_params[0], my_params[1])
+    return sQuery
+    
+def MakeSqlQuery_water_pulsar_daily_for_all_row(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+Select z4.date_val, z4.ab_name, z4.hvs_1_num, z4.hvs_1,z4.gvs_1_num, z4.gvs_1, 
+z4.hvs_2_num, z4.hvs_2,  z4.gvs_2_num,z4.gvs_2, 
+z4.hvs_3_num,z4.hvs_3, z4.gvs_3_num, z4.gvs_3, 
+z4.sum_hvs,
+z4.sum_gvs
+from
+(select z3.date as date_val, water_pulsar_abons.ab_name, z3.date, z3.hvs_1_num, z3.hvs_1,z3.gvs_1_num, z3.gvs_1, 
+z3.hvs_2_num, z3.hvs_2,  z3.gvs_2_num,z3.gvs_2, 
+z3.hvs_3_num,z3.hvs_3, z3.gvs_3_num, z3.gvs_3, 
+z3.sum_hvs,
+z3.sum_gvs
+from water_pulsar_abons
+left join
+(Select z2.date,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
+z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
+z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
+(z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
+(z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
+from 
+(
+Select z1.date,z1.name,z1.guid, 
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
+from
+(
+SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11) as type_meter,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,  
+   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+) as z1
+group by z1.date,z1.name,z1.guid) as z2) as z3
+on water_pulsar_abons.ab_name=z3.name
+where water_pulsar_abons.obj_name= '%s'
+) as z4
+
+group by z4.date_val, z4.ab_name, z4.date, z4.hvs_1_num, z4.hvs_1,z4.gvs_1_num, z4.gvs_1, 
+z4.hvs_2_num, z4.hvs_2,  z4.gvs_2_num,z4.gvs_2, 
+z4.hvs_3_num,z4.hvs_3, z4.gvs_3_num, z4.gvs_3, 
+z4.sum_hvs,
+z4.sum_gvs
+order by  z4.ab_name
+    """%(my_params[4],my_params[2],my_params[4],my_params[2],my_params[4],my_params[3],my_params[4],my_params[3],
+         my_params[5],my_params[2],my_params[5],my_params[2],my_params[5],my_params[3],my_params[5],my_params[3],
+         my_params[6],my_params[2],my_params[6],my_params[2],my_params[6],my_params[3],my_params[6],my_params[3],
+          obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
+    #print sQuery
+    return sQuery
+    
+def get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, isAbon):
+    my_params=[u'Пульсар ГВС', u'Пульсар ХВС',u'ХВС',u'ГВС', 'Стояк 1', 'Стояк 2', 'Стояк 3']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_all_row(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
     return data_table
