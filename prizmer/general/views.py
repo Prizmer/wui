@@ -11523,11 +11523,58 @@ def forma_80020(request):
     args['electric_data_start'] = electric_data_start
       
     return render_to_response("data_table/electric/41.html", args)
+    
+def pulsar_heat_period(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            
+#*********************************************************************************************************************************************************************
+            if (bool(is_abonent_level.search(obj_key))):
+                data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+            elif (bool(is_object_level_2.search(obj_key))):
+                data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    
+
+    return render_to_response("data_table/heat/59.html", args)
 
 def pulsar_heat_daily(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
-    is_object_level = re.compile(r'level')
+    is_object_level_2 = re.compile(r'level2')
     is_group_level = re.compile(r'group')
     data_table = []
     obj_title = u'Не выбран'
@@ -11556,21 +11603,10 @@ def pulsar_heat_daily(request):
 
 
 #*********************************************************************************************************************************************************************
-            if (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for abonents group
-                    data_table= common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_title, electric_data_end)
-                    if not data_table:
-                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
-
-#*********************************************************************************************************************************************************************
-            else:
-                pass
-        else:
-            obj_title = u'Не выбран'
-            obj_parent_title = u'Не выбран'
-            obj_key = u'Не выбран'
-            is_electric_monthly = 0
-            is_electric_daily = 0 
-            is_electric_current = 0
+            if (bool(is_abonent_level.search(obj_key))):
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+            elif (bool(is_object_level_2.search(obj_key))):
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
                 
     args['data_table'] = data_table
     args['obj_title'] = obj_title

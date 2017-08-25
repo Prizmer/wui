@@ -90,6 +90,7 @@ urlpatterns = patterns('',
     url(r'^55/$', views.water_elf_gvs_potreblenie), # потребление по гвс -Эльф
 
     url(r'^56/$', views.pulsar_heat_daily), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^59/$', views.pulsar_heat_period), # Показание на дату с теплосчётчиков Пульсар
     
     url(r'^57/$', views.pulsar_water_period), # Показание за период с водосчётчиков Пульсар
     url(r'^58/$', views.pulsar_water_daily), # Показание на дату с водосчётчиков Пульсар

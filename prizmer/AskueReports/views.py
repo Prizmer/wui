@@ -9028,3 +9028,238 @@ def report_pulsar_water_daily_row(request):
     file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    
+def report_pulsar_heat_daily(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар. Потказания по теплу на ' + unicode(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Энергия, Гкал'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Объем, м3'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Температура входа, С'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Температура выхода, С'
+    ws['F5'].style = ali_grey
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         =  request.session['obj_parent_title']
+    obj_title         =  request.session['obj_title']
+    electric_data_end   =  request.session['electric_data_end']            
+    obj_key             =  request.session['obj_key']
+    
+    data_table = []
+                     
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # тип
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # стояк
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # счётчик
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][5])  # показаня
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][6])  # показаня
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+
+    #ws.row_dimensions[5].height = 63
+    ws.column_dimensions['A'].width = 20 
+    ws.column_dimensions['E'].width = 23 
+    ws.column_dimensions['F'].width = 23
+#    ws.column_dimensions['D'].width = 17
+
+#------------
+            
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'pulsar_heat_report_'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_pulsar_heat_period(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+    electric_data_start   = request.session["electric_data_start"]
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар. Потребление тепла с ' +unicode(electric_data_start)+' по '+ unicode(electric_data_end)
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Показания Энергии на ' + str(electric_data_start)+', Гкал '
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Показания Энергии на ' + str(electric_data_end)+', Гкал '
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Потребление Энергии, Гкал'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Показания Объёма на ' + str(electric_data_start)+', м3'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Показания Объёма на ' + str(electric_data_start)+', м3'
+    ws['G5'].style = ali_grey
+    
+    ws['H5'] = 'Потребление Объёма, м3'
+    ws['H5'].style = ali_grey
+#Запрашиваем данные для отчета
+
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+          
+    obj_key             = request.session['obj_key']
+             
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)
+               
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Время работы
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # Время работы
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][7])  # Время работы
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+     
+#    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+        
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_heat_pulsar_period_'+str(electric_data_end)+'-'+str(electric_data_start)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
