@@ -2311,22 +2311,23 @@ def ChangeNull(data_table, electric_data):
 def ChangeNull_for_pulsar(data_table):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
-        if (data_table[i][2] == None) or (data_table[i][3] is None):
+        
+        if (data_table[i][2] == None) or (data_table[i][2] is None):
             data_table[i][3]=u'-'            
             data_table[i][2]=u'нет'
-        if (data_table[i][4] == None) or (data_table[i][3] is None):
+        if (data_table[i][4] == None) or (data_table[i][4] is None):
             data_table[i][5]=u'-'  
             data_table[i][4]=u'нет'
-        if (data_table[i][6] == None) or (data_table[i][3] is None):
+        if (data_table[i][6] == None) or (data_table[i][6] is None):
             data_table[i][7]=u'-'  
             data_table[i][6]=u'нет'
-        if (data_table[i][8] == None) or (data_table[i][3] is None):
+        if (data_table[i][8] == None) or (data_table[i][8] is None):
             data_table[i][9]=u'-'  
             data_table[i][8]=u'нет'
-        if (data_table[i][10] == None) or (data_table[i][3] is None):
+        if (data_table[i][10] == None) or (data_table[i][10] is None):
             data_table[i][11]=u'-'  
             data_table[i][10]=u'нет'
-        if (data_table[i][12] == None) or (data_table[i][3] is None):
+        if (data_table[i][12] == None) or (data_table[i][12] is None):
             data_table[i][13]=u'-'  
             data_table[i][12]=u'нет'
         data_table[i]=tuple(data_table[i])
@@ -5246,11 +5247,13 @@ def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric
 
 def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    SELECT 
+    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+from water_pulsar_abons
+left join
+(SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11),
-   
+  substring(types_meters.name from 9 for 11),   
   meters.attr1,
   meters.factory_number_manual,   
   daily_values.value,   
@@ -5274,9 +5277,12 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
-ORDER BY
-  abonents.name ASC;
-    """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1])
+) as z1
+on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+where 
+water_pulsar_abons.obj_name='%s'and
+water_pulsar_abons.ab_name='%s' 
+    """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
 
     return sQuery
     
@@ -5490,14 +5496,14 @@ def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric
     
 def MakeSqlQuery_water_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select z2.date,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
+Select z2.date_end,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
 z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
 z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
 (z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
 (z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
 from 
 (
-Select z1.date,z1.name,z1.guid, 
+Select z1.date_end, z1.name,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
@@ -5512,14 +5518,16 @@ sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_man
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
 from
 (
-SELECT 
+Select '%s'::date as date_end,water_pulsar_abons.ab_name as name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value
+from water_pulsar_abons
+left join
+(SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11) as type_meter,   
+  substring(types_meters.name from 9 for 11),   
   meters.attr1,
   meters.factory_number_manual,   
-  daily_values.value,  
-   
+  daily_values.value,   
   abonents.guid
 FROM 
   public.abonents, 
@@ -5540,38 +5548,30 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+) as z0
+on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
+where water_pulsar_abons.ab_name='%s' and
+water_pulsar_abons.obj_name='%s'
 ) as z1
-group by z1.date,z1.name,z1.guid
+group by z1.date_end,z1.name
 ) as z2
     """%(my_params[4],my_params[2],my_params[4],my_params[2],my_params[4],my_params[3],my_params[4],my_params[3],
          my_params[5],my_params[2],my_params[5],my_params[2],my_params[5],my_params[3],my_params[5],my_params[3],
          my_params[6],my_params[2],my_params[6],my_params[2],my_params[6],my_params[3],my_params[6],my_params[3],
-         obj_parent_title, obj_title, electric_data_end, my_params[0], my_params[1])
+         electric_data_end,
+         obj_parent_title, obj_title, electric_data_end, my_params[0], my_params[1], obj_title,obj_parent_title)
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all_row(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-Select z4.date_val, z4.ab_name, z4.hvs_1_num, z4.hvs_1,z4.gvs_1_num, z4.gvs_1, 
-z4.hvs_2_num, z4.hvs_2,  z4.gvs_2_num,z4.gvs_2, 
-z4.hvs_3_num,z4.hvs_3, z4.gvs_3_num, z4.gvs_3, 
-z4.sum_hvs,
-z4.sum_gvs
-from
-(select z3.date as date_val, water_pulsar_abons.ab_name, z3.date, z3.hvs_1_num, z3.hvs_1,z3.gvs_1_num, z3.gvs_1, 
-z3.hvs_2_num, z3.hvs_2,  z3.gvs_2_num,z3.gvs_2, 
-z3.hvs_3_num,z3.hvs_3, z3.gvs_3_num, z3.gvs_3, 
-z3.sum_hvs,
-z3.sum_gvs
-from water_pulsar_abons
-left join
-(Select z2.date,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
+Select z2.date_end,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
 z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
 z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
 (z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
 (z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
 from 
 (
-Select z1.date,z1.name,z1.guid, 
+Select z1.date_end, z1.name,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
@@ -5586,14 +5586,16 @@ sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_man
 sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
 from
 (
-SELECT 
+Select '%s'::date as date_end,water_pulsar_abons.ab_name as name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value
+from water_pulsar_abons
+left join
+(SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11) as type_meter,   
+  substring(types_meters.name from 9 for 11),   
   meters.attr1,
   meters.factory_number_manual,   
-  daily_values.value,  
-   
+  daily_values.value,   
   abonents.guid
 FROM 
   public.abonents, 
@@ -5611,24 +5613,22 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   meters.guid_types_meters = types_meters.guid AND
   objects.name = '%s' AND 
+
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+) as z0
+on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
+where 
+water_pulsar_abons.obj_name='%s'
 ) as z1
-group by z1.date,z1.name,z1.guid) as z2) as z3
-on water_pulsar_abons.ab_name=z3.name
-where water_pulsar_abons.obj_name= '%s'
-) as z4
-
-group by z4.date_val, z4.ab_name, z4.date, z4.hvs_1_num, z4.hvs_1,z4.gvs_1_num, z4.gvs_1, 
-z4.hvs_2_num, z4.hvs_2,  z4.gvs_2_num,z4.gvs_2, 
-z4.hvs_3_num,z4.hvs_3, z4.gvs_3_num, z4.gvs_3, 
-z4.sum_hvs,
-z4.sum_gvs
-order by  z4.ab_name
+group by z1.date_end,z1.name
+) as z2
+order by z2.name
     """%(my_params[4],my_params[2],my_params[4],my_params[2],my_params[4],my_params[3],my_params[4],my_params[3],
          my_params[5],my_params[2],my_params[5],my_params[2],my_params[5],my_params[3],my_params[5],my_params[3],
          my_params[6],my_params[2],my_params[6],my_params[2],my_params[6],my_params[3],my_params[6],my_params[3],
-          obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
+         electric_data_end,
+          obj_title, electric_data_end, my_params[0], my_params[1], obj_title)
     #print sQuery
     return sQuery
     

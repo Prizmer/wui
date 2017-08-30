@@ -8759,6 +8759,8 @@ def report_pulsar_water_daily(request):
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False)
 
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
         
 # Заполняем отчет значениями
     for row in range(6, len(data_table)+6):
@@ -8799,7 +8801,7 @@ def report_pulsar_water_daily(request):
 
 
     ws.row_dimensions[5].height = 63
-#    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['A'].width = 23 
 #    ws.column_dimensions['B'].width = 17 
 #    ws.column_dimensions['C'].width = 17
 #    ws.column_dimensions['D'].width = 17
