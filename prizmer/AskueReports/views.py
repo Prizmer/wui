@@ -8710,7 +8710,7 @@ def report_pulsar_water_period(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pulsar_water_period_report_'+electric_data_start+'-'+electric_data_end
+    output_name = u'pulsar_water_period_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -8814,7 +8814,7 @@ def report_pulsar_water_daily(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pulsar_water_report_'+electric_data_end
+    output_name = u'pulsar_water_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -9026,7 +9026,7 @@ def report_pulsar_water_daily_row(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'report_water_pulsar_row_'+str(electric_data_end)
+    output_name = u'report_water_pulsar_row_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)
     file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
@@ -9132,7 +9132,7 @@ def report_pulsar_heat_daily(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pulsar_heat_report_'+electric_data_end
+    output_name = u'pulsar_heat_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -9261,7 +9261,7 @@ def report_pulsar_heat_period(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'report_heat_pulsar_period_'+str(electric_data_end)+'-'+str(electric_data_start)
+    output_name = u'report_heat_pulsar_period_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)+'-'+str(electric_data_start)
     file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response

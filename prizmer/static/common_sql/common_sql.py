@@ -2311,7 +2311,23 @@ def ChangeNull(data_table, electric_data):
 def ChangeNull_for_pulsar(data_table):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
-        
+        if (data_table[i][3] == 0):
+            data_table[i][3]=u'Н/Д'
+        if (data_table[i][5] == 0):
+            data_table[i][5]=u'Н/Д'
+        if (data_table[i][7] == 0):
+            data_table[i][7]=u'Н/Д'
+        if (data_table[i][9] == 0):
+            data_table[i][9]=u'Н/Д'
+        if (data_table[i][11] == 0):
+            data_table[i][11]=u'Н/Д'
+        if (data_table[i][13] == 0):
+            data_table[i][13]=u'Н/Д'
+        if (data_table[i][14] == 0):
+            data_table[i][14]=u'Н/Д'
+        if (data_table[i][15] == 0):
+            data_table[i][15]=u'Н/Д'
+            
         if (data_table[i][2] == None) or (data_table[i][2] is None):
             data_table[i][3]=u'-'            
             data_table[i][2]=u'нет'
