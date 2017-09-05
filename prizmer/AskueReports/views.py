@@ -7554,7 +7554,7 @@ def report_water_tekon_gvs(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pokazaniya_na_datu_water_tekon_gvs_report'
+    output_name = u'pokazaniya_na_datu_water_tekon_gvs_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -7644,7 +7644,7 @@ def report_tekon_heat_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pokazaniya_na_datu_heat_tekon_report'
+    output_name = u'pokazaniya_na_datu_heat_tekon_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -7948,7 +7948,7 @@ def report_water_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_water_report_'+translate(meters_name)+'_'+electric_data_end
+    output_name = u'heat_water_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -8266,7 +8266,7 @@ def report_elf_hvs_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'elf_hvs_report_'+electric_data_end
+    output_name = u'elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -8379,7 +8379,7 @@ def report_elf_hvs_potreblenie(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'potreblenie_elf_hvs_report'
+    output_name = u'potreblenie_elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+u'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -8492,7 +8492,7 @@ def report_elf_gvs_potreblenie(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'potreblenie_elf_gvs_report'
+    output_name = u'potreblenie_elf_gvs_report'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+u'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -8585,7 +8585,7 @@ def report_elf_gvs_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'elf_gvs_report_'+electric_data_end
+    output_name = u'elf_gvs_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
