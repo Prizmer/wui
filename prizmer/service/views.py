@@ -280,8 +280,9 @@ def GetTableFromExcel(sPath,sSheet):
         K=ws[u'k%s'%(row)].value
         L=ws[u'l%s'%(row)].value
         M=ws[u'm%s'%(row)].value
+        N=ws[u'n%s'%(row)].value
         
-        vals =[A,B,C,D,E,F,G,H,I,J,K,L,M]
+        vals =[A,B,C,D,E,F,G,H,I,J,K,L,M,N]
         dt.append(vals)
         row+=1
     return dt
@@ -293,6 +294,7 @@ def LoadObjectsAndAbons(sPath, sSheet):
     global cfg_sheet_name
     cfg_sheet_name=sSheet
     result="Объекты не загружены"
+    print 'test'
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
     for i in range(1,len(dtAll)):
@@ -368,6 +370,7 @@ def load_electric_objects(request):
     object_status    = ""
     counter_status    = ""
     result="Не загружено"
+    print 'test1'
     if request.is_ajax():
         if request.method == 'GET':
             request.session["choice_file"]    = fileName    = request.GET['choice_file']
@@ -378,6 +381,7 @@ def load_electric_objects(request):
             
             directory=os.path.join(BASE_DIR,'static/cfg/')
             sPath=directory+fileName
+            print sPath, sheet
             result=LoadObjectsAndAbons(sPath, sheet)
     
     object_status=result#"Загрузка объектов условно прошла"
@@ -407,6 +411,7 @@ def LoadElectricMeters(sPath, sSheet):
         type_meter=dtAll[i][8] #тип счётчика
         NumLic=dtAll[i][5] #номер лицевого счёта, тут используется как пароль для м-230-ум
         Group=dtAll[i][12]
+        attr1=dtAll[i][13]
         isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)        
         
@@ -466,6 +471,20 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), password = unicode(Group), guid_types_meters = TypesMeters.objects.get(guid = u"b53173f2-2307-4b70-b84c-61b634521e87") )
                 add_meter.save()
                 print u'Прибор добавлен' + ' --->   ' + u'Tekon_heat'
+            elif unicode(type_meter) == u'Пульсар ХВС':
+                add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), attr1 = unicode(attr1), guid_types_meters = TypesMeters.objects.get(guid = u"f1789bb7-7fcd-4124-8432-40320559890f") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар ХВС'
+            
+            elif unicode(type_meter) == u'Пульсар ГВС':
+                add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), attr1 = unicode(attr1), guid_types_meters = TypesMeters.objects.get(guid = u"a1a349ba-e070-4ec9-975d-9f39e61c34da") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар ГВС'
+
+            elif unicode(type_meter) == u'Пульсар Теплосчётчик':
+                add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
+                add_meter.save()
+                print u'Прибор добавлен' + ' --->   ' + u'Пульсар Теплосчётчик'
             else:
                 print u'Не найдено совпадение с существующим типом прибора'
                 met-=1
@@ -546,7 +565,8 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
     for i in range(1,len(dtAll)):
         print u'Обрабатываем строку ' + dtAll[i][6]+' - '+dtAll[i][7]
         meter=dtAll[i][6] #счётчик
-        PortType=dtAll[0][12] # com или tcp-ip
+        #print dtAll[0][11], dtAll[0][12]
+        PortType=dtAll[0][11] # com или tcp-ip
         #print 'i=',i,' len=', len(dtAll)
         ip_adr=unicode(dtAll[i][10]).strip()
         ip_port=unicode(dtAll[i][11]).strip()
@@ -580,13 +600,15 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                     guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
             
                     print guid_ip_port_from_excel
-                    guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
-                    add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
-                    add_ip_port_link.save()
+                    if (len(guid_ip_port_from_excel)>0):
+                        guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+                        add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+                        add_ip_port_link.save()
+                    else: print u'Вы забыли загрузить порты'
             else:
                 pass
             
-#signals.post_save.connect(add_link_meter, sender=Meters)
+signals.post_save.connect(add_link_meter, sender=Meters)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -722,7 +744,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             else:
                 pass
     
-#signals.post_save.connect(add_link_taken_params, sender=TakenParams)
+signals.post_save.connect(add_link_taken_params, sender=TakenParams)
 
 def load_water_objects(request):
     args={}
