@@ -97,7 +97,10 @@ urlpatterns = patterns('',
     url(r'^57/$', views.pulsar_water_period), # Показание за период с водосчётчиков Пульсар
     url(r'^58/$', views.pulsar_water_daily), # Показание на дату с водосчётчиков Пульсар
     
-    url(r'^60/$', views.pulsar_water_daily_row), # Показания по стоякам в одну строку на дату с водосчётчиков Пульсар   
+    url(r'^60/$', views.pulsar_water_daily_row), # Показания по стоякам в одну строку на дату с водосчётчиков Пульсар  
+    
+    url(r'^63/$', views.heat_elf_period), # Показание за период Эльф-тепло
+    url(r'^64/$', views.heat_elf_daily), # Показание на дату Эльф-тепло 
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),

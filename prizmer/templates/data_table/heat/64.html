@@ -1,0 +1,40 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания по теплосчётчикам Эльф на  <strong>{{electric_data_end}}</strong> </span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Энергия, Гкал</th>
+<th>Объём, м3</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<!-- <td>{{value.0}}</td> -->
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td><strong>{{value.2}}</strong></td>
+<td><strong>{{value.3}}</strong></td>
+
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>
