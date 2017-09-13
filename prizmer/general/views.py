@@ -5282,6 +5282,7 @@ def pokazaniya_water_identificators(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name
 
     return render_to_response("data_table/water/12.html", args)     
 
@@ -5310,6 +5311,7 @@ def pokazaniya_water_gvs_hvs_daily(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = obj_title
 
     return render_to_response("data_table/water/28.html", args)     
 def pokazaniya_water_gvs_hvs_current(request):
@@ -5350,6 +5352,7 @@ def pokazaniya_water_gvs_hvs_current(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = obj_title
 
     return render_to_response("data_table/water/26.html", args)     
 
@@ -5379,6 +5382,7 @@ def water_elf_hvs_by_date(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['res'] = u'ХВС'
+    args['obj_title'] = obj_title
     return render_to_response("data_table/water/52.html", args)     
 
 def water_elf_gvs_by_date(request):
@@ -5407,6 +5411,7 @@ def water_elf_gvs_by_date(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['res'] = u'ГВС'
+    args['obj_title'] = obj_title
 
     return render_to_response("data_table/water/52.html", args)
 
@@ -5438,6 +5443,7 @@ def water_elf_hvs_potreblenie(request):
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
     args['res'] = u'ХВС'
+    args['obj_title'] = obj_title
 
     return render_to_response("data_table/water/53.html", args)
     
@@ -5470,6 +5476,7 @@ def water_elf_gvs_potreblenie(request):
     args['electric_data_end'] = electric_data_end
     args['res'] = u'ГВС'
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = obj_title
 
     return render_to_response("data_table/water/53.html", args)
 
@@ -5539,6 +5546,7 @@ def potreblenie_water(request):
     args['data_table'] = data_table
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name
 
 
     return render_to_response("data_table/water/11.html", args)
@@ -10535,6 +10543,7 @@ def pokazaniya_heat(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
 
     return render_to_response("data_table/heat/18.html", args)
 
@@ -10571,6 +10580,7 @@ def pokazaniya_heat_v2(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
     return render_to_response("data_table/heat/18.html", args)
 
 def potreblenie_heat(request): 
@@ -10679,6 +10689,7 @@ def potreblenie_heat(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
 
 
     return render_to_response("data_table/heat/19.html", args)
@@ -10717,6 +10728,7 @@ def potreblenie_heat_v2(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
 
 
     return render_to_response("data_table/heat/19.html", args)
@@ -10762,6 +10774,7 @@ def pokazaniya_heat_current(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
 
     return render_to_response("data_table/heat/20.html", args)
 
@@ -10798,6 +10811,7 @@ def pokazaniya_heat_current_v2(request):
 
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
     return render_to_response("data_table/heat/20.html", args)
 
 # Test SPG
@@ -10838,6 +10852,7 @@ def pokazaniya_spg(request):
         
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
 
     return render_to_response("data_table/gas/22.html", args)
     
@@ -10878,6 +10893,7 @@ def pokazaniya_sayany(request):
         
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/30.html", args)
     
@@ -10919,6 +10935,7 @@ def pokazaniya_sayany_v2(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/30.html", args)
     
@@ -10961,6 +10978,7 @@ def pokazaniya_sayany_last(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/32.html", args)
     
@@ -10996,6 +11014,7 @@ def heat_potreblenie_sayany(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/33.html", args)
 
@@ -11038,6 +11057,7 @@ def water_by_date(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/38.html", args)
     
@@ -11083,6 +11103,7 @@ def water_potreblenie_pulsar(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/39.html", args)
 
@@ -11117,6 +11138,7 @@ def pokazaniya_water_hvs_tekon(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/34.html", args)
 
@@ -11152,6 +11174,7 @@ def water_potreblenie_hvs_tekon(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/35.html", args)
 
@@ -11185,6 +11208,7 @@ def pokazaniya_water_gvs_tekon(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/36.html", args)
 
@@ -11220,6 +11244,7 @@ def water_potreblenie_gvs_tekon(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/water/37.html", args)
 
@@ -11252,6 +11277,7 @@ def tekon_heat_by_date(request):
     
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/50.html", args)
 
@@ -11287,6 +11313,7 @@ def tekon_heat_potreblenie(request):
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
       
     return render_to_response("data_table/heat/51.html", args)
     
@@ -11397,6 +11424,7 @@ def resources_heat_by_date(request):
 
     args['data_table'] = data_table
     args['electric_data_end'] = electric_data_end
+    
       
     return render_to_response("data_table/48.html", args)
 
@@ -11521,6 +11549,7 @@ def forma_80020(request):
     args['data_table_check_data'] = data_table_check_data
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
+    args['obj_title'] = obj_title
       
     return render_to_response("data_table/electric/41.html", args)
     

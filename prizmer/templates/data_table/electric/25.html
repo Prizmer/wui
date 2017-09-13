@@ -13,7 +13,10 @@
 
 <br>
 {% if data_table %}
-<span>Таблица значений профиля показаний за период без учёта Кт</span> 
+<span>Таблица значений профиля показаний за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}} без учёта Кт</span> 
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
 <table class="content" id="data-table" >
 <tr>
 <th>Дата</th>
