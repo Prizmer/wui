@@ -8814,7 +8814,7 @@ def report_pulsar_water_daily(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'pulsar_water_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
+    output_name = u'pulsar_water_report_'+translate(obj_title)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -9038,7 +9038,7 @@ def report_pulsar_heat_daily(request):
 
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Пульсар. Потказания по теплу на ' + unicode(request.session["electric_data_end"])
+    ws['A2'] = 'Пульсар. Показания по теплу на ' + unicode(request.session["electric_data_end"])
     
 
     ws['A5'] = 'Абонент'
@@ -9119,10 +9119,11 @@ def report_pulsar_heat_daily(request):
             ws.cell('F%s'%(row)).style = ali_white
             next
 
-    #ws.row_dimensions[5].height = 63
+    ws.row_dimensions[5].height = 63
     ws.column_dimensions['A'].width = 20 
-    ws.column_dimensions['E'].width = 23 
-    ws.column_dimensions['F'].width = 23
+    ws.column_dimensions['C'].width = 23 
+    ws.column_dimensions['E'].width = 17 
+    ws.column_dimensions['F'].width = 17
 #    ws.column_dimensions['D'].width = 17
 
 #------------
