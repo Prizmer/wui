@@ -11951,7 +11951,8 @@ def heat_elf_period(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
             request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
-            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']   
+            request.session["electric_data_end"]   = electric_data_start   = request.GET['electric_data_start'] 
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_elf_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
