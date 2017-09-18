@@ -303,6 +303,9 @@ class ComportSettings(models.Model):
     read_timeout = models.SmallIntegerField()
     attempts = models.DecimalField(max_digits=3, decimal_places=0)
     delay_between_sending = models.IntegerField()
+    gsm_on = models.BooleanField('Использовать CSD канал?', default=False)
+    gsm_phone_number = models.CharField(unique=False, max_length=15)
+    gsm_init_string  = models.CharField(unique=False, max_length=50)
     class Meta:
         db_table = 'comport_settings'
         verbose_name = u'Com порт'
@@ -1227,6 +1230,7 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         
     elif instance.guid_types_meters.name == u'Меркурий 230-УМ':
         #Добавляем параметры для счётчика Меркурий на УСПД УМ-RTU.    
+        
         #-------------Суточные
         # "Показание". T0 A+
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"b6e89205-3814-463d-86d1-f52cec7d8962"))
@@ -1239,6 +1243,14 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param.save() 
         # "Показание". T3 A+
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"4e20bda9-6e75-4b0f-a99a-0e4c1cd07d3b"))
+        add_param.save()
+        
+        #-------------Мощность        
+        #А+ Профиль
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"922ad57c-8f5e-4f00-a78d-e3ba89ef859f")) # A+ 30-мин. срез мощности
+        add_param.save()        
+        #R+ Профиль
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"61101fa3-a96a-4934-9482-e32036c12829")) # R+ 30-мин. срез мощности
         add_param.save()
         
     elif instance.guid_types_meters.name == u'Пульсар Теплосчётчик':
@@ -1281,8 +1293,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
-#cfg_excel_name = 'D:\\Work\\08082017\\prizmer\\static\\cfg\\fili2_electric_work.xlsx'
-#cfg_sheet_name = u'k5'
+cfg_excel_name = 'D:\\Work\\18092017 GSM\\prizmer\\static\cfg\\omon.xlsx'
+cfg_sheet_name = u'vru'
 is_electic_cfg = True
 is_water_cfg = False
 is_heat_cfg = False

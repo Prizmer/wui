@@ -11549,7 +11549,6 @@ def forma_80020(request):
     args['data_table_check_data'] = data_table_check_data
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
-    args['obj_title'] = obj_title
       
     return render_to_response("data_table/electric/41.html", args)
     
