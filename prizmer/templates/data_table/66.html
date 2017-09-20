@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Отчёт по теплу и воде</title>
+<!-- Graph plugin-->
+{% load staticfiles %}	<link href="{%static "../../static/flot/examples.css"%}" rel="stylesheet" type="text/css">
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}  <script src="{%static "../../static/flot/jquery.flot.time.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.categories.js" %}" type="text/javascript" ></script>
+{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.axislabels.js" %}" type="text/javascript" ></script>
+
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Теплосчётчики Эльф.Отчёт по теплу и воде на <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Номер счётчика Эльф</th>
+<th>Показания Энергии на {{electric_data_end}}, Гкал</th>
+<th>Показания Объёма на {{electric_data_start}}, м3</th>
+<th>Счётчик ХВС</th>
+<th>Значение на {{electric_data_end}}</th>
+<th>Счётчик ГВС</th>
+<th>Значение на {{electric_data_end}}</th>
+</tr>
+
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
+</body>
+</html>

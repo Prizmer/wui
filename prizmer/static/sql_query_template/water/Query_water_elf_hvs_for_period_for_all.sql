@@ -1,14 +1,14 @@
-﻿Select ab_name, water_abons.factory_number_manual, z3.attr1,z3.val_start,z3.val_end,z3.delta
+﻿Select z_end.ab_name, z_end.factory_number_manual, z_end.attr1,z_end.val_end, z_start.val_start, z_end.val_end-z_start.val_start as delta
+from
+(Select ab_name, water_abons.factory_number_manual, z1.attr1,z1.val_end
 from water_abons
 left join 
-(Select z1.name,z1.factory_number_manual,z1.attr1,z1.value as val_start,z2.value as val_end, z1.value-z2.value as delta, z1.ab_guid
-from
 (SELECT 
   daily_values.date, 
   abonents.name,   
   meters.factory_number_manual, 
   meters.attr1, 
-  daily_values.value, 
+  daily_values.value as val_end, 
   taken_params.id,   
   params.channel,
   abonents.guid as ab_guid,
@@ -30,16 +30,21 @@ WHERE
   taken_params.guid_params = params.guid AND
   objects.name = 'Корпус 1' AND 
   params.channel = 1 AND 
-  daily_values.date='24.07.2017'
+  daily_values.date='20.09.2017'
 ORDER BY
-  abonents.name ASC) as z1,
-  
+  abonents.name ASC) as z1
+  on z1.factory_number_manual=water_abons.factory_number_manual 
+  where water_abons.obj_name='Корпус 1') as z_end,
+
+  (Select ab_name, water_abons.factory_number_manual, z2.attr1,z2.val_start
+from water_abons
+left join 
 (SELECT 
   daily_values.date, 
   abonents.name,   
   meters.factory_number_manual, 
   meters.attr1, 
-  daily_values.value, 
+  daily_values.value as val_start, 
   taken_params.id,   
   params.channel,
   abonents.guid as ab_guid,
@@ -61,10 +66,10 @@ WHERE
   taken_params.guid_params = params.guid AND
   objects.name = 'Корпус 1' AND 
   params.channel = 1 AND 
-  daily_values.date='24.07.2017'
+  daily_values.date='19.09.2017'
 ORDER BY
   abonents.name ASC) as z2
-  where z1.ab_guid=z2.ab_guid
-  ) as z3
-on water_abons.ab_guid=z3.ab_guid
-where water_abons.obj_name='Корпус 1'
+  on z2.factory_number_manual=water_abons.factory_number_manual
+  where water_abons.obj_name='Корпус 1') as z_start
+  where z_end.factory_number_manual=z_start.factory_number_manual
+  order by z_end.ab_name

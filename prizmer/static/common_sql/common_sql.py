@@ -1131,91 +1131,19 @@ def get_current_water_gvs_hvs(obj_title, obj_parent_title , electric_data, isAbo
             data_table=ChangeNull(data_table, electric_data)
     return data_table
 
-def makeSqlQuery_water_for_abon_gvs_hvs_elf_for_period(abon,obj_title, electric_data_end, electric_data_start, channel,attr):
-    sQuery="""
-    Select z1.name,z1.factory_number_manual,z1.%s,z1.value,z2.value, z1.value-z2.value as delta
-from
-(SELECT 
-  daily_values.date, 
-  abonents.name,   
-  meters.factory_number_manual, 
-  meters.%s, 
-  daily_values.value, 
-  taken_params.id,   
-  params.channel,
-  abonents.guid as ab_guid,
-   meters.guid
-FROM 
-  public.meters, 
-  public.abonents, 
-  public.objects, 
-  public.link_abonents_taken_params, 
-  public.taken_params, 
-  public.daily_values, 
-  public.params
-WHERE 
-  meters.guid = taken_params.guid_meters AND
-  abonents.guid_objects = objects.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  taken_params.id = daily_values.id_taken_params AND
-  taken_params.guid_params = params.guid AND
-  objects.name = '%s' AND 
-  params.channel = %s AND 
-  abonents.name = '%s' and
-  daily_values.date='%s'
-ORDER BY
-  abonents.name ASC) as z1,
-  
-(SELECT 
-  daily_values.date, 
-  abonents.name,   
-  meters.factory_number_manual, 
-  meters.%s, 
-  daily_values.value, 
-  taken_params.id,   
-  params.channel,
-  abonents.guid as ab_guid,
-   meters.guid
-FROM 
-  public.meters, 
-  public.abonents, 
-  public.objects, 
-  public.link_abonents_taken_params, 
-  public.taken_params, 
-  public.daily_values, 
-  public.params
-WHERE 
-  meters.guid = taken_params.guid_meters AND
-  abonents.guid_objects = objects.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  taken_params.id = daily_values.id_taken_params AND
-  taken_params.guid_params = params.guid AND
-  objects.name = '%s' AND 
-  params.channel = %s AND 
-  abonents.name = '%s' and
-  daily_values.date='%s'
-ORDER BY
-  abonents.name ASC) as z2
-  where z1.ab_guid=z2.ab_guid
-    """%(attr,attr,obj_title,channel,abon, electric_data_end,attr, obj_title,channel,abon, electric_data_start)
-    print sQuery
-    return sQuery
-
 def makeSqlQuery_water_for_obj_gvs_hvs_elf_for_period(obj_title, electric_data_end, electric_data_start,channel,attr):
     sQuery="""
-    Select ab_name, water_abons.factory_number_manual, z3.%s,z3.val_start,z3.val_end,z3.delta
+    Select z_end.ab_name, z_end.factory_number_manual, z_end.%s,z_end.val_end, z_start.val_start, z_end.val_end-z_start.val_start as delta
+from
+(Select ab_name, water_abons.factory_number_manual, z1.%s,z1.val_end
 from water_abons
 left join 
-(Select z1.name,z1.factory_number_manual,z1.%s,z1.value as val_start,z2.value as val_end, z1.value-z2.value as delta, z1.ab_guid
-from
 (SELECT 
   daily_values.date, 
   abonents.name,   
   meters.factory_number_manual, 
   meters.%s, 
-  daily_values.value, 
+  daily_values.value as val_end, 
   taken_params.id,   
   params.channel,
   abonents.guid as ab_guid,
@@ -1239,14 +1167,19 @@ WHERE
   params.channel = %s AND 
   daily_values.date='%s'
 ORDER BY
-  abonents.name ASC) as z1,
-  
+  abonents.name ASC) as z1
+  on z1.factory_number_manual=water_abons.factory_number_manual 
+  where water_abons.obj_name='%s') as z_end,
+
+  (Select ab_name, water_abons.factory_number_manual, z2.%s,z2.val_start
+from water_abons
+left join 
 (SELECT 
   daily_values.date, 
   abonents.name,   
   meters.factory_number_manual, 
   meters.%s, 
-  daily_values.value, 
+  daily_values.value as val_start, 
   taken_params.id,   
   params.channel,
   abonents.guid as ab_guid,
@@ -1271,11 +1204,97 @@ WHERE
   daily_values.date='%s'
 ORDER BY
   abonents.name ASC) as z2
-  where z1.ab_guid=z2.ab_guid
-  ) as z3
-on water_abons.ab_guid=z3.ab_guid
-where water_abons.obj_name='%s'
-    """%(attr,attr,attr,obj_title,channel, electric_data_end,attr, obj_title,channel, electric_data_start,obj_title)
+  on z2.factory_number_manual=water_abons.factory_number_manual
+  where water_abons.obj_name='%s') as z_start
+  where z_end.factory_number_manual=z_start.factory_number_manual
+  order by z_end.ab_name
+
+    """%(attr,attr,attr, obj_title,channel,electric_data_end,obj_title, attr, attr, obj_title,channel, electric_data_start,obj_title)
+    #print sQuery
+    #print '!!!!!!!!!!!!!attention'
+    return sQuery
+
+def makeSqlQuery_water_for_abon_gvs_hvs_elf_for_period(abon, obj_title, electric_data_end, electric_data_start, channel,attr):
+    sQuery="""
+    Select z_end.ab_name, z_end.factory_number_manual, z_end.%s,z_end.val_end, z_start.val_start, z_end.val_end-z_start.val_start as delta
+from
+(Select ab_name, water_abons.factory_number_manual, z1.%s,z1.val_end
+from water_abons
+left join 
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value as val_end, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.factory_number_manual=water_abons.factory_number_manual 
+  where water_abons.obj_name='%s') as z_end,
+
+  (Select ab_name, water_abons.factory_number_manual, z2.%s,z2.val_start
+from water_abons
+left join 
+(SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.%s, 
+  daily_values.value as val_start, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = %s AND 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z2
+  on z2.factory_number_manual=water_abons.factory_number_manual
+  where water_abons.obj_name='%s') as z_start
+  where z_end.factory_number_manual=z_start.factory_number_manual
+  and  z_end.ab_name='%s'
+  order by z_end.ab_name
+
+    """%(attr,attr,attr, obj_title,channel,electric_data_end,obj_title, attr, attr, obj_title,channel, electric_data_start,obj_title,abon)
+    
     return sQuery
 
 def get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,electric_data_start, channel,attr, isAbon):
@@ -1286,12 +1305,8 @@ def get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,e
     else: 
         cursor.execute(makeSqlQuery_water_for_obj_gvs_hvs_elf_for_period(obj_title, electric_data_end, electric_data_start,channel,attr))
     data_table = cursor.fetchall()
-    
-    if len(data_table)>0: 
-        if isAbon:
-            data_table=ChangeNull(data_table, None)
-        else:
-            data_table=ChangeNull(data_table, electric_data_end)
+
+    data_table=ChangeNull(data_table, None)
     return data_table
 
 def makeSqlQuery_water_for_abon_gvs_hvs_elf(obj_title, obj_parent_title , electric_data_end, channel, attr):
@@ -5662,50 +5677,19 @@ def get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_
     
 def MakeSqlQuery_heat_elf_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-    select heat_abons.ab_name, heat_abons.factory_number_manual, z3.energy_start, z3.energy_end, z3.delta_energy, z3.volume_start, z3.volume_end, z3.delta_volume
+    Select z_end.ab_name, z_end.factory_number_manual, z_end.energy_end,z_start.energy_start,z_end.energy_end-z_start.energy_start as delta_energy, z_end.volume_end,z_start.volume_start,z_end.volume_end-z_start.volume_start as delta_volume
+from
+(select heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy_end, z2.volume_end
 from heat_abons
 left join
-(Select z1.ab_name, z1.factory_number_manual, z1.energy as energy_end,z2.energy as energy_start, z1.energy-z2.energy as delta_energy, z1.volume as volume_end,z2.volume as volume_start, z1.volume-z2.volume as delta_volume
-from
+
 (SELECT 
 daily_values.date,                           
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
-
-FROM 
-  public.link_abonents_taken_params, 
-  public.meters, 
-  public.abonents, 
-  public.taken_params, 
-  public.objects, 
-  public.daily_values, 
-  public.params, 
-  public.names_params, 
-  public.types_meters
-WHERE 
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  meters.guid = taken_params.guid_meters AND
-  meters.guid_types_meters = types_meters.guid AND
-  abonents.guid = link_abonents_taken_params.guid_abonents AND
-  abonents.guid_objects = objects.guid AND
-  taken_params.guid_params = params.guid AND
-  daily_values.id_taken_params = taken_params.id AND
-  params.guid_names_params = names_params.guid AND
-  params.guid_types_meters = types_meters.guid AND
-  objects.name = '%s' AND 
-  types_meters.name = '%s' and
-  daily_values.date='%s'
-  group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z1,
-  (SELECT 
-daily_values.date,                           
-                          objects.name, 
-                          abonents.name as ab_name, 
-                          meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end
 
 FROM 
   public.link_abonents_taken_params, 
@@ -5731,11 +5715,52 @@ WHERE
   types_meters.name = '%s' and
   daily_values.date='%s'
   group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z2
-  where z1.factory_number_manual=z2.factory_number_manual) as z3
-  on z3.factory_number_manual=heat_abons.factory_number_manual
+  on z2.factory_number_manual=heat_abons.factory_number_manual
   where heat_abons.obj_name='%s'
-  order by ab_name
-    """%(my_params[0],my_params[1],obj_title,my_params[2],electric_data_end, 
+) as z_end,
+
+(select heat_abons.ab_name, heat_abons.factory_number_manual, z1.energy_start, z1.volume_start
+from heat_abons
+left join
+(SELECT 
+daily_values.date,                           
+                          objects.name, 
+                          abonents.name as ab_name, 
+                          meters.factory_number_manual,                           
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start
+
+FROM 
+  public.link_abonents_taken_params, 
+  public.meters, 
+  public.abonents, 
+  public.taken_params, 
+  public.objects, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  meters.guid_types_meters = types_meters.guid AND
+  abonents.guid = link_abonents_taken_params.guid_abonents AND
+  abonents.guid_objects = objects.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' and
+  daily_values.date='%s'
+  group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z1
+  on z1.factory_number_manual=heat_abons.factory_number_manual
+  where heat_abons.obj_name='%s'
+) as z_start
+  
+  where z_start.factory_number_manual=z_end.factory_number_manual
+  order by z_start.ab_name
+    """%(my_params[0],my_params[1],obj_title,my_params[2],electric_data_end,obj_title, 
          my_params[0],my_params[1],obj_title,my_params[2],electric_data_start,obj_title)
     
     return sQuery
@@ -5923,6 +5948,269 @@ def get_data_table_elf_heat_daily(obj_parent_title, obj_title, electric_data_end
         cursor.execute(MakeSqlQuery_heat_elf_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params))
     else:
         cursor.execute(MakeSqlQuery_heat_elf_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+    
+def MakeSqlQuery_heat_water_elf_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    select z_heat.ab_name, z_heat.factory_number_manual, z_heat.energy, z_heat.volume, z_water_hvs.attr1, z_water_hvs.value,z_water_gvs.attr2, z_water_gvs.value
+from
+(Select heat_abons.ab_name, heat_abons.factory_number_manual, z1.energy, z1.volume
+from heat_abons
+left join
+(SELECT 
+daily_values.date,                           
+                          objects.name, 
+                          abonents.name as ab_name, 
+                          meters.factory_number_manual,                           
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+
+FROM 
+  public.link_abonents_taken_params, 
+  public.meters, 
+  public.abonents, 
+  public.taken_params, 
+  public.objects, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  meters.guid_types_meters = types_meters.guid AND
+  abonents.guid = link_abonents_taken_params.guid_abonents AND
+  abonents.guid_objects = objects.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' and
+  daily_values.date='%s'
+  group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z1
+  on heat_abons.factory_number_manual=z1.factory_number_manual
+  where heat_abons.obj_name='%s'
+) as z_heat,
+  (Select z1.date,ab_name,water_abons.factory_number_manual, z1.attr1, z1.value
+from water_abons
+left join
+(
+SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.attr1, 
+  daily_values.value, 
+  taken_params.id, 
+  
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = 1 and 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.ab_guid=water_abons.ab_guid
+  where water_abons.obj_name = '%s' 
+) as z_water_hvs,
+(Select z1.date,ab_name,water_abons.factory_number_manual, z1.attr2, z1.value
+from water_abons
+left join
+(
+SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.attr2, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = 2 and 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.ab_guid=water_abons.ab_guid
+  where water_abons.obj_name = '%s' 
+) as z_water_gvs
+where z_heat.ab_name=z_water_hvs.ab_name
+and z_heat.ab_name=z_water_gvs.ab_name
+order by z_heat.ab_name
+    """%(my_params[0],my_params[1],obj_title,my_params[2],electric_data_end,obj_title,
+         obj_title,electric_data_end, obj_title,obj_title,electric_data_end, obj_title)
+    #print sQuery
+    return sQuery
+
+def MakeSqlQuery_heat_water_elf_daily_for_abon(obj_title, abon, electric_data_end, my_params):
+    sQuery="""
+    select z_heat.ab_name, z_heat.factory_number_manual, z_heat.energy, z_heat.volume, z_water_hvs.attr1, z_water_hvs.value,z_water_gvs.attr2, z_water_gvs.value
+from
+(Select heat_abons.ab_name, heat_abons.factory_number_manual, z1.energy, z1.volume
+from heat_abons
+left join
+(SELECT 
+daily_values.date,                           
+                          objects.name, 
+                          abonents.name as ab_name, 
+                          meters.factory_number_manual,                           
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+
+FROM 
+  public.link_abonents_taken_params, 
+  public.meters, 
+  public.abonents, 
+  public.taken_params, 
+  public.objects, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  meters.guid_types_meters = types_meters.guid AND
+  abonents.guid = link_abonents_taken_params.guid_abonents AND
+  abonents.guid_objects = objects.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' and
+  daily_values.date='%s'
+  group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z1
+  on heat_abons.factory_number_manual=z1.factory_number_manual
+  where heat_abons.obj_name='%s'
+) as z_heat,
+  (Select z1.date,ab_name,water_abons.factory_number_manual, z1.attr1, z1.value
+from water_abons
+left join
+(
+SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.attr1, 
+  daily_values.value, 
+  taken_params.id, 
+  
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = 1 and 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.ab_guid=water_abons.ab_guid
+  where water_abons.obj_name = '%s' 
+) as z_water_hvs,
+(Select z1.date,ab_name,water_abons.factory_number_manual, z1.attr2, z1.value
+from water_abons
+left join
+(
+SELECT 
+  daily_values.date, 
+  abonents.name,   
+  meters.factory_number_manual, 
+  meters.attr2, 
+  daily_values.value, 
+  taken_params.id,   
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid
+FROM 
+  public.meters, 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params
+WHERE 
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  objects.name = '%s' AND 
+  params.channel = 2 and 
+  daily_values.date='%s'
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.ab_guid=water_abons.ab_guid
+  where water_abons.obj_name = '%s' 
+) as z_water_gvs
+where z_heat.ab_name=z_water_hvs.ab_name
+and z_heat.ab_name=z_water_gvs.ab_name and
+z_heat.ab_name='%s'
+order by z_heat.ab_name
+    """%(my_params[0],my_params[1],obj_title,my_params[2],electric_data_end,obj_title,
+         obj_title,electric_data_end, obj_title,obj_title,electric_data_end, obj_title, abon)
+    return sQuery
+
+
+def get_data_table_elf_heat_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+    my_params=[u'Энергия',u'Объем',u'Эльф 1.08']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_heat_water_elf_daily_for_abon(obj_parent_title, obj_title, electric_data_end, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_heat_water_elf_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params))
     data_table = cursor.fetchall()
     
     return data_table
