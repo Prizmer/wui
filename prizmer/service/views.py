@@ -300,11 +300,17 @@ def LoadObjectsAndAbons(sPath, sSheet):
     for i in range(1,len(dtAll)):
         print u'Обрабатываем строку ' + dtAll[i][2]+' - '+dtAll[i][3]
         obj_l0=dtAll[i][0]
+        print obj_l0
         obj_l1=dtAll[i][1]
+        print obj_l1
         obj_l2=dtAll[i][2]
+        print obj_l2
         abon=dtAll[i][3]
+        print abon
         account_1=dtAll[i][4]
+        print account_1
         account_2=dtAll[i][5]
+        print account_2
         isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")
         isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")
         isNewObj_l2=SimpleCheckIfExist('objects','name',obj_l2,"","","")
@@ -381,7 +387,7 @@ def load_electric_objects(request):
             
             directory=os.path.join(BASE_DIR,'static/cfg/')
             sPath=directory+fileName
-            print sPath, sheet
+            print 'Path:_____',sPath, sheet
             result=LoadObjectsAndAbons(sPath, sheet)
     
     object_status=result#"Загрузка объектов условно прошла"
@@ -400,18 +406,25 @@ def LoadElectricMeters(sPath, sSheet):
     global cfg_sheet_name
     cfg_sheet_name=sSheet
     result=u"Счётчики не загружены"
+    print type(sPath), sPath, type(sSheet), sSheet
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     met=0
+    print 'load dt - ok'
     for i in range(1,len(dtAll)):
-        print u'Обрабатываем строку ' + dtAll[i][3]+' - '+dtAll[i][6]
-        obj_l2=dtAll[i][2] #корпус
-        abon=dtAll[i][3] #квартира
-        meter=dtAll[i][6] #номер счётчика
-        adr=dtAll[i][7] #номер в сети
-        type_meter=dtAll[i][8] #тип счётчика
-        NumLic=dtAll[i][5] #номер лицевого счёта, тут используется как пароль для м-230-ум
-        Group=dtAll[i][12]
-        attr1=dtAll[i][13]
+        print u'Обрабатываем строку ' + unicode(dtAll[i][3])+' - '+unicode(dtAll[i][6])
+        obj_l2=unicode(dtAll[i][2]) #корпус
+        abon=unicode(dtAll[i][3]) #квартира
+        meter=unicode(dtAll[i][6]) #номер счётчика
+        adr=unicode(dtAll[i][7]) #номер в сети
+        type_meter=unicode(dtAll[i][8]) #тип счётчика
+        NumLic=unicode(dtAll[i][5]) #номер лицевого счёта, тут используется как пароль для м-230-ум
+        Group=unicode(dtAll[i][12])
+        attr1=unicode(dtAll[i][13])
+#        print obj_l2
+#        print abon
+#        print meter
+#        print adr
+#        print type_meter
         isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)        
         
@@ -421,6 +434,7 @@ def LoadElectricMeters(sPath, sSheet):
         if not (isNewMeter):
             
             print 'create meter '+meter +" adress: "+adr
+            
             if unicode(type_meter) == u'М-200':
                 add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"6224d20b-1781-4c39-8799-b1446b60774d") )
                 add_meter.save()
@@ -428,7 +442,13 @@ def LoadElectricMeters(sPath, sSheet):
                 
                 
             elif unicode(type_meter) == u'М-230':
+                print 'm-230'
+#                print unicode(type_meter)
+#                print unicode(meter)
+#                print unicode(adr)
                 add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), password = 111111 , factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"423b33a7-2d68-47b6-b4f6-5b470aedc4f4") )
+#                print add_meter
+#                print 'bryak'
                 add_meter.save()
                 print u'Прибор добавлен' + ' --->   ' + u'М-230'
                 
@@ -497,6 +517,12 @@ def LoadElectricMeters(sPath, sSheet):
 
 def load_electric_counters(request):
     args={}
+    fileName=""
+    sheet    = ""
+    tcp_ip_status    = ""
+    object_status    = ""
+    counter_status    = ""
+    result=""
     if request.is_ajax():
         if request.method == 'GET':
             request.session["choice_file"]    = fileName    = request.GET['choice_file']
@@ -506,6 +532,7 @@ def load_electric_counters(request):
             request.session["counter_status"]    = counter_status    = request.GET['counter_status']
             directory=os.path.join(BASE_DIR,'static/cfg/')
             sPath=directory+fileName
+            print 'before loading'
             result=LoadElectricMeters(sPath, sheet)
     counter_status=result#"Загрузка счётчиков условно прошла"
         
@@ -563,7 +590,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
     for i in range(1,len(dtAll)):
-        print u'Обрабатываем строку ' + dtAll[i][6]+' - '+dtAll[i][7]
+        print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         meter=dtAll[i][6] #счётчик
         #print dtAll[0][11], dtAll[0][12]
         PortType=dtAll[0][11] # com или tcp-ip
@@ -608,7 +635,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             
-#signals.post_save.connect(add_link_meter, sender=Meters)
+signals.post_save.connect(add_link_meter, sender=Meters)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -744,7 +771,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             else:
                 pass
     
-#signals.post_save.connect(add_link_taken_params, sender=TakenParams)
+signals.post_save.connect(add_link_taken_params, sender=TakenParams)
 
 def load_water_objects(request):
     args={}
