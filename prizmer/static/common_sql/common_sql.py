@@ -1300,7 +1300,7 @@ ORDER BY
 def get_daily_water_elf_period(obj_title, obj_parent_title , electric_data_end,electric_data_start, channel,attr, isAbon):
     cursor = connection.cursor()
     if isAbon:
-        print attr
+        #print attr
         cursor.execute(makeSqlQuery_water_for_abon_gvs_hvs_elf_for_period(obj_title, obj_parent_title, electric_data_end, electric_data_start, channel,attr))
     else: 
         cursor.execute(makeSqlQuery_water_for_obj_gvs_hvs_elf_for_period(obj_title, electric_data_end, electric_data_start,channel,attr))
@@ -4860,6 +4860,35 @@ def get_taken_param_by_meters_number_and_guid_params(meters_number, guid_params)
     simpleq = simpleq.fetchall()
     return simpleq
 
+def get_name_of_type_meter_by_serial_number(meters_number):
+    # Получаем имя типа счётчика по его заводскому номеру
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                          types_meters.name
+                        FROM 
+                          public.meters, 
+                          public.types_meters
+                        WHERE 
+                          meters.guid_types_meters = types_meters.guid AND
+                          meters.factory_number_manual = %s;""",[meters_number])
+    simpleq = simpleq.fetchall()
+    return simpleq
+
+def get_name_of_type_meter_by_guid(meters_guid):
+    # Получаем имя типа счётчика по его guid
+    simpleq = connection.cursor()
+    simpleq.execute("""SELECT 
+                      types_meters.name
+                    FROM 
+                      public.meters, 
+                      public.types_meters
+                    WHERE 
+                      meters.guid_types_meters = types_meters.guid AND
+                      meters.guid = %s;""",[meters_guid])
+    simpleq = simpleq.fetchall()
+    return simpleq
+    
+
 def get_taken_param_by_guid_meters_and_guid_params(guid_meters, guid_params):
     simpleq = connection.cursor()
     simpleq.execute("""SELECT 
@@ -5438,7 +5467,7 @@ ORDER BY
 ) as z2
 where z1.factory_number_manual=z2.factory_number_manual
     """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1])
-    print sQuery
+    #print sQuery
     return sQuery
     
 def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):

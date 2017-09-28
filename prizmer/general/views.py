@@ -4882,9 +4882,6 @@ def profil_30_aplus(request):
         if request.method == 'GET':
             request.session["obj_title"]           = meters_name           = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']                     
-            print u'мы где-то тут'
-            print electric_data_end
-            print meters_name
             
             a_plus = connection.cursor()
             a_plus.execute("""SELECT 
@@ -4909,7 +4906,6 @@ def profil_30_aplus(request):
                                   meters.name = %s AND 
                                   names_params.name = 'A+ Профиль';""",[electric_data_end, meters_name])
             a_plus = a_plus.fetchall()
-            print a_plus
             val_table_a_plus = []
            
             for x in range(len(a_plus)):
@@ -11460,15 +11456,18 @@ def forma_80020(request):
 
             # Делаем информационную табличку со счётчиками входящими в данную группу
             data_table = common_sql.get_info_group_80020_meters(group_name)
-           
+            #print group_name
+            #print u'Это наш data_TABLE --> ', data_table
+        
         # Делаем проверку на сумму профилей мощности и размности показаний счётчика
             # Узнаем начальные и конечные показания по счётчику
             # T0 A+ Начальная дата
+                
             for y in range(len(data_table)):
                 data_table[y] = list(data_table[y])
                 my_parametr = u'T0 A+'
                 result = common_sql.get_data_table_electric_parametr_daily_by_meters_number(data_table[y][3], electric_data_start, my_parametr)
-               
+
                 if result:
                     data_table[y].append(result[0][0])
                 else:
@@ -11516,13 +11515,25 @@ def forma_80020(request):
             for x in range(len(data_table)):
                 #Получаем считываемые параметры по заводскому номеру прибора.
                  #A+
-                 guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
-                 result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
-                 list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
+                name_of_type_meters = common_sql.get_name_of_type_meter_by_serial_number(data_table[x][3])
+                guid_params = u''
+                if name_of_type_meters[0][0] == u'Меркурий 230-УМ':
+                    guid_params = u'922ad57c-8f5e-4f00-a78d-e3ba89ef859f'
+                elif name_of_type_meters[0][0] == u'Меркурий 230':
+                    guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
+                else:
+                    pass
+                result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
+                list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
                  #R+
-                 guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
-                 result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
-                 list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
+                if name_of_type_meters[0][0] == u'Меркурий 230-УМ':
+                     guid_params = u'61101fa3-a96a-4934-9482-e32036c12829'
+                elif name_of_type_meters[0][0] == u'Меркурий 230':
+                     guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
+                else:
+                    pass
+                result = common_sql.get_taken_param_by_meters_number_and_guid_params(data_table[x][3], guid_params)
+                list_of_taken_params.append(unicode(result[0][0]) + u' ' + unicode(result[0][1]))
                                 
             # Добавляем дату в лист с параметрами и делаем таблицу для шапки таблицы 
             list_of_taken_params.insert(0, u'Дата')
@@ -11549,7 +11560,7 @@ def forma_80020(request):
     args['data_table_check_data'] = data_table_check_data
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
-      
+    
     return render_to_response("data_table/electric/41.html", args)
     
 def pulsar_heat_period(request):

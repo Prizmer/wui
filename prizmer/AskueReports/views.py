@@ -5117,8 +5117,6 @@ def report_sayany_last(request):
     obj_key             = request.session['obj_key']
 
     
-    #print parent_name,meters_name,electric_data_end, obj_key
-    
     data_table = []
 #    if request.is_ajax():
 #        #if request.method == 'GET':
@@ -5134,7 +5132,6 @@ def report_sayany_last(request):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
         if (data_table[i][3] is None):
-            #print data_table[i][1], meters_name
             data_table[i][0]=electric_data_end
             dt=common_sql.get_data_table_by_date_heat_sayany_v2(data_table[i][1], meters_name, None, True)
             if (len(dt)>0):
@@ -5394,7 +5391,6 @@ def report_water_potreblenie_pulsar(request):
     data_table=[]
     
     if (bool(is_abonent_level.search(obj_key))): 
-        #print 'test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
         data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name,electric_data_start, electric_data_end, False)
@@ -5410,7 +5406,6 @@ def report_water_potreblenie_pulsar(request):
             num=num.replace(u'ХВС, №', ' ')
             num=num.replace(u'ГВС, №', ' ')
             data_table[i][3]=num
-            #print num
         data_table[i]=tuple(data_table[i])
 
         
@@ -5538,8 +5533,6 @@ def pokazaniya_water_current_report(request):
         for row in data_table_temp:
             if row[4]==u'Н/Д' and row[5]==u'Н/Д':
                 row2=common_sql.get_current_water_gvs_hvs(unicode(row[2]), unicode(row[6]) , electric_data_end, True)
-                #print row2
-                #print unicode(row[2]), unicode(row[6]), electric_data_end, True
                 if len(row2)==0:
                     r=[unicode(electric_data_end), u'Н/Д', unicode(row[2]),unicode(row[3]), u'Н/Д', u'Н/Д']
                     data_table.append(r)
@@ -7706,9 +7699,7 @@ def report_potreblenie_heat(request):
                      
     if (bool(is_abonent_level.search(obj_key))):        
         data_table_end = common_sql.get_data_table_by_date_heat(meters_name, parent_name, electric_data_end)
-        #print data_table_end
         data_table_start = common_sql.get_data_table_by_date_heat(meters_name, parent_name, electric_data_start)
-        #print data_table_start
         data_table = []
         for x in range(len(data_table_end)):
             try:
@@ -8033,20 +8024,31 @@ def report_forma_80020(request):
             list_of_taken_params = []
             #Получаем считываемые параметры по guid счётчика.
              #A+
-            guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
+            name_of_type_meters = common_sql.get_name_of_type_meter_by_guid(meters_guid_list[x])
+            if name_of_type_meters[0][0] == u'Меркурий 230-УМ':
+                guid_params = u'922ad57c-8f5e-4f00-a78d-e3ba89ef859f'
+            elif name_of_type_meters[0][0] == u'Меркурий 230':
+                guid_params = u'6af9ddce-437a-4e07-bd70-6cf9dcc10b31'
+            else:
+                pass
             result = common_sql.get_taken_param_by_guid_meters_and_guid_params(meters_guid_list[x], guid_params)
             result_list = []
             result_list.append(unicode(result[0][0]))
             result_list.append(unicode(result[0][1]))
             list_of_taken_params.append(result_list)
             #R+
-            guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
+            if name_of_type_meters[0][0] == u'Меркурий 230-УМ':
+                 guid_params = u'61101fa3-a96a-4934-9482-e32036c12829'
+            elif name_of_type_meters[0][0] == u'Меркурий 230':
+                 guid_params = u'66e997c0-8128-40a7-ae65-7e8993fbea61'
+            else:
+                pass
+            
             result = common_sql.get_taken_param_by_guid_meters_and_guid_params(meters_guid_list[x], guid_params)
             result_list = []
             result_list.append(unicode(result[0][0]))
             result_list.append(unicode(result[0][1]))
             list_of_taken_params.append(result_list)
-            #print list_of_taken_params
             
             for y in range(len(list_of_taken_params)):
                 my_dict_of_profil = {0: [u'0000', u'0030', 0, 1],
@@ -8175,8 +8177,7 @@ def report_forma_80020(request):
     output_name = u'80020_' + unicode(dogovor_number_from_base) + u'_' + start_date.strftime('%Y%m%d') + u'-'+ end_date.strftime('%Y%m%d')
     file_ext = u'zip'
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
-
-   
+  
     return response
 
 def report_elf_hvs_by_date(request):

@@ -833,14 +833,14 @@ def LoadObjectsAndAbons_water(sPath, sheet):
     kv=0
     for i in range(2,len(dtAll)):
         obj_l0=u'Вода' # всегда будет Вода как объект-родитель
-        obj_l1=unicode(dtAll[i][0]) #корпус
-        obj_l2=unicode(dtAll[i][1])#квартира
+        obj_l1=dtAll[i][0] #корпус
+        obj_l2=dtAll[i][1] #квартира
         if not dtAll[i][1] or dtAll[i][1]==None:
             j=i
             while not obj_l2 or obj_l2==None:
                 j-=1
-                obj_l2=unicode(dtAll[j][1])
-        abon=unicode(dtAll[i][2]) #абонент он же счётчик по воде
+                obj_l2=dtAll[j][1]
+        abon=dtAll[i][2] #абонент он же счётчик по воде
 #        chanel=dtAll[i][4] # канал пульсара
 #        numPulsar=dtAll[i][5] #номер пульсара
 #        typePulsar=dtAll[i][5] #тип пульсара
