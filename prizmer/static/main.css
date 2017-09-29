@@ -216,6 +216,29 @@ font-size: small;
 padding: 3px;
 }
 
+.table_vertical
+{
+	table-layout: fixed;
+	width:100%;
+}
+.th_vertical
+{
+	/* transform-origin: 100% 0;  */
+	transform:rotate(-90deg);
+	height:300px;
+	width:20px;
+	white-space: nowrap;
+	padding:3px;
+	padding-top:0;
+	text-align:left;
+
+}
+
+.td_vertical
+{
+	width:20px;
+}
+
 .th_hvs
 {
 background-color:#E6E6FA;

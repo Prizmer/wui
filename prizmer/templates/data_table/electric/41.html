@@ -14,7 +14,7 @@
 <br>
 <span>Номер договора: <strong>{{data_table.0.2}}</strong><span>
 <br>
-<table class="content" id="data-table" >
+<table id="data-table" >
 <tr>
 <th>Заводской номер</th>
 <th>Псевдоним</th>
@@ -49,20 +49,21 @@
 <br>
 <span>Проверка наличия данных</span>
 {% if data_table_check_data_header %}
-<table class="content" id="data-table_2" >
+<table class="table_vertical" id="data-table_2" >
 <thead>
+
 <tr>
 {% for value in data_table_check_data_header %}
-   <th>{{value}}</th>
+   <th class="th_vertical">{{value}}</th>
 {% endfor %}
 </tr>
 </thead>
 {% for value in data_table_check_data %}
 <tr>
 <td>{{value.0|date:"d M Y"}}</td>
-<td>{{value.1}}</td>
-<td>{{value.2}}</td>
-<td>{{value.3}}</td>
+<td class="td_vertical">{{value.1}}</td>
+<td class="td_vertical">{{value.2}}</td>
+<td class="td_vertical">{{value.3}}</td>
 <td>{{value.4}}</td>
 <td>{{value.5}}</td>
 <td>{{value.6}}</td>
