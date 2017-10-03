@@ -5402,38 +5402,11 @@ def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,ele
     #print obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1]
     #print obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1]    
     sQuery="""
-    Select z1.name, z1.type_meters, z1.attr1, z1.factory_number_manual,z1.value,z2.value, z2.value-z1.value as delta
+    Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,z1.value_start,z2.value_end, z2.value_end-z1.value_start as delta
 from
-(SELECT 
-  daily_values.date,  
-  abonents.name, 
-  substring(types_meters.name from 9 for 11) as type_meters,   
-  meters.attr1,
-  meters.factory_number_manual,   
-  daily_values.value,   
-  abonents.guid
-FROM 
-  public.abonents, 
-  public.objects, 
-  public.link_abonents_taken_params, 
-  public.taken_params, 
-  public.daily_values, 
-  public.meters, 
-  public.types_meters
-WHERE 
-  abonents.guid_objects = objects.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  taken_params.guid_meters = meters.guid AND
-  daily_values.id_taken_params = taken_params.id AND
-  meters.guid_types_meters = types_meters.guid AND
-  objects.name = '%s' AND 
-  abonents.name='%s' and
-  daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
-ORDER BY
-  abonents.name ASC
-) as z1,
+(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value as value_start
+from water_pulsar_abons
+left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
@@ -5462,25 +5435,19 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
-ORDER BY
-  abonents.name ASC
-) as z2
-where z1.factory_number_manual=z2.factory_number_manual
-    """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1])
-    #print sQuery
-    return sQuery
-    
-def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
-    sQuery="""
-    Select water_pulsar_abons.ab_name, z3.type_meters, z3.attr1, water_pulsar_abons.factory_number_manual, z3.val_start,z3.val_end, z3.delta
+) as z0
+on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
+where water_pulsar_abons.obj_name='%s' 
+and water_pulsar_abons.ab_name='%s'
+) as z1,
+(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value as value_end
 from water_pulsar_abons
-Left Join
-(Select z1.name, z1.type_meters, z1.attr1, z1.factory_number_manual,z1.value as val_start,z2.value as val_end, z2.value-z1.value as delta
-from
+left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11) as type_meters,   
+  substring(types_meters.name from 9 for 11)as type_meters,
+   
   meters.attr1,
   meters.factory_number_manual,   
   daily_values.value,   
@@ -5501,11 +5468,26 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   meters.guid_types_meters = types_meters.guid AND
   objects.name = '%s' AND 
+  abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
-ORDER BY
-  abonents.name ASC
-) as z1,
+) as z1
+on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+where water_pulsar_abons.obj_name='%s' 
+and water_pulsar_abons.ab_name='%s'
+) as z2
+where z1.factory_number_manual=z2.factory_number_manual
+    """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title, obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1],obj_parent_title, obj_title)
+    #print sQuery
+    return sQuery
+    
+def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+    sQuery="""
+   Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,z1.value_start,z2.value_end, z2.value_end-z1.value_start as delta
+from
+(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value as value_start
+from water_pulsar_abons
+left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
@@ -5530,15 +5512,51 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   meters.guid_types_meters = types_meters.guid AND
   objects.name = '%s' AND 
+
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
-ORDER BY
-  abonents.name ASC
+) as z0
+on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
+where water_pulsar_abons.obj_name='Корпус Б1' 
+
+) as z1,
+(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value as value_end
+from water_pulsar_abons
+left join
+(SELECT 
+  daily_values.date,  
+  abonents.name, 
+  substring(types_meters.name from 9 for 11)as type_meters,
+   
+  meters.attr1,
+  meters.factory_number_manual,   
+  daily_values.value,   
+  abonents.guid
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+
+  daily_values.date = '%s' and
+  (types_meters.name='%s' or types_meters.name='%s')
+) as z1
+on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+where water_pulsar_abons.obj_name='%s' 
+
 ) as z2
-where z1.factory_number_manual=z2.factory_number_manual) as z3
-on water_pulsar_abons.factory_number_manual=z3.factory_number_manual
-where water_pulsar_abons.obj_name='%s'
-order by water_pulsar_abons.ab_name, z3.type_meters, z3.attr1
+where z1.factory_number_manual=z2.factory_number_manual
     """%(obj_title, electric_data_start, my_params[0], my_params[1], obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
     return sQuery
     
