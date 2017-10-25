@@ -7942,7 +7942,7 @@ def report_water_by_date(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_water_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_end
+    output_name = u'water_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
