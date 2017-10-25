@@ -27,4 +27,16 @@ WHERE
   taken_params.guid_params = params.guid AND
   link_meters_tcpip_settings.guid_meters = meters.guid AND
   link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
-  params.guid_types_meters = types_meters.guid;
+  params.guid_types_meters = types_meters.guid and
+  types_meters.name='Меркурий 230'
+    group by objects.name, 
+  abonents.name, 
+  meters.factory_number_manual, 
+  meters.address, 
+  types_meters.name, 
+  link_abonents_taken_params.coefficient, 
+  tcpip_settings.ip_address, 
+  tcpip_settings.ip_port
+  order by 
+objects.name ,
+  abonents.name

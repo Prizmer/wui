@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
 
-    url(r'^test/$', views.choose_service), # Выберите отчет
+    url(r'^config/$', views.choose_service), # Выберите отчет
     url(r'^service_file/$', views.service_file), # форма для загрузки файла на сервер
     url(r'^service_file_loading/$', views.service_file_loading), # загрузка файла на сервер
     url(r'^service_electric/$', views.service_electric), # электрика, загрузка нужных полей

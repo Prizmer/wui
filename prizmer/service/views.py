@@ -1096,7 +1096,7 @@ def change_electric_meters(request):
             if (not old_meter or old_meter==None or new_meter==None or not new_meter):
                 change_meter_status=u"Заполните обе ячейки"
             else:
-                change_meter_status=ChangeMeters(unicode(old_meter), unicode(new_meter))
+                change_meter_status=ChangeMeters(old_meter, new_meter)
 
                 
     #change_meter_status=unicode(old_meter)+unicode(new_meter)
@@ -1118,22 +1118,24 @@ def ChangeMeters(old_meter, new_meter):
     
     dtTakenParams=GetSimpleTable('taken_params','guid_meters', guidOldMeter)
     
+    oldName=unicode(dtOldMeter[0][1])
+    newName=oldName.replace(old_meter,new_meter)
+    old_factory_number_manual=unicode(dtOldMeter[0][5])
+    new_factory_number_manual=old_factory_number_manual.replace(old_meter,new_meter)
+    old_address=unicode(dtOldMeter[0][2])
+    new_address=old_address.replace(old_meter,new_meter)
     
-    newName=str(dtOldMeter[0][1]).replace(old_meter,new_meter)
-    new_factory_number_manual=str(dtOldMeter[0][5]).replace(old_meter,new_meter)
-    new_address=str(dtOldMeter[0][2]).replace(old_meter,new_meter)
-    
-    if UpdateTable('meters','guid', guidOldMeter, 'name', unicode(newName), 'factory_number_manual', unicode(new_factory_number_manual),'address', unicode(new_address)):
+    if UpdateTable('meters','guid', guidOldMeter, 'name', newName, 'factory_number_manual', new_factory_number_manual,'address', new_address):
         result=u"Счётчик "+unicode(old_meter)+ " успешно заменён на "+unicode(new_meter)
-    print result
+    #print result
     con=0
     for i in range(len(dtTakenParams)):
         dtTakenParams[i]=list(dtTakenParams[i])
-        guidTaken=dtTakenParams[i][1]
+        guidTaken=unicode(dtTakenParams[i][1])
         dtLinkAbonentsTakenParams=GetSimpleTable('link_abonents_taken_params','guid_taken_params', guidTaken)
-        oldTakenParamName=dtTakenParams[i][4]
+        oldTakenParamName=unicode(dtTakenParams[i][4])
         newTakenParamName=oldTakenParamName.replace(old_meter,new_meter)
-        OldLinkAbonentTakenParamName=dtLinkAbonentsTakenParams[0][1]
+        OldLinkAbonentTakenParamName=unicode(dtLinkAbonentsTakenParams[0][1])
         newLinkAbonentTakenParamName= OldLinkAbonentTakenParamName.replace(old_meter,new_meter)
         #get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name
         #"Квартира 0103 - М-230 21949676"
@@ -1146,8 +1148,8 @@ def ChangeMeters(old_meter, new_meter):
         # "М-230 22633939 Меркурий 230 T0 A+ Суточный -- adress: 0  channel: 0"
         #"Саяны Комбик 4443 Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1"
         
-        print newTakenParamName
-        print newLinkAbonentTakenParamName
+#        print newTakenParamName
+#        print newLinkAbonentTakenParamName
         if UpdateTable('link_abonents_taken_params','guid_taken_params', guidTaken, 'name', newLinkAbonentTakenParamName,"","","","") and UpdateTable('taken_params','guid', guidTaken, 'name',newTakenParamName,"","","",""):
             con+=1
     result+=u"; Изменено связей:"+unicode(con)
@@ -1179,7 +1181,7 @@ def UpdateTable(table,whereFieled, whereValue,field1,value1,field2,value2,field3
      WHERE %s='%s'
      RETURNING * 
    """%(table, field1, value1,field2,value2,field3,value3,whereFieled, whereValue)
-    print sQuery
+    #print sQuery
     cursor.execute(sQuery)
     dt = cursor.fetchall()
     if len(dt):
