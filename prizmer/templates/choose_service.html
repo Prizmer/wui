@@ -25,16 +25,20 @@ var choice_sheet="";
 var tcp_ip_status="";
 var object_status="";
 var counter_status="";
+var old_meter="";
+var new_meter="";
 			
 var load_service = function(page){
         isFirst=1;
 		choice_file=$("#choice_file").val();
 		choice_sheet=$("#choice_sheet").val();
+		old_meter=$("#old_meter").val();
+		new_meter=$("#new_meter").val();
         $.ajax({
         type: "GET",
         url: "/service/"+page,
         beforeSend: function(){show_loader();},
-        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status},        
+        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter},        
        })
 	   
 	   .done(function( msg ) {

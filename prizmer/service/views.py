@@ -1081,6 +1081,110 @@ def load_water_port(request):
     args["tcp_ip_status"]=tcp_ip_status
 
     return render_to_response("service/service_water.html", args)
+  
+def change_electric_meters(request):
+    args={}
+
+    old_meter=u''
+    new_meter=u''
+    change_meter_status=u"Функция в разработке"
+    if request.is_ajax():
+        if request.method == 'GET':
+            
+            request.session["old_meter"]    = old_meter    = request.GET.get('old_meter')
+            request.session["new_meter"]    = new_meter   = request.GET.get('new_meter')
+            if (not old_meter or old_meter==None or new_meter==None or not new_meter):
+                change_meter_status=u"Заполните обе ячейки"
+            else:
+                change_meter_status=ChangeMeters(unicode(old_meter), unicode(new_meter))
+
+                
+    #change_meter_status=unicode(old_meter)+unicode(new_meter)
+    args["change_meter_status"]=change_meter_status
+
+    return render_to_response("service/service_change_electric.html", args)
+  
+def ChangeMeters(old_meter, new_meter):
+    result=u""
+    isExistOldMeter=SimpleCheckIfExist('meters','factory_number_manual',old_meter,"","","")
+    isExistNewMeter=SimpleCheckIfExist('meters','factory_number_manual',new_meter,"","","")
+    if not isExistOldMeter:
+        return u"Номера старого счётчика нет в базе"
+    if isExistNewMeter:
+        return u"Новый счётчик уже существует а базе"
+    
+    dtOldMeter=GetSimpleTable('meters','factory_number_manual', old_meter)
+    guidOldMeter=unicode(dtOldMeter[0][0])
+    
+    dtTakenParams=GetSimpleTable('taken_params','guid_meters', guidOldMeter)
+    
+    
+    newName=str(dtOldMeter[0][1]).replace(old_meter,new_meter)
+    new_factory_number_manual=str(dtOldMeter[0][5]).replace(old_meter,new_meter)
+    new_address=str(dtOldMeter[0][2]).replace(old_meter,new_meter)
+    
+    if UpdateTable('meters','guid', guidOldMeter, 'name', unicode(newName), 'factory_number_manual', unicode(new_factory_number_manual),'address', unicode(new_address)):
+        result=u"Счётчик "+unicode(old_meter)+ " успешно заменён на "+unicode(new_meter)
+    print result
+    con=0
+    for i in range(len(dtTakenParams)):
+        dtTakenParams[i]=list(dtTakenParams[i])
+        guidTaken=dtTakenParams[i][1]
+        dtLinkAbonentsTakenParams=GetSimpleTable('link_abonents_taken_params','guid_taken_params', guidTaken)
+        oldTakenParamName=dtTakenParams[i][4]
+        newTakenParamName=oldTakenParamName.replace(old_meter,new_meter)
+        OldLinkAbonentTakenParamName=dtLinkAbonentsTakenParams[0][1]
+        newLinkAbonentTakenParamName= OldLinkAbonentTakenParamName.replace(old_meter,new_meter)
+        #get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name
+        #"Квартира 0103 - М-230 21949676"
+        if (OldLinkAbonentTakenParamName.find('М-230')):
+            typeMeter=u'М-230'
+        if (OldLinkAbonentTakenParamName.find('Саяны Комбик')):
+            typeMeter=u'Саяны Комбик'  
+        newLinkAbonentTakenParamName=OldLinkAbonentTakenParamName.split('-')[0]+ u' - '+ typeMeter +u' ' + unicode(new_meter)
+        
+        # "М-230 22633939 Меркурий 230 T0 A+ Суточный -- adress: 0  channel: 0"
+        #"Саяны Комбик 4443 Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1"
+        
+        print newTakenParamName
+        print newLinkAbonentTakenParamName
+        if UpdateTable('link_abonents_taken_params','guid_taken_params', guidTaken, 'name', newLinkAbonentTakenParamName,"","","","") and UpdateTable('taken_params','guid', guidTaken, 'name',newTakenParamName,"","","",""):
+            con+=1
+    result+=u"; Изменено связей:"+unicode(con)
+    
+    return result
+    
+def UpdateTable(table,whereFieled, whereValue,field1,value1,field2,value2,field3,value3):
+    isOk=False
+    dt=[]
+    cursor = connection.cursor()
+    if (field2==""):
+        sQuery="""           
+     UPDATE %s
+     SET  %s='%s'       
+     WHERE %s='%s'
+     RETURNING * 
+   """%(table, field1, value1, whereFieled, whereValue)
+    elif (field3==""):
+        sQuery="""           
+     UPDATE %s
+     SET  %s='%s', %s='%s'      
+     WHERE %s=%s
+     RETURNING * 
+   """%(table, field1, value1,field2,value2,whereFieled, whereValue)
+    else:
+       sQuery="""           
+     UPDATE %s
+     SET  %s='%s', %s='%s', %s='%s'       
+     WHERE %s='%s'
+     RETURNING * 
+   """%(table, field1, value1,field2,value2,field3,value3,whereFieled, whereValue)
+    print sQuery
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+    if len(dt):
+        isOk=True   
+    return isOk
     
 def load_tcp_ip_water_ports_from_excel(sPath, sheet):
     #Добавление tcp_ip портов

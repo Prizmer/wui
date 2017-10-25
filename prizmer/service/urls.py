@@ -26,4 +26,6 @@ urlpatterns = patterns('',
     url(r'^load_water_pulsar/$', views.load_water_pulsar), # вода, загрузка пульсаров и создание связей с абонентами
     url(r'^load_water_port/$', views.load_water_port), # загрузка портов из файла для воды
     
+    url(r'^service_change_electric/$', views.change_electric_meters), # загрузка портов из файла для воды
+    
 )

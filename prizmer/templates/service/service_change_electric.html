@@ -1,0 +1,36 @@
+
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
+<script src="/static/liHighLight.js" type=text/javascript></script>
+
+<br>
+<span><strong> Электрика и тепло | Замена счётчиков</strong> </span>
+<br><br>
+
+<p>
+ <div>
+ Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. <br><br>
+        <span><strong>Старый счётчик&nbsp;</strong></span>
+		<input id="old_meter" name="old_meter" type="text">
+
+		<span><strong>&nbsp;&nbsp;Новый счётчик&nbsp;</strong></span>
+		<input id="new_meter" name="new_meter" type="text">
+		<br>
+        <span onclick="load_service('service_change_electric')" class="button" id="tcp-ip-port-button">Заменить</span> {{change_meter_status}}
+		<br>
+        <br><br>
+		<!-- <span><strong>Загрузка Объектов и Абонентов &nbsp;</strong></span>
+        <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> &nbsp;{{object_status}}
+		<br>
+        <br><br>
+		<span><strong>Загрузка  счётчиков&nbsp;</strong></span>
+        <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> &nbsp;{{counter_status}} -->
+    </div>
+
+</form>
+<br>
+<br>
+<br>
