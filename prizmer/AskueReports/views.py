@@ -135,6 +135,8 @@ def translate(name):
         (u"у", u"u"),
         (u"ф", u"f"),
         (u"х", u"h"),
+        (u"ъ", u"`"),
+        (u"ь", u"'"),
         (u"э", u"e"),
     )
     #перебираем символы в таблице и заменяем
@@ -8271,9 +8273,11 @@ def report_elf_hvs_by_date(request):
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
     output_name = u'elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
+    print output_name
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    
     return response
     
 def report_elf_hvs_potreblenie(request):

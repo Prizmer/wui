@@ -76,6 +76,14 @@ width: 95%;
 
 }
 
+#meters_change_block{
+	width: 90%; /* Размеры */
+    background: #E6E6FA; /* Цвет фона */
+    outline: 2px solid #BEBEBE; /* серая рамка */
+    border: 3px solid #fff; /* Белая рамка */
+    border-radius: 10px; /* Радиус скругления */
+}
+
 #title-structura{
 margin-top: 30px;
 margin-bottom: 5px;

@@ -11,25 +11,40 @@
 <br><br>
 
 <p>
- <div>
- Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. <br><br>
-        <span><strong>Старый счётчик&nbsp;</strong></span>
+ <div id="meters_change_block">
+ &nbsp;&nbsp;Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. 
+<br><br>
+ <font color="000">
+        <span><strong>&nbsp;&nbsp;Старый счётчик&nbsp;</strong></span>
 		<input id="old_meter" name="old_meter" type="text">
 
-		<span><strong>&nbsp;&nbsp;Новый счётчик&nbsp;</strong></span>
+		<span><strong>&nbsp;&nbsp;&nbsp;Новый счётчик&nbsp;</strong></span>
 		<input id="new_meter" name="new_meter" type="text">
-		<br>
-        <span onclick="load_service('service_change_electric')" class="button" id="tcp-ip-port-button">Заменить</span> {{change_meter_status}}
-		<br>
-        <br><br>
-		<!-- <span><strong>Загрузка Объектов и Абонентов &nbsp;</strong></span>
-        <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> &nbsp;{{object_status}}
-		<br>
-        <br><br>
-		<span><strong>Загрузка  счётчиков&nbsp;</strong></span>
-        <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> &nbsp;{{counter_status}} -->
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('service_change_electric')" class="button" id="change_button">Заменить</span> 
+		<br>        
+	</font>	
+	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{change_meter_status}} </font>
+	<br><br>
     </div>
+<br>
+<div id="meters_change_block">
+ &nbsp;&nbsp;Счётчики будут поменяны местами в БД
+<br><br>
+ <font color="000">
+        <span><strong>&nbsp;&nbsp;Счётчик 1&nbsp;</strong></span>
+		<input id="meter1" name="meter1" type="text">
 
+		<span><strong>&nbsp;&nbsp;&nbsp;Счётчик 2&nbsp;</strong></span>
+		<input id="meter2" name="meter2" type="text">
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('service_replace_electric')" class="button" id="replace_button">Заменить</span> 
+		<br>        
+	</font>	
+	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{replace_meter_status}} <font>
+	<br><br>
+    </div>
+	
 </form>
 <br>
 <br>

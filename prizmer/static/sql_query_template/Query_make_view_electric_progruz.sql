@@ -1,12 +1,13 @@
-﻿SELECT 
-  objects.guid,
-  objects.name, 
-  abonents.name, 
+﻿CREATE OR REPLACE VIEW electric_progruz AS 
+SELECT 
+  abonents.guid as ab_guid,
+  objects.name as obj_name, 
+  abonents.name as ab_name, 
   ''::text as askue,
   ''::text as numLic, 
   meters.factory_number_manual, 
   meters.address, 
-  types_meters.name, 
+  types_meters.name as type_meter, 
   link_abonents_taken_params.coefficient, 
   tcpip_settings.ip_address, 
   tcpip_settings.ip_port
@@ -31,7 +32,7 @@ WHERE
   params.guid_types_meters = types_meters.guid and
   types_meters.name='Меркурий 230'
     group by 
-    objects.guid, objects.name, 
+    abonents.guid, objects.name, 
   abonents.name, 
   meters.factory_number_manual, 
   meters.address, 

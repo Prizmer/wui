@@ -27,6 +27,8 @@ var object_status="";
 var counter_status="";
 var old_meter="";
 var new_meter="";
+var meter1="";
+var meter2="";
 			
 var load_service = function(page){
         isFirst=1;
@@ -34,11 +36,14 @@ var load_service = function(page){
 		choice_sheet=$("#choice_sheet").val();
 		old_meter=$("#old_meter").val();
 		new_meter=$("#new_meter").val();
+		meter1=$("#meter1").val();
+		meter2=$("#meter2").val();
+		
         $.ajax({
         type: "GET",
         url: "/service/"+page,
         beforeSend: function(){show_loader();},
-        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter},        
+        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2},        
        })
 	   
 	   .done(function( msg ) {
@@ -129,7 +134,8 @@ $(function() {
 		{% load staticfiles %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download-ico64.png" %}" alt="Загрузить файл">
 		{% load staticfiles %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/electric-ico64.png" %}" alt="Электрика">
 		{% load staticfiles %} <img  onclick="load_service('service_water')" id="water-ico" src="{%static "images/water-ico64.png" %}" alt="Вода">
-		{% load staticfiles %} <img  onclick="load_service('service_change_electric')" id="change-ico" src="{%static "images/change-ico64.png" %}" alt="Замена счётчиков (электричество и тепло!)">
+		{% load staticfiles %} <img  onclick="load_service('service_change_electric')" id="change-ico" src="{%static "images/change-ico64.png" %}" alt="Замена счётчиков-электричество и тепло!">
+		{% load staticfiles %} <img  onclick="load_service('service_get_info')" id="change-ico" src="{%static "images/tech-ico64.png" %}" alt="Информация по объекту">
 		<p>
 		<span><strong>Выберите файл &nbsp;</strong></span>
 			<select onchange="change_wb();" name="choice_file" id="choice_file">

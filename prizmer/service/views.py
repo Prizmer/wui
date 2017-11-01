@@ -452,12 +452,12 @@ def LoadElectricMeters(sPath, sSheet):
         isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)        
         
-        writeToLog( u'счётчик существует ', isNewMeter)
+        #writeToLog( u'счётчик существует ', isNewMeter)
         if not (isNewAbon):
             return u"Сначала создайте стурктуру объектов и абонентов"
         if not (isNewMeter):
             
-            writeToLog('create meter '+meter +" adress: "+adr)
+            #writeToLog('create meter '+meter +" adress: "+adr)
             
             if unicode(type_meter) == u'М-200':
                 add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"6224d20b-1781-4c39-8799-b1446b60774d") )
@@ -1134,9 +1134,9 @@ def ChangeMeters(old_meter, new_meter):
         guidTaken=unicode(dtTakenParams[i][1])
         dtLinkAbonentsTakenParams=GetSimpleTable('link_abonents_taken_params','guid_taken_params', guidTaken)
         oldTakenParamName=unicode(dtTakenParams[i][4])
-        newTakenParamName=oldTakenParamName.replace(old_meter,new_meter)
+        #newTakenParamName=oldTakenParamName.replace(old_meter,new_meter)
         OldLinkAbonentTakenParamName=unicode(dtLinkAbonentsTakenParams[0][1])
-        newLinkAbonentTakenParamName= OldLinkAbonentTakenParamName.replace(old_meter,new_meter)
+        #newLinkAbonentTakenParamName= OldLinkAbonentTakenParamName.replace(old_meter,new_meter)
         #get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name
         #"Квартира 0103 - М-230 21949676"
         if (OldLinkAbonentTakenParamName.find('М-230')):
@@ -1147,8 +1147,10 @@ def ChangeMeters(old_meter, new_meter):
         
         # "М-230 22633939 Меркурий 230 T0 A+ Суточный -- adress: 0  channel: 0"
         #"Саяны Комбик 4443 Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1"
-        
-#        print newTakenParamName
+        n=oldTakenParamName.find(old_meter)
+        s=oldTakenParamName[n+len(old_meter):]
+        newTakenParamName= typeMeter + u' ' + unicode(new_meter) + s
+        #print newTakenParamName
 #        print newLinkAbonentTakenParamName
         if UpdateTable('link_abonents_taken_params','guid_taken_params', guidTaken, 'name', newLinkAbonentTakenParamName,"","","","") and UpdateTable('taken_params','guid', guidTaken, 'name',newTakenParamName,"","","",""):
             con+=1
@@ -1171,7 +1173,7 @@ def UpdateTable(table,whereFieled, whereValue,field1,value1,field2,value2,field3
         sQuery="""           
      UPDATE %s
      SET  %s='%s', %s='%s'      
-     WHERE %s=%s
+     WHERE %s='%s'
      RETURNING * 
    """%(table, field1, value1,field2,value2,whereFieled, whereValue)
     else:
@@ -1181,7 +1183,7 @@ def UpdateTable(table,whereFieled, whereValue,field1,value1,field2,value2,field3
      WHERE %s='%s'
      RETURNING * 
    """%(table, field1, value1,field2,value2,field3,value3,whereFieled, whereValue)
-    #print sQuery
+    print sQuery
     cursor.execute(sQuery)
     dt = cursor.fetchall()
     if len(dt):
@@ -1219,3 +1221,143 @@ def load_tcp_ip_water_ports_from_excel(sPath, sheet):
         writeToLog( result)
         row+=1
     return IsAdded
+    
+def replace_electric_meters(request):
+    args={}
+
+    meter1=u''
+    meter2=u''
+    change_meter_status=u""
+    replace_meter_status=u'НЕ удалось поменять счётчики местами'
+    if request.is_ajax():
+        if request.method == 'GET':                        
+            request.session["meter1"]    = meter1    = request.GET.get('meter1')
+            request.session["meter2"]    = meter2   = request.GET.get('meter2')
+            
+            if (not meter1 or meter1==None or meter2==None or not meter2):
+                replace_meter_status=u"Заполните обе ячейки"
+            else:                
+                replace_meter_status=ReplaceMeters(meter1, meter2)
+
+    args["change_meter_status"]=change_meter_status
+    args["replace_meter_status"]=replace_meter_status
+    return render_to_response("service/service_change_electric.html", args)
+    
+def ReplaceMeters(meter1, meter2):
+    result=u''
+    
+    isExistOldMeter=SimpleCheckIfExist('meters','factory_number_manual',meter1,"","","")
+    isExistNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter2,"","","")
+    if not isExistOldMeter:
+        return u"Номера первого счётчика нет в базе"
+    if not isExistNewMeter:
+        return u"Номера второго счётчика нет в базе"
+        
+#  objects.guid as obj_guid,      0 
+#  objects.name as obj_name,      1
+#  abonents.guid as ab_guid,      2 
+#  abonents.name as ab_name,      3
+#  link_abonents_taken_params.guid as link_ab_taken_guid,       4
+#  link_abonents_taken_params.name as link_ab_taken_name,       5
+#  taken_params.guid as taken_guid,       6
+#  taken_params.name as taken_name,       7
+#  meters.guid as meter_guid,             8
+#  meters.name as meter_name,             9
+#  meters.address as meter_adr,           10
+#  meters.factory_number_manual           11
+        
+    dtAllTakenMeter1=GetSimpleTable('all_taken_params','factory_number_manual', meter1)
+    guidAbonent1=unicode(dtAllTakenMeter1[0][2])
+    abName1=unicode(dtAllTakenMeter1[0][3])
+    
+    dtAllTakenMeter2=GetSimpleTable('all_taken_params','factory_number_manual', meter2)    
+    guidAbonent2=unicode(dtAllTakenMeter2[0][2])
+    abName2=unicode(dtAllTakenMeter2[0][3])
+    
+    nameParam1=unicode(dtAllTakenMeter1[0][7])
+    nameParam2=unicode(dtAllTakenMeter2[0][7])
+        
+    typeMeter1=getTypeMeter(nameParam1)
+    typeMeter2=getTypeMeter(nameParam2)
+    
+    if len(typeMeter1)<1 or len(typeMeter2)<1:
+        return u'Для этого типа счётчика ещё нет функции обработки'
+    if typeMeter1 !=typeMeter2:
+        return u'Типы счётчиков не совпадают'
+    
+    result+=changeConnectionMeterAbonent(dtAllTakenMeter1, typeMeter1, meter1, meter2, guidAbonent2, abName2)
+    result+=changeConnectionMeterAbonent(dtAllTakenMeter2, typeMeter1, meter2, meter1, guidAbonent1, abName1) 
+           
+        
+    return result
+
+def getTypeMeter(nameParam1):
+    typeMeter1=u''
+    if (nameParam1.find('М-230') or nameParam1.find('Меркурий 230')):
+        typeMeter1=u'М-230'
+    elif (nameParam1.find('Саяны Комбик')):
+        typeMeter1=u'Саяны Комбик' 
+    elif (nameParam1.find('М-200') or nameParam1.find('Меркурий 200')):
+        typeMeter1=u"Меркурий 200"
+    return  typeMeter1
+
+def changeConnectionMeterAbonent(dtAllTakenMeter1, typeMeter, meter1, meter2, guidAbonent2, abName2):
+    result=u''
+    #guidMeter1=unicode(dtAllTakenMeter1[0][8])
+    #guidAbonent1=unicode(dtAllTakenMeter1[0][1])
+    #meterName1=unicode(dtAllTakenMeter1[0][9])
+    #abName1=unicode(dtAllTakenMeter1[0][2])
+    con1=0
+    for i in range(len(dtAllTakenMeter1)):
+        dtAllTakenMeter1[i]=list(dtAllTakenMeter1[i])
+        guidParam1=unicode(dtAllTakenMeter1[i][6])   
+        nameParam1=unicode(dtAllTakenMeter1[i][7])
+        guidLinkAbonentParam1=unicode(dtAllTakenMeter1[i][4])
+        #nameLinkAbonentParam1=unicode(dtAllTakenMeter1[i][5])
+        
+        newTakenParamName1= makeNewTakenParamName(nameParam1, meter1, meter2, typeMeter)
+        newLinkAbonentTakenParamName1=makeLinkabonentTakenParamName(abName2,typeMeter,meter2)
+        print newTakenParamName1        
+        print newLinkAbonentTakenParamName1
+        
+        isUpdateTakenParam=UpdateTable('taken_params','guid', guidParam1, 'name',newTakenParamName1,"","","","")
+        isUpdateLinkAbonTakenParam=UpdateTable('link_abonents_taken_params','guid', guidLinkAbonentParam1, 'guid_abonents', guidAbonent2,'name', newLinkAbonentTakenParamName1,"","")   
+        if isUpdateTakenParam and isUpdateLinkAbonTakenParam:
+            con1+=1
+            print con1
+      
+    if (con1>0):
+        result+=u' Счётчик '+meter1+u' привязан к абоненту '+abName2+'. Изменено привязок: '+unicode(con1)
+    else: result+=u' Что-то пошло не так, ни одной привязки не изменено! '+meter1
+    return result
+
+def makeLinkabonentTakenParamName(abName,typeMeter,new_meter):
+    #"Квартира 0103 - М-230 21949676"   
+#LinkAbonentsTakenParams (name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name 
+    newLinkAbonentTakenParamName=abName+ u' - '+ typeMeter +u' ' + unicode(new_meter)
+    return newLinkAbonentTakenParamName
+
+def makeNewTakenParamName(nameParam1, old_meter, new_meter, typeMeter):
+    newName=u''
+
+        # "М-230 22633939 Меркурий 230 T0 A+ Суточный -- adress: 0  channel: 0"
+        #"Саяны Комбик 4443 Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1"
+    n=nameParam1.find(old_meter)
+    s=nameParam1[n+len(old_meter):]
+    newName= typeMeter + u' ' + unicode(new_meter) + s
+    return newName
+    
+def get_electric_progruz(request):
+    pass
+
+def get_water_progruz(request):
+    pass
+
+def get_heat_progruz(request):
+    pass
+
+def get_info(request):
+    args={}
+    
+
+    return render_to_response("service/service_get_info.html", args)

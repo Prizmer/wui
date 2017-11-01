@@ -1,0 +1,35 @@
+
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
+<script src="/static/liHighLight.js" type=text/javascript></script>
+
+<br>
+<span><strong> Электрика и тепло | Замена счётчиков</strong> </span>
+<br><br>
+
+<p>
+ <div id="meters_change_block">
+ &nbsp;&nbsp; Создать прогрузочные ведомости из БД
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('get_electric_progruz')" class="button" id="get_info">Электрика</span> 
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('get_water_progruz')" class="button" id="get_info">Вода</span> 
+		<br><br>   
+        &nbsp;&nbsp;<span onclick="load_service('get_heat_progruz')" class="button" id="get_info">Тепло</span> 
+		<br><br> 		
+	
+    </div>
+<br>
+<div id="meters_change_block">
+ &nbsp;&nbsp;Статистика по корпуса
+<br><br>
+ В разработке
+    </div>
+	
+</form>
+<br>
+<br>
+<br>

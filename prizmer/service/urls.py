@@ -26,6 +26,11 @@ urlpatterns = patterns('',
     url(r'^load_water_pulsar/$', views.load_water_pulsar), # вода, загрузка пульсаров и создание связей с абонентами
     url(r'^load_water_port/$', views.load_water_port), # загрузка портов из файла для воды
     
-    url(r'^service_change_electric/$', views.change_electric_meters), # загрузка портов из файла для воды
+    url(r'^service_change_electric/$', views.change_electric_meters), # замена одного счётчика на другой
+    url(r'^service_replace_electric/$', views.replace_electric_meters), # поменять местами счётчики
+    url(r'^service_get_info/$', views.get_info), # поменять местами счётчики
+    url(r'^get_electric_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
+    url(r'^get_water_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
+    url(r'^get_heat_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
     
 )

@@ -497,10 +497,10 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         #add_param.save()
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e7617c95-7e42-4cfa-9acd-5bc119261c6d")) # Q Реактивная мощность
         #add_param.save()
-        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6af9ddce-437a-4e07-bd70-6cf9dcc10b31")) # A+ 30-мин. срез мощности
-        #add_param.save()
-        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"66e997c0-8128-40a7-ae65-7e8993fbea61")) # R+ 30-мин. срез мощности
-        #add_param.save()
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6af9ddce-437a-4e07-bd70-6cf9dcc10b31")) # A+ 30-мин. срез мощности
+        add_param.save()
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"66e997c0-8128-40a7-ae65-7e8993fbea61")) # R+ 30-мин. срез мощности
+        add_param.save()
     elif instance.guid_types_meters.name == u'Меркурий 233':
         #Добавляем параметры для Меркурия 233
         pass
