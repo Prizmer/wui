@@ -1119,9 +1119,9 @@ def ChangeMeters(old_meter, new_meter):
     dtTakenParams=GetSimpleTable('taken_params','guid_meters', guidOldMeter)
     
     oldName=unicode(dtOldMeter[0][1])
-    newName=oldName.replace(old_meter,new_meter)
+    newName=oldName.replace(old_meter,new_meter) #поменять на срез+ добавление или формировать полность по новой
     old_factory_number_manual=unicode(dtOldMeter[0][5])
-    new_factory_number_manual=old_factory_number_manual.replace(old_meter,new_meter)
+    new_factory_number_manual=old_factory_number_manual.replace(old_meter,new_meter)  #поменять на срез+ добавление или формировать полность по новой
     old_address=unicode(dtOldMeter[0][2])
     new_address=old_address.replace(old_meter,new_meter)
     
