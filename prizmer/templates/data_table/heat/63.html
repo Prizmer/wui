@@ -12,11 +12,16 @@
 <tr>
 <th>Абонент</th>
 <th>Счётчик</th>
-<th>Показания Энергии на {{electric_data_start}}, Гкал</th>
+<!-- <th>Показания Энергии на {{electric_data_start}}, Гкал</th>
 <th>Показания Энергии на {{electric_data_end}}, Гкал</th>
 <th>Расход Энергии, Гкал</th>
 <th>Показания Объёма на {{electric_data_start}}, м3</th>
+<th>Показания Объёма на {{electric_data_end}}, м3</th> -->
+<th>Показания Энергии на {{electric_data_end}}, Гкал</th>
+<th>Показания Энергии на {{electric_data_start}}, Гкал</th>
+<th>Расход Энергии, Гкал</th>
 <th>Показания Объёма на {{electric_data_end}}, м3</th>
+<th>Показания Объёма на {{electric_data_start}}, м3</th>
 <th>Расход Объёма, м3</th>
 
 
@@ -27,10 +32,10 @@
 <td>{{value.1}}</td>
 <td>{{value.2}}</td>
 <td>{{value.3}}</td>
-<td><strong>{{value.4}}</strong></td>
+<td><strong>{{value.4|floatformat:2}}</strong></td>
 <td>{{value.5}}</td>
 <td>{{value.6}}</td>
-<td><strong>{{value.7}}</strong></td>
+<td><strong>{{value.7|floatformat:2}}</strong></td>
 
 
 </tr>

@@ -5199,6 +5199,7 @@ from
 )as z2
 where z1.number_manual=z2.number_manual
     """%(params[0],params[1],params[2],params[3], obj_parent_title,obj_title,params[4], electric_data_start,params[0],params[1],params[2],params[3], obj_parent_title,obj_title,params[4], electric_data_end)
+
     return sQuery
 
 def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params):

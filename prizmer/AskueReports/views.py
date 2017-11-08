@@ -9459,14 +9459,25 @@ def report_pulsar_heat_daily_2(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
-def report_heat_elf_period(request):
+def report_heat_elf_period_2(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
+    
+#    electric_data_end   = request.GET.get("electric_data_end")
+#    print electric_data_end
+    electric_data_end   = request.GET.get("electric_data_end")
+    electric_data_start   = request.GET.get("electric_data_start")
+#    print 'start', electric_data_start
+#    print 'end', electric_data_end 
+#    print 'AJAX: ', request.is_ajax()
+#    print 'GET: ', request.method 
+
+    #print request.session["test"]
 
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Теплосчётчик Эльф. Потребление тепла в период с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    ws['A2'] = 'Теплосчётчик Эльф. Потребление тепла в период c ' +unicode(electric_data_start)+' по '+ unicode(electric_data_end)
     
 
     ws['A5'] = 'Абонент'
@@ -9475,19 +9486,149 @@ def report_heat_elf_period(request):
     ws['B5'] = 'Счётчик'
     ws['B5'].style = ali_grey
     
-    ws['C5'] = 'Показания Энергии на ' + str(request.session["electric_data_end"])+', Гкал'
+    ws['C5'] = 'Показания Энергии на ' + str(electric_data_end)+', Гкал '
     ws['C5'].style = ali_grey
-        
-    ws['D5'] = 'Показания Энергии на ' + str(request.session["electric_data_start"])+', Гкал'
+    
+    ws['D5'] = 'Показания Энергии на ' + str(electric_data_start)+', Гкал '
     ws['D5'].style = ali_grey
     
     ws['E5'] = 'Потребление Энергии, Гкал'
     ws['E5'].style = ali_grey
     
-    ws['f5'] = 'Показания Объёма на ' + str(request.session["electric_data_end"])+', м3'
+    ws['f5'] = 'Показания Объёма на ' + str(electric_data_end)+', m3'
+    ws['f5'].style = ali_grey
+    
+    ws['g5'] = 'Показания Объёма на ' + str(electric_data_start)+', m3'
+    ws['g5'].style = ali_grey       
+    
+    ws['h5'] = 'Расход объёма, m3'
+    ws['h5'].style = ali_grey
+    
+#Запрашиваем данные для отчета
+
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')          
+    obj_key             = request.GET.get('obj_key')
+#    print obj_parent_title
+#    print obj_title
+    data_table=[]      
+    if (bool(is_abonent_level.search(obj_key))):
+         data_table = common_sql.get_data_table_elf_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+         data_table = common_sql.get_data_table_elf_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+
+    
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.2f'))  # Показания по теплу на конец
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.2f'))  # Показания по теплу на начало
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (format(data_table[row-6][4],'.2f'))  # Потребление
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % (format(data_table[row-6][5],'.2f'))  # Показания по теплу на конец
+            ws.cell('f%s'%(row)).style = ali_white
+        except:
+            ws.cell('f%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('g%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.2f'))  # Показания по теплу на начало
+            ws.cell('g%s'%(row)).style = ali_white
+        except:
+            ws.cell('g%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('h%s'%(row)).value = '%s' % (format(data_table[row-6][7],'.2f'))  # Потребление
+            ws.cell('h%s'%(row)).style = ali_white
+        except:
+            ws.cell('h%s'%(row)).style = ali_white
+            next
+
+            
+     
+#    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['E'].width = 17 
+        
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    
+    output_name = u'elf_heat_energy_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_heat_elf_period(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_start = request.session['electric_data_start'] #request.session['electric_data_start']
+    electric_data_end   = request.session['electric_data_end'] 
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Теплосчётчик Эльф. Потребление тепла в период с ' + unicode(electric_data_start) + ' по ' + unicode(electric_data_end)
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Показания Энергии на ' + unicode(electric_data_end)+', Гкал'
+    ws['C5'].style = ali_grey
+        
+    ws['D5'] = 'Показания Энергии на ' + unicode(electric_data_start)+', Гкал'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Потребление Энергии, Гкал'
+    ws['E5'].style = ali_grey
+    
+    ws['f5'] = 'Показания Объёма на ' + unicode(electric_data_end)+', м3'
     ws['f5'].style = ali_grey
         
-    ws['g5'] = 'Показания Объёма на ' + str(request.session["electric_data_start"])+', м3'
+    ws['g5'] = 'Показания Объёма на ' + unicode(electric_data_start)+', м3'
     ws['g5'].style = ali_grey
     
     ws['h5'] = 'Потребленённый Объём, м3'
@@ -9500,9 +9641,9 @@ def report_heat_elf_period(request):
     
     obj_parent_title         = request.session['obj_parent_title']
     obj_title         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']            
+    #electric_data_end   = request.session['electric_data_end']            
     obj_key             = request.session['obj_key']
-    electric_data_start = request.session['electric_data_start']
+    #electric_data_start = request.session['electric_data_start']
     
 #    print unicode(request.session.items())
 #    print obj_parent_title
@@ -9623,10 +9764,10 @@ def report_heat_elf_daily(request):
     is_abonent_level = re.compile(r'abonent')
     is_object_level_2 = re.compile(r'level2')
     
-    obj_parent_title         = request.session['obj_parent_title']
-    obj_title         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']            
-    obj_key             = request.session['obj_key']
+    obj_parent_title    = request.GET.get('obj_parent_title')
+    obj_title           = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')            
+    obj_key             = request.GET.get('obj_key')
 
     
 #    print unicode(request.session.items())
