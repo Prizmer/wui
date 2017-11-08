@@ -63,9 +63,9 @@ $("#choice_report").selectmenu({
 	 var obj_key="";
 	 
 	 var node = $("#tree").fancytree("getActiveNode");
-	     if(node){obj_title = node.title;
+	     if(node){obj_title = escapeHtml(node.title);
               obj_key = node.key;
-              obj_parent_title = node.parent.title;}
+              obj_parent_title = escapeHtml(node.parent.title);}
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
@@ -105,15 +105,29 @@ $("#choice_report").selectmenu({
 // Подкрашиваем зеленым "На начало суток"
 $("#electric-daily-button").css( "color", "green" );
 
+//замена спецсимволов
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+
 //изменение дат в кнопке экспорт
 $( "#tree" ).mouseleave(function() {
          var obj_parent_title="";
 	     var obj_title="";
 	     var obj_key="";	 
 	     var node = $("#tree").fancytree("getActiveNode");
-	     if(node){obj_title = node.title;
+	     if(node){obj_title = escapeHtml(node.title);
               obj_key = node.key;
-              obj_parent_title = node.parent.title;}
+              obj_parent_title = escapeHtml(node.parent.title);}
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
@@ -130,9 +144,9 @@ $( "#datepickerStart" ).mouseleave(function() {
 	     var obj_title="";
 	     var obj_key="";	 
 	     var node = $("#tree").fancytree("getActiveNode");
-	     if(node){obj_title = node.title;
+	     if(node){obj_title = escapeHtml(node.title);
               obj_key = node.key;
-              obj_parent_title = node.parent.title;}
+              obj_parent_title = escapeHtml(node.parent.title);}
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
@@ -152,9 +166,9 @@ $( "#datepickerEnd" ).mouseleave(function() {
 		 var electric_data_start_1 = $('#datepickerStart').datepicker().val();
          var electric_data_end_1 = $('#datepickerEnd').datepicker().val();
 	     var node = $("#tree").fancytree("getActiveNode");
-	     if(node){obj_title = node.title;
+	     if(node){obj_title = escapeHtml(node.title);
               obj_key = node.key;
-              obj_parent_title = node.parent.title;}
+              obj_parent_title = escapeHtml(node.parent.title);}
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}

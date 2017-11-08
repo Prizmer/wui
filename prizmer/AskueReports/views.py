@@ -8299,10 +8299,10 @@ def report_elf_hvs_potreblenie(request):
     ws['C5'] = 'Счётчик ХВС'
     ws['C5'].style = ali_grey
         
-    ws['D5'] = 'Показания на ' + str(request.session["electric_data_end"])
+    ws['D5'] = 'Показания на ' + str(request.session["electric_data_start"])
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '  + str(request.session["electric_data_start"]) 
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"]) 
     ws['E5'].style = ali_grey
     
     ws['F5'] = 'Потребление'
@@ -8349,14 +8349,14 @@ def report_elf_hvs_potreblenie(request):
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу на конец
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][3])  # Потребление
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
@@ -8412,10 +8412,10 @@ def report_elf_gvs_potreblenie(request):
     ws['C5'] = 'Счётчик ГВС'
     ws['C5'].style = ali_grey
         
-    ws['D5'] = 'Показания на '  + str(request.session["electric_data_end"])
+    ws['D5'] = 'Показания на '  + str(request.session["electric_data_start"])
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '  +  str(request.session["electric_data_start"])
+    ws['E5'] = 'Показания на '  +  str(request.session["electric_data_end"])
     ws['E5'].style = ali_grey
     
     ws['F5'] = 'Потребление'
@@ -8462,14 +8462,14 @@ def report_elf_gvs_potreblenie(request):
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу на конец
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][3])  # Потребление
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
@@ -9463,6 +9463,11 @@ def report_heat_elf_period_2(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')          
+
+#    print obj_parent_title
+#    print obj_title
     
 #    electric_data_end   = request.GET.get("electric_data_end")
 #    print electric_data_end
@@ -9486,19 +9491,19 @@ def report_heat_elf_period_2(request):
     ws['B5'] = 'Счётчик'
     ws['B5'].style = ali_grey
     
-    ws['C5'] = 'Показания Энергии на ' + str(electric_data_end)+', Гкал '
+    ws['C5'] = 'Показания Энергии на ' + str(electric_data_start)+', Гкал '
     ws['C5'].style = ali_grey
     
-    ws['D5'] = 'Показания Энергии на ' + str(electric_data_start)+', Гкал '
+    ws['D5'] = 'Показания Энергии на ' + str(electric_data_end)+', Гкал '
     ws['D5'].style = ali_grey
     
     ws['E5'] = 'Потребление Энергии, Гкал'
     ws['E5'].style = ali_grey
     
-    ws['f5'] = 'Показания Объёма на ' + str(electric_data_end)+', m3'
+    ws['f5'] = 'Показания Объёма на ' + str(electric_data_start)+', m3'
     ws['f5'].style = ali_grey
     
-    ws['g5'] = 'Показания Объёма на ' + str(electric_data_start)+', m3'
+    ws['g5'] = 'Показания Объёма на ' + str(electric_data_end)+', m3'
     ws['g5'].style = ali_grey       
     
     ws['h5'] = 'Расход объёма, m3'
@@ -9508,8 +9513,7 @@ def report_heat_elf_period_2(request):
 
     
     is_abonent_level = re.compile(r'abonent')
-    is_object_level_2 = re.compile(r'level2')
-    
+    is_object_level_2 = re.compile(r'level2')    
     obj_parent_title         = request.GET.get('obj_parent_title')
     obj_title         = request.GET.get('obj_title')          
     obj_key             = request.GET.get('obj_key')
@@ -9542,14 +9546,14 @@ def report_heat_elf_period_2(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.2f'))  # Показания по теплу на конец
+            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.2f'))  # Показания по теплу на конец
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.2f'))  # Показания по теплу на начало
+            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.2f'))  # Показания по теплу на начало
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
@@ -9563,14 +9567,14 @@ def report_heat_elf_period_2(request):
             next
         
         try:
-            ws.cell('f%s'%(row)).value = '%s' % (format(data_table[row-6][5],'.2f'))  # Показания по теплу на конец
+            ws.cell('f%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.2f'))  # Показания по теплу на конец
             ws.cell('f%s'%(row)).style = ali_white
         except:
             ws.cell('f%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('g%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.2f'))  # Показания по теплу на начало
+            ws.cell('g%s'%(row)).value = '%s' % (format(data_table[row-6][5],'.2f'))  # Показания по теплу на начало
             ws.cell('g%s'%(row)).style = ali_white
         except:
             ws.cell('g%s'%(row)).style = ali_white
