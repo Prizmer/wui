@@ -5351,9 +5351,9 @@ def report_water_potreblenie_pulsar(request):
     wb = Workbook()
     ws = wb.active
     
-    meters_name         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
-    electric_data_start   = request.session['electric_data_start']
+    meters_name         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+    electric_data_start   = request.GET.get('electric_data_start')
     
 #Шапка
     ws.merge_cells('A2:G2')
@@ -5391,8 +5391,8 @@ def report_water_potreblenie_pulsar(request):
 #    is_object_level_1 = re.compile(r'level1')
     is_object_level_2 = re.compile(r'level1')
 
-    parent_name         = request.session['obj_parent_title']
-    obj_key             = request.session['obj_key']
+    parent_name         = request.GET.get('obj_parent_title')
+    obj_key             = request.GET.get('obj_key')
     data_table=[]
     
     if (bool(is_abonent_level.search(obj_key))): 
@@ -7856,8 +7856,8 @@ def report_water_by_date(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-    meters_name         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
+    meters_name         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
 #Шапка
     ws.merge_cells('A2:E2')
     ws['A2'] = meters_name+'. Показания по воде на ' + electric_data_end
@@ -7882,10 +7882,10 @@ def report_water_by_date(request):
     is_abonent_level = re.compile(r'level2')
     is_object_level_2 = re.compile(r'level1')
     
-    parent_name         = request.session['obj_parent_title']
-    meters_name         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']            
-    obj_key             = request.session['obj_key']
+    parent_name         = request.GET.get('obj_parent_title')
+    #meters_name         = request.session['obj_title']
+    electric_data_end   = request.GET.get('electric_data_end')           
+    obj_key             = request.GET.get('obj_key')
     
     data_table = []
     if (bool(is_abonent_level.search(obj_key))): 
@@ -9500,13 +9500,13 @@ def report_heat_elf_period_2(request):
     ws['E5'] = 'Потребление Энергии, Гкал'
     ws['E5'].style = ali_grey
     
-    ws['f5'] = 'Показания Объёма на ' + str(electric_data_start)+', m3'
+    ws['f5'] = 'Показания Объёма на ' + str(electric_data_start)+', м3'
     ws['f5'].style = ali_grey
     
-    ws['g5'] = 'Показания Объёма на ' + str(electric_data_end)+', m3'
+    ws['g5'] = 'Показания Объёма на ' + str(electric_data_end)+', м3'
     ws['g5'].style = ali_grey       
     
-    ws['h5'] = 'Расход объёма, m3'
+    ws['h5'] = 'Расход объёма, м3'
     ws['h5'].style = ali_grey
     
 #Запрашиваем данные для отчета
@@ -9590,8 +9590,13 @@ def report_heat_elf_period_2(request):
             
      
 #    ws.row_dimensions[5].height = 41
+    ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 17 
-    ws.column_dimensions['E'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 17
+    ws.column_dimensions['E'].width = 17
+    ws.column_dimensions['F'].width = 18 
         
     wb.save(response)
     response.seek(0)
@@ -9879,7 +9884,7 @@ def report_heat_water_elf_daily(request):
     obj_title         = request.session['obj_title']
     electric_data_end   = request.session['electric_data_end']            
     obj_key             = request.session['obj_key']
-    electric_data_start = request.session['electric_data_start']
+    #electric_data_start = request.session['electric_data_start']
     
 #    print unicode(request.session.items())
 #    print obj_parent_title
