@@ -5479,7 +5479,7 @@ and water_pulsar_abons.ab_name='%s'
 ) as z2
 where z1.factory_number_manual=z2.factory_number_manual
     """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title, obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1],obj_parent_title, obj_title)
-    #print sQuery
+    #print sQuery  
     return sQuery
     
 def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
@@ -5518,7 +5518,7 @@ WHERE
   (types_meters.name='%s' or types_meters.name='%s')
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
-where water_pulsar_abons.obj_name='Корпус Б1' 
+where water_pulsar_abons.obj_name='%s' 
 
 ) as z1,
 (select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value as value_end
@@ -5558,7 +5558,9 @@ where water_pulsar_abons.obj_name='%s'
 
 ) as z2
 where z1.factory_number_manual=z2.factory_number_manual
-    """%(obj_title, electric_data_start, my_params[0], my_params[1], obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
+order by z1.ab_name, z1.attr1,z1.type_meter
+    """%(obj_title, electric_data_start, my_params[0], my_params[1],obj_title, obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
+      
     return sQuery
     
 def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
