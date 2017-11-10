@@ -7935,7 +7935,7 @@ def report_water_by_date(request):
             
     ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 17
-    ws.column_dimensions['B'].width = 17
+    ws.column_dimensions['B'].width = 25
     ws.column_dimensions['C'].width = 25
                     
     
@@ -8621,10 +8621,10 @@ def report_pulsar_water_period(request):
     ws['D5'] = 'Счётчик'
     ws['D5'].style = ali_grey
     
-    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_start"])+', м3'
     ws['E5'].style = ali_grey
     
-    ws['F5'] = 'Показания на '  + str(request.session["electric_data_start"])+', м3'
+    ws['F5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
     ws['F5'].style = ali_grey
     
     ws['G5'] = 'Разница, м3'
@@ -8704,7 +8704,7 @@ def report_pulsar_water_period(request):
 
 
     ws.row_dimensions[5].height = 63
-#    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['A'].width = 17 
 #    ws.column_dimensions['B'].width = 17 
 #    ws.column_dimensions['C'].width = 17
 #    ws.column_dimensions['D'].width = 17
@@ -9178,7 +9178,7 @@ def report_pulsar_heat_period(request):
     ws['F5'] = 'Показания Объёма на ' + str(electric_data_start)+', м3'
     ws['F5'].style = ali_grey
     
-    ws['G5'] = 'Показания Объёма на ' + str(electric_data_start)+', м3'
+    ws['G5'] = 'Показания Объёма на ' + str(electric_data_end)+', м3'
     ws['G5'].style = ali_grey
     
     ws['H5'] = 'Потребление Объёма, м3'
