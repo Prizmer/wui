@@ -4870,10 +4870,7 @@ def report_pokazaniya_sayany(request):
     parent_name    = request.session['obj_parent_title']
     
     obj_key             = request.session['obj_key']
-
-    
-    #print parent_name,meters_name,electric_data_end, obj_key
-    
+        
     data_table = []
 #    if request.is_ajax():
 #        #if request.method == 'GET':
@@ -8056,16 +8053,16 @@ def report_forma_80020(request):
             list_of_taken_params.append(result_list)
             
             for y in range(len(list_of_taken_params)):
-                my_dict_of_profil = {0: [u'0000', u'0030', 0, 1],
-                                     1: [u'0030', u'0100', 0, 1],
-                                     2: [u'0100', u'0130', 0, 1],
-                                     3: [u'0130', u'0200', 0, 1],
-                                     4: [u'0200', u'0230', 0, 1],
-                                     5: [u'0230', u'0300', 0, 1],
-                                     6: [u'0300', u'0330', 0, 1],
-                                     7: [u'0330', u'0400', 0, 1],
-                                     8: [u'0400', u'0430', 0, 1],
-                                     9: [u'0430', u'0500', 0, 1],
+                my_dict_of_profil = { 0: [u'0000', u'0030', 0, 1],
+                                      1: [u'0030', u'0100', 0, 1],
+                                      2: [u'0100', u'0130', 0, 1],
+                                      3: [u'0130', u'0200', 0, 1],
+                                      4: [u'0200', u'0230', 0, 1],
+                                      5: [u'0230', u'0300', 0, 1],
+                                      6: [u'0300', u'0330', 0, 1],
+                                      7: [u'0330', u'0400', 0, 1],
+                                      8: [u'0400', u'0430', 0, 1],
+                                      9: [u'0430', u'0500', 0, 1],
                                      10: [u'0500', u'0530', 0, 1],
                                      11: [u'0530', u'0600', 0, 1],
                                      12: [u'0600', u'0630', 0, 1],
@@ -8134,10 +8131,8 @@ def report_forma_80020(request):
                         result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
                         if result_30_min:
                             my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0]), 0] #Квт.ч
-                            #print u'------ Есть значение',list_of_taken_params[y][1] , my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             
                         else:
-                            #print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             pass
                     
                 elif list_of_taken_params[y][1] == u'R+ Профиль':
@@ -8146,13 +8141,10 @@ def report_forma_80020(request):
                         result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
                         if result_30_min:
                             my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0]), 0] # Квар.ч
-                            #print u'------ Есть значение',list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             
                         else:
-                           # print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                            pass
                 else:
-                    #print u'Нет совпадений параметров'
                     my_measuring_channel_code = u''
                        
                 my_measuring_channel_desc = unicode(list_of_taken_params[y][0]) + u' ' + unicode(list_of_taken_params[y][1])            
@@ -8273,7 +8265,6 @@ def report_elf_hvs_by_date(request):
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
     output_name = u'elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
-    print output_name
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -9465,9 +9456,6 @@ def report_heat_elf_period_2(request):
     ws = wb.active
     obj_parent_title         = request.GET.get('obj_parent_title')
     obj_title         = request.GET.get('obj_title')          
-
-#    print obj_parent_title
-#    print obj_title
     
 #    electric_data_end   = request.GET.get("electric_data_end")
 #    print electric_data_end
@@ -9517,8 +9505,7 @@ def report_heat_elf_period_2(request):
     obj_parent_title         = request.GET.get('obj_parent_title')
     obj_title         = request.GET.get('obj_title')          
     obj_key             = request.GET.get('obj_key')
-#    print obj_parent_title
-#    print obj_title
+
     data_table=[]      
     if (bool(is_abonent_level.search(obj_key))):
          data_table = common_sql.get_data_table_elf_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
@@ -9654,9 +9641,6 @@ def report_heat_elf_period(request):
     obj_key             = request.session['obj_key']
     #electric_data_start = request.session['electric_data_start']
     
-#    print unicode(request.session.items())
-#    print obj_parent_title
-    
     data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         pass
@@ -9778,10 +9762,7 @@ def report_heat_elf_daily(request):
     electric_data_end   = request.GET.get('electric_data_end')            
     obj_key             = request.GET.get('obj_key')
 
-    
-#    print unicode(request.session.items())
-#    print obj_parent_title
-    
+       
     data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_elf_heat_daily(obj_parent_title, obj_title, electric_data_end, True)
@@ -9886,9 +9867,6 @@ def report_heat_water_elf_daily(request):
     obj_key             = request.session['obj_key']
     #electric_data_start = request.session['electric_data_start']
     
-#    print unicode(request.session.items())
-#    print obj_parent_title
-    
     data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_elf_heat_water_daily(obj_parent_title, obj_title, electric_data_end, True)
@@ -9976,7 +9954,7 @@ def report_heat_water_elf_daily(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
-# Разработка отчёта 80040----------------------------------------------------------------------------------------------------------------------------------------------
+
 def report_forma_80040(request):
     import zipfile
     response = StringIO.StringIO()
@@ -9997,7 +9975,7 @@ def report_forma_80040(request):
                   step=datetime.timedelta(days=1),
                   inclusive=True)]
     
-    info_group_80040 = common_sql.get_info_group_80020(group_80040_name)
+    info_group_80040 = common_sql.get_info_group_80020(group_80040_name) # Всю информацию для макета 80040 берем из данных группы 80020. Данные идентичны. 
     inn_sender_from_base      = info_group_80040[0][0]
     name_sender_from_base     = info_group_80040[0][1]
     inn_postavshik_from_base  = info_group_80040[0][2]
@@ -10082,88 +10060,113 @@ def report_forma_80040(request):
             list_of_taken_params.append(result_list)
             
             for y in range(len(list_of_taken_params)):
-                my_dict_of_profil = {0: [u'0000', u'0030', 0, 1],
-                                     1: [u'0030', u'0100', 0, 1],
-                                     2: [u'0100', u'0130', 0, 1],
-                                     3: [u'0130', u'0200', 0, 1],
-                                     4: [u'0200', u'0230', 0, 1],
-                                     5: [u'0230', u'0300', 0, 1],
-                                     6: [u'0300', u'0330', 0, 1],
-                                     7: [u'0330', u'0400', 0, 1],
-                                     8: [u'0400', u'0430', 0, 1],
-                                     9: [u'0430', u'0500', 0, 1],
-                                     10: [u'0500', u'0530', 0, 1],
-                                     11: [u'0530', u'0600', 0, 1],
-                                     12: [u'0600', u'0630', 0, 1],
-                                     13: [u'0630', u'0700', 0, 1],
-                                     14: [u'0700', u'0730', 0, 1],
-                                     15: [u'0730', u'0800', 0, 1],
-                                     16: [u'0800', u'0830', 0, 1],
-                                     17: [u'0830', u'0900', 0, 1],
-                                     18: [u'0900', u'0930', 0, 1],
-                                     19: [u'0930', u'1000', 0, 1],
-                                     20: [u'1000', u'1030', 0, 1],
-                                     21: [u'1030', u'1100', 0, 1],
-                                     22: [u'1100', u'1130', 0, 1],                                
-                                     23: [u'1130', u'1200', 0, 1],
-                                     24: [u'1200', u'1230', 0, 1],
-                                     25: [u'1230', u'1300', 0, 1],
-                                     26: [u'1300', u'1330', 0, 1],
-                                     27: [u'1330', u'1400', 0, 1],
-                                     28: [u'1400', u'1430', 0, 1],
-                                     29: [u'1430', u'1500', 0, 1],
-                                     30: [u'1500', u'1530', 0, 1],
-                                     31: [u'1530', u'1600', 0, 1],
-                                     32: [u'1600', u'1630', 0, 1],
-                                     33: [u'1630', u'1700', 0, 1],
-                                     34: [u'1700', u'1730', 0, 1],
-                                     35: [u'1730', u'1800', 0, 1],
-                                     36: [u'1800', u'1830', 0, 1],
-                                     37: [u'1830', u'1900', 0, 1],
-                                     38: [u'1900', u'1930', 0, 1],
-                                     39: [u'1930', u'2000', 0, 1],
-                                     40: [u'2000', u'2030', 0, 1],                                
-                                     41: [u'2030', u'2100', 0, 1],
-                                     42: [u'2100', u'2130', 0, 1],
-                                     43: [u'2130', u'2200', 0, 1],
-                                     44: [u'2200', u'2230', 0, 1],
-                                     45: [u'2230', u'2300', 0, 1],
-                                     46: [u'2300', u'2330', 0, 1],
-                                     47: [u'2330', u'0000', 0, 1] }
-                time_table = ['00:00:00', '00:30:00',
-                              '01:00:00', '01:30:00',
-                              '02:00:00', '02:30:00',
-                              '03:00:00', '03:30:00',
-                              '04:00:00', '04:30:00',
-                              '05:00:00', '05:30:00',
-                              '06:00:00', '06:30:00',
-                              '07:00:00', '07:30:00',
-                              '08:00:00', '08:30:00',
-                              '09:00:00', '09:30:00',
-                              '10:00:00', '10:30:00',
-                              '11:00:00', '11:30:00',
-                              '12:00:00', '12:30:00',
-                              '13:00:00', '13:30:00',
-                              '14:00:00', '14:30:00',
-                              '15:00:00', '15:30:00',
-                              '16:00:00', '16:30:00',
-                              '17:00:00', '17:30:00',
-                              '18:00:00', '18:30:00',
-                              '19:00:00', '19:30:00',
-                              '20:00:00', '20:30:00',
-                              '21:00:00', '21:30:00',
-                              '22:00:00', '22:30:00',
-                              '23:00:00', '23:30:00']
+                my_dict_of_profil =           {0: [u'0000', u'0030', 0, 1],
+                                               1: [u'0030', u'0100', 0, 1],
+                                               2: [u'0100', u'0130', 0, 1],
+                                               3: [u'0130', u'0200', 0, 1],
+                                               4: [u'0200', u'0230', 0, 1],
+                                               5: [u'0230', u'0300', 0, 1],
+                                               6: [u'0300', u'0330', 0, 1],
+                                               7: [u'0330', u'0400', 0, 1],
+                                               8: [u'0400', u'0430', 0, 1],
+                                               9: [u'0430', u'0500', 0, 1],
+                                              10: [u'0500', u'0530', 0, 1],
+                                              11: [u'0530', u'0600', 0, 1],
+                                              12: [u'0600', u'0630', 0, 1],
+                                              13: [u'0630', u'0700', 0, 1],
+                                              14: [u'0700', u'0730', 0, 1],
+                                              15: [u'0730', u'0800', 0, 1],
+                                              16: [u'0800', u'0830', 0, 1],
+                                              17: [u'0830', u'0900', 0, 1],
+                                              18: [u'0900', u'0930', 0, 1],
+                                              19: [u'0930', u'1000', 0, 1],
+                                              20: [u'1000', u'1030', 0, 1],
+                                              21: [u'1030', u'1100', 0, 1],
+                                              22: [u'1100', u'1130', 0, 1],                                
+                                              23: [u'1130', u'1200', 0, 1],
+                                              24: [u'1200', u'1230', 0, 1],
+                                              25: [u'1230', u'1300', 0, 1],
+                                              26: [u'1300', u'1330', 0, 1],
+                                              27: [u'1330', u'1400', 0, 1],
+                                              28: [u'1400', u'1430', 0, 1],
+                                              29: [u'1430', u'1500', 0, 1],
+                                              30: [u'1500', u'1530', 0, 1],
+                                              31: [u'1530', u'1600', 0, 1],
+                                              32: [u'1600', u'1630', 0, 1],
+                                              33: [u'1630', u'1700', 0, 1],
+                                              34: [u'1700', u'1730', 0, 1],
+                                              35: [u'1730', u'1800', 0, 1],
+                                              36: [u'1800', u'1830', 0, 1],
+                                              37: [u'1830', u'1900', 0, 1],
+                                              38: [u'1900', u'1930', 0, 1],
+                                              39: [u'1930', u'2000', 0, 1],
+                                              40: [u'2000', u'2030', 0, 1],                                
+                                              41: [u'2030', u'2100', 0, 1],
+                                              42: [u'2100', u'2130', 0, 1],
+                                              43: [u'2130', u'2200', 0, 1],
+                                              44: [u'2200', u'2230', 0, 1],
+                                              45: [u'2230', u'2300', 0, 1],
+                                              46: [u'2300', u'2330', 0, 1],
+                                              47: [u'2330', u'0000', 0, 1] }
+                
+                my_dict_of_profil_hour =  {0: [u'0000', u'0100', 0, 1],
+                                           1: [u'0100', u'0200', 0, 1],
+                                           2: [u'0200', u'0300', 0, 1],
+                                           3: [u'0300', u'0400', 0, 1],
+                                           4: [u'0400', u'0500', 0, 1],
+                                           5: [u'0500', u'0600', 0, 1],
+                                           6: [u'0600', u'0700', 0, 1],
+                                           7: [u'0700', u'0800', 0, 1],
+                                           8: [u'0800', u'0900', 0, 1],
+                                           9: [u'0900', u'1000', 0, 1],
+                                          10: [u'1000', u'1100', 0, 1],
+                                          11: [u'1100', u'1200', 0, 1],
+                                          12: [u'1200', u'1300', 0, 1],
+                                          13: [u'1300', u'1400', 0, 1],
+                                          14: [u'1400', u'1500', 0, 1],
+                                          15: [u'1500', u'1600', 0, 1],
+                                          16: [u'1600', u'1700', 0, 1],
+                                          17: [u'1700', u'1800', 0, 1],
+                                          18: [u'1800', u'1900', 0, 1],
+                                          19: [u'1900', u'2000', 0, 1],
+                                          20: [u'2000', u'2100', 0, 1],
+                                          21: [u'2100', u'2200', 0, 1],
+                                          22: [u'2200', u'2300', 0, 1],                                
+                                          23: [u'2300', u'0000', 0, 1]}
+
+                time_table =  ['00:00:00', '00:30:00',
+                               '01:00:00', '01:30:00',
+                               '02:00:00', '02:30:00',
+                               '03:00:00', '03:30:00',
+                               '04:00:00', '04:30:00',
+                               '05:00:00', '05:30:00',
+                               '06:00:00', '06:30:00',
+                               '07:00:00', '07:30:00',
+                               '08:00:00', '08:30:00',
+                               '09:00:00', '09:30:00',
+                               '10:00:00', '10:30:00',
+                               '11:00:00', '11:30:00',
+                               '12:00:00', '12:30:00',
+                               '13:00:00', '13:30:00',
+                               '14:00:00', '14:30:00',
+                               '15:00:00', '15:30:00',
+                               '16:00:00', '16:30:00',
+                               '17:00:00', '17:30:00',
+                               '18:00:00', '18:30:00',
+                               '19:00:00', '19:30:00',
+                               '20:00:00', '20:30:00',
+                               '21:00:00', '21:30:00',
+                               '22:00:00', '22:30:00',
+                               '23:00:00', '23:30:00']
+                
                 if list_of_taken_params[y][1] == u'A+ Профиль':
                     my_measuring_channel_code = u'01'
                     for time in range(len(time_table)):
                         result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
                         if result_30_min:
                             my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0]), 0] #Квт.ч
-                            #print u'------ Есть значение',list_of_taken_params[y][1] , my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             
                         else:
-                            #print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             pass
                     
                 elif list_of_taken_params[y][1] == u'R+ Профиль':
@@ -10172,24 +10175,28 @@ def report_forma_80040(request):
                         result_30_min = common_sql.get_30_min_value_by_meters_number_param_names_and_datetime(list_of_taken_params[y][0], list_of_taken_params[y][1], list_of_dates[dates].strftime('%Y-%m-%d'), time_table[time])
                         if result_30_min:
                             my_dict_of_profil[time]=[my_dict_of_profil[time][0], my_dict_of_profil[time][1], float(result_30_min[0][4])*common_sql.get_k_t_t_by_factory_number_manual(list_of_taken_params[y][0]), 0] # Квар.ч
-                            #print u'------ Есть значение',list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                             
                         else:
-                           # print u'Оставляем по умолчанию', list_of_taken_params[y][1], my_dict_of_profil[time][0], my_dict_of_profil[time][1]
                            pass
                 else:
-                    #print u'Нет совпадений параметров'
                     my_measuring_channel_code = u''
                        
                 my_measuring_channel_desc = unicode(list_of_taken_params[y][0]) + u' ' + unicode(list_of_taken_params[y][1])            
                 measuringchannelElt = etree.SubElement(measurepointElt, 'measuringchannel', code = my_measuring_channel_code, desc = my_measuring_channel_desc )
                 
-                                                  
-                for z in range (len(my_dict_of_profil)):
-                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = unicode(my_dict_of_profil[z][0]), end = unicode(my_dict_of_profil[z][1]))
-                    value  = etree.SubElement(periodElt, 'value', status = unicode(my_dict_of_profil[z][3]))
-                    value.text = unicode(my_dict_of_profil[z][2])
-            
+                #Берем словарь с получасовыми значениями и делаем часовой словарь, складывая значения получасовок
+                hour_iterator = 0
+                for half_hour_iterator in range(0, len(my_dict_of_profil), 2):
+                    my_dict_of_profil_hour[hour_iterator][2] = my_dict_of_profil[half_hour_iterator][2] + my_dict_of_profil[half_hour_iterator+1][2]
+                    my_dict_of_profil_hour[hour_iterator][3] = 0
+
+                    hour_iterator=hour_iterator+1
+                
+                #Пишем часовой словарь с данными в структуру xml макета 80020                
+                for z in range (len(my_dict_of_profil_hour)):
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = unicode(my_dict_of_profil_hour[z][0]), end = unicode(my_dict_of_profil_hour[z][1]))
+                    value  = etree.SubElement(periodElt, 'value', status = unicode(my_dict_of_profil_hour[z][3]))
+                    value.text = unicode(my_dict_of_profil_hour[z][2])
         
         # Создание и сохранение документа
         doc = etree.ElementTree(root) 
