@@ -1,0 +1,99 @@
+<script src="/static/liHighLight_30_min.js" type=text/javascript></script>
+
+<span>Отчёт по форме 80040</span>
+<br>
+<span>Дата начала формирования отчётов {{electric_data_start}}</span>
+<br>
+<span>Дата окончания формирования отчётов {{electric_data_end}}</span>
+<br>
+<br>
+{% if data_table %}
+<span>Отправитель: <strong>{{data_table.0.0}}</strong></span>
+<br>
+<span>ИНН Отправителя: <strong>{{data_table.0.1}}</strong></span>
+<br>
+<span>Номер договора: <strong>{{data_table.0.2}}</strong><span>
+<br>
+<table id="data-table" >
+<tr>
+<th>Заводской номер</th>
+<th>Псевдоним</th>
+<th>Код ПСИ</th>
+<th>Дата последнего чтения</th>
+<th>T0 A+ нач.</th>
+<th>T0 A+ кон.</th>
+<td>Разница</td>
+<td>Сумма получасовок</td>
+<td>% Сбора Получасовок</td>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<td><strong>{{value.11|floatformat}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<span>Проверка наличия данных</span>
+{% if data_table_check_data_header %}
+<table class="table_vertical" id="data-table_2" >
+<thead>
+
+<tr>
+{% for value in data_table_check_data_header %}
+   <th class="th_vertical">{{value}}</th>
+{% endfor %}
+</tr>
+</thead>
+{% for value in data_table_check_data %}
+<tr>
+<td>{{value.0|date:"d M Y"}}</td>
+<td class="td_vertical">{{value.1}}</td>
+<td class="td_vertical">{{value.2}}</td>
+<td class="td_vertical">{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<td>{{value.11}}</td>
+<td>{{value.12}}</td>
+<td>{{value.13}}</td>
+<td>{{value.14}}</td>
+<td>{{value.15}}</td>
+<td>{{value.16}}</td>
+<td>{{value.17}}</td>
+<td>{{value.18}}</td>
+<td>{{value.19}}</td>
+<td>{{value.20}}</td>
+<td>{{value.21}}</td>
+<td>{{value.22}}</td>
+<td>{{value.23}}</td>
+<td>{{value.24}}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+<br>
+<br>
+{% endif %}
+<br>
+<br>
+<br>
