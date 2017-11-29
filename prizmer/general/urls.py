@@ -102,7 +102,10 @@ urlpatterns = patterns('',
     url(r'^63/$', views.heat_elf_period), # Показание за период Эльф-тепло
     url(r'^64/$', views.heat_elf_daily), # Показание на дату Эльф-тепло 
     
-    url(r'^66/$', views.heat_water_elf_daily), # Показание на дату по Эльф-тепло и вода 
+    url(r'^66/$', views.heat_water_elf_daily), # Показание на дату по Эльф-тепло и вода
+    url(r'^71/$', views.forma_80040), # Отчёт по форме 80040
+
+    
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
