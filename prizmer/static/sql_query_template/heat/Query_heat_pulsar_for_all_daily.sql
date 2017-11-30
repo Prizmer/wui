@@ -1,4 +1,8 @@
-﻿Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy,z2.volume,z2.t_in,z2.t_out
+﻿Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
+round(z2.energy::numeric,7),
+round(z2.volume::numeric,7),
+round(z2.t_in::numeric,1),
+round(z2.t_out::numeric,1)
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -35,11 +39,12 @@ left join
             			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
             			  params.guid_names_params = names_params.guid AND
             			  meters.guid_types_meters = types_meters.guid AND
-            			  objects.name = 'Корпус 2' AND            			  
+            			  objects.name = 'Корпус C1' AND            			  
             			  types_meters.name = 'Пульсар Теплосчётчик' AND 
-            			  daily_values.date = '11.08.2017' 
+            			  daily_values.date = '30.11.2017' 
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='Корпус 2'
+where heat_abons.obj_name='Корпус C1'
+order by heat_abons.ab_name

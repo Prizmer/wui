@@ -9102,14 +9102,14 @@ def report_pulsar_heat_daily(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # стояк
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # стояк
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # счётчик
+            ws.cell('D%s'%(row)).value =  '%s' % (data_table[row-6][4])  # счётчик
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
@@ -9221,49 +9221,49 @@ def report_pulsar_heat_period(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.7f')) # '%s' % (data_table[row-6][2])  # Показания по теплу на начало
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.7f')) # '%s' % (data_table[row-6][3])  # Показания по теплу на конец
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).value =  '%s' % (format(data_table[row-6][4],'.7f'))  # '%s' % (data_table[row-6][4])  # Потребление
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
             next
         
         try:
-            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Время работы
+            ws.cell('F%s'%(row)).value =  '%s' % (format(data_table[row-6][5],'.7f')) # '%s' % (data_table[row-6][5])  # Время работы
             ws.cell('F%s'%(row)).style = ali_white
         except:
             ws.cell('F%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # Время работы
+            ws.cell('G%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.7f')) # '%s' % (data_table[row-6][6])  # Время работы
             ws.cell('G%s'%(row)).style = ali_white
         except:
             ws.cell('G%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][7])  # Время работы
+            ws.cell('H%s'%(row)).value =  '%s' % (format(data_table[row-6][7],'.7f'))  #'%s' % (data_table[row-6][7])  # Время работы
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
             next
             
      
-#    ws.row_dimensions[5].height = 41
+    ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 17 
         
     wb.save(response)
@@ -9341,21 +9341,21 @@ def report_pulsar_heat_period_2(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.7f'))  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).value =  '%s' % (format(data_table[row-6][2],'.7f'))   # Показания по теплу на начало
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.7f'))  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).value =  '%s' % (format(data_table[row-6][3],'.7f'))   # Показания по теплу на конец
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (format(data_table[row-6][4],'.7f'))  # Потребление
+            ws.cell('E%s'%(row)).value =  '%s' % (format(data_table[row-6][4],'.7f'))  # Потребление
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
@@ -9433,7 +9433,7 @@ def report_pulsar_heat_daily_2(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.7f'))  # стояк
+            ws.cell('C%s'%(row)).value =  '%s' % (format(data_table[row-6][3],'.7f'))   # стояк
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
@@ -9546,42 +9546,42 @@ def report_heat_elf_period_2(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.2f'))  # Показания по теплу на конец
+            ws.cell('C%s'%(row)).value = '%s' % (format(data_table[row-6][3],'.7f'))  # Показания по теплу на конец
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.2f'))  # Показания по теплу на начало
+            ws.cell('D%s'%(row)).value = '%s' % (format(data_table[row-6][2],'.7f'))  # Показания по теплу на начало
             ws.cell('D%s'%(row)).style = ali_white
         except:
             ws.cell('D%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (format(data_table[row-6][4],'.2f'))  # Потребление
+            ws.cell('E%s'%(row)).value = '%s' % (format(data_table[row-6][4],'.7f'))  # Потребление
             ws.cell('E%s'%(row)).style = ali_white
         except:
             ws.cell('E%s'%(row)).style = ali_white
             next
         
         try:
-            ws.cell('f%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.2f'))  # Показания по теплу на конец
+            ws.cell('f%s'%(row)).value = '%s' % (format(data_table[row-6][6],'.7f'))  # Показания по теплу на конец
             ws.cell('f%s'%(row)).style = ali_white
         except:
             ws.cell('f%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('g%s'%(row)).value = '%s' % (format(data_table[row-6][5],'.2f'))  # Показания по теплу на начало
+            ws.cell('g%s'%(row)).value = '%s' % (format(data_table[row-6][5],'.7f'))  # Показания по теплу на начало
             ws.cell('g%s'%(row)).style = ali_white
         except:
             ws.cell('g%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('h%s'%(row)).value = '%s' % (format(data_table[row-6][7],'.2f'))  # Потребление
+            ws.cell('h%s'%(row)).value = '%s' % (format(data_table[row-6][7],'.7f'))  # Потребление
             ws.cell('h%s'%(row)).style = ali_white
         except:
             ws.cell('h%s'%(row)).style = ali_white

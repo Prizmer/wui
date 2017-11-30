@@ -2315,9 +2315,11 @@ def ChangeNull(data_table, electric_data):
     #обойти в цикле все строки и добавить "Н/Д" в ячейки, где null
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
+        #if i<10: print data_table[i]
         for j in range(1,len(data_table[i])):
             if (data_table[i][j] == None) or (data_table[i][j] is None):
                 data_table[i][j]=u'Н/Д'
+                #print data_table[i][j]
         if (electric_data is not None):
             data_table[i][0]=electric_data
         data_table[i]=tuple(data_table[i])
@@ -5006,10 +5008,10 @@ def get_30_min_value_by_meters_number_param_names_and_datetime(meters_number, pa
 def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params):
     sQuery="""
     SELECT z1.daily_date, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            round(sum(Case when z1.params_name = '%s' then z1.value_daily  end)::numeric,7) as energy,
+            round(sum(Case when z1.params_name = '%s' then z1.value_daily  end)::numeric,7) as volume,
+            round(sum(Case when z1.params_name = '%s' then z1.value_daily  end)::numeric,1) as t_in,
+            round(sum(Case when z1.params_name = '%s' then z1.value_daily  end)::numeric,1) as t_out
             
                                     FROM
                                     (SELECT 
@@ -5052,7 +5054,11 @@ def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electr
 
 def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params):
     sQuery="""
-           Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy,z2.volume,z2.t_in,z2.t_out
+           Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, 
+round(z2.energy::numeric,7),
+round(z2.volume::numeric,7),
+round(z2.t_in::numeric,1),
+round(z2.t_out::numeric,1)
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -5096,7 +5102,8 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s'""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title )
+where heat_abons.obj_name='%s'
+order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title )
     #print sQuery    
     return sQuery
 
@@ -5204,58 +5211,36 @@ where z1.number_manual=z2.number_manual
 
 def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params):
     sQuery="""
-    Select heat_abons.ab_name, heat_abons.factory_number_manual, z3.energy_start, z3.energy_end, z3.energy_end-z3.energy_start as delta_energy, z3.volume_start, z3.volume_end,z3.volume_end-z3.volume_start as delta_volume
+   Select  heat_abons.ab_name, heat_abons.factory_number_manual, 
+round((z5.energy_start)::numeric,7) as energy_st,  
+round(z5.energy_end::numeric,7)as energy_e, 
+round((z5.energy_end-z5.energy_start)::numeric,7) as energy_delta, 
+round((z5.volume_start)::numeric,7), 
+round((z5.volume_end)::numeric,7), 
+round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta
+ 
 from heat_abons
-inner join
-(Select z1.name_abonents, z1.number_manual,z1.energy as energy_start, z2.energy as energy_end, z1.volume as volume_start, z2.volume as volume_end
-from
-(SELECT 
-            			  objects.name as name_objects, 
-            			  abonents.name as name_abonents,            			 
-            			  meters.factory_number_manual as number_manual, 
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as energy,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as volume,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as t_in,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as t_out,
-            			  types_meters.name as meter_type
-            			FROM 
-            			  public.daily_values, 
-            			  public.taken_params, 
-            			  public.abonents, 
-            			  public.link_abonents_taken_params, 
-            			  public.objects, 
-            			  public.params, 
-            			  public.names_params, 
-            			  public.meters, 
-            			  public.types_meters
-            			WHERE 
-            			  daily_values.id_taken_params = taken_params.id AND
-            			  taken_params.guid_params = params.guid AND
-            			  taken_params.guid_meters = meters.guid AND
-            			  abonents.guid_objects = objects.guid AND
-            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
-            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-            			  params.guid_names_params = names_params.guid AND
-            			  meters.guid_types_meters = types_meters.guid AND
-            			  objects.name = '%s' AND
-            			  
-            			  types_meters.name = '%s' AND 
-            			  daily_values.date = '%s'                                                      
-                                  
-            group by daily_values.date, 
-            			  objects.name, 
-            			  abonents.name,             			
-            			  meters.factory_number_manual,
-            			  types_meters.name )as z1,
+left join
 
-(SELECT 
+(Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end
+from
+(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_start,z2.volume as volume_start,z2.t_in as t_in_start,z2.t_out as t_out_start
+from heat_abons
+left join
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
             			  objects.name as name_objects, 
-            			  abonents.name as name_abonents,            			 
+            			  abonents.name as name_abonents, 
+            			  daily_values.value as value_daily, 
             			  meters.factory_number_manual as number_manual, 
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as energy,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as volume,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as t_in,
-            sum(Case when names_params.name = '%s' then daily_values.value  end) as t_out,
+            			  names_params.name as params_name, 
             			  types_meters.name as meter_type
             			FROM 
             			  public.daily_values, 
@@ -5276,21 +5261,67 @@ from
             			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
             			  params.guid_names_params = names_params.guid AND
             			  meters.guid_types_meters = types_meters.guid AND
-            			  objects.name = '%s' AND
-            			  
+            			  objects.name = '%s' AND            			  
             			  types_meters.name = '%s' AND 
-            			  daily_values.date = '%s'                                                      
-                                  
-            group by daily_values.date, 
-            			  objects.name, 
-            			  abonents.name,             			
-            			  meters.factory_number_manual,
-            			  types_meters.name
-)as z2
-where z1.number_manual=z2.number_manual) as z3
-on z3.number_manual=heat_abons.factory_number_manual
+            			  daily_values.date = '%s' 
+                                    ) z1
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            order by z1.name_abonents) as z2
+on z2.number_manual=heat_abons.factory_number_manual
+where heat_abons.obj_name='%s') as z3,
+(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_end,z2.volume as volume_end,z2.t_in as t_in_end,z2.t_out as t_out_end
+from heat_abons
+left join
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
+            			  objects.name as name_objects, 
+            			  abonents.name as name_abonents, 
+            			  daily_values.value as value_daily, 
+            			  meters.factory_number_manual as number_manual, 
+            			  names_params.name as params_name, 
+            			  types_meters.name as meter_type
+            			FROM 
+            			  public.daily_values, 
+            			  public.taken_params, 
+            			  public.abonents, 
+            			  public.link_abonents_taken_params, 
+            			  public.objects, 
+            			  public.params, 
+            			  public.names_params, 
+            			  public.meters, 
+            			  public.types_meters
+            			WHERE 
+            			  daily_values.id_taken_params = taken_params.id AND
+            			  taken_params.guid_params = params.guid AND
+            			  taken_params.guid_meters = meters.guid AND
+            			  abonents.guid_objects = objects.guid AND
+            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            			  params.guid_names_params = names_params.guid AND
+            			  meters.guid_types_meters = types_meters.guid AND
+            			  objects.name = '%s' AND            			  
+            			  types_meters.name = '%s' AND 
+            			  daily_values.date = '%s' 
+                                    ) z1
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            order by z1.name_abonents) as z2
+on z2.number_manual=heat_abons.factory_number_manual
+where heat_abons.obj_name='%s') as z4
+where z3.factory_number_manual=z4.factory_number_manual
+) as z5
+on z5.factory_number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' 
-    """%(params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_start,params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_end, obj_title)
+order by heat_abons.ab_name
+    """%(params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_start,obj_title,
+         params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_end, obj_title,  obj_title)
+    #print sQuery    
     return sQuery
 
 def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, isAbon):
