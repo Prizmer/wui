@@ -9102,7 +9102,7 @@ def report_pulsar_heat_daily(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # стояк
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # стояк
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
