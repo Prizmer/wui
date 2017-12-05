@@ -9466,19 +9466,10 @@ def report_heat_elf_period_2(request):
     obj_parent_title         = request.GET.get('obj_parent_title')
     obj_title         = request.GET.get('obj_title')          
 
-#    print obj_parent_title
-#    print obj_title
-    
-#    electric_data_end   = request.GET.get("electric_data_end")
-#    print electric_data_end
+
     electric_data_end   = request.GET.get("electric_data_end")
     electric_data_start   = request.GET.get("electric_data_start")
-#    print 'start', electric_data_start
-#    print 'end', electric_data_end 
-#    print 'AJAX: ', request.is_ajax()
-#    print 'GET: ', request.method 
 
-    #print request.session["test"]
 
 #Шапка
     ws.merge_cells('A2:E2')
@@ -9973,5 +9964,249 @@ def report_heat_water_elf_daily(request):
     output_name = u'pokazaniya_elf_report_'+translate(obj_parent_title)+u'_'+electric_data_end
     file_ext = u'xlsx'
     
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_water_pulsar_potreblenie_skladochnaya(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title                = request.GET.get('obj_title')
+    electric_data_end        = request.GET.get("electric_data_end")
+    electric_data_start      = request.GET.get("electric_data_start")
+
+
+#Шапка
+    
+#    ws.merge_cells('A2:E2')
+#    ws['A2'] = 'Теплосчётчик Пульсар. Потребление воды в период c ' +unicode(electric_data_start)+' по '+ unicode(electric_data_end)
+    ws.merge_cells('B2:N2')
+    ws['B2'] =u'Шапка отчёта'
+    ws['B2'].style = ali_grey
+    ws['C2'].style = ali_grey
+    ws['D2'].style = ali_grey
+    ws['E2'].style = ali_grey
+    ws['F2'].style = ali_grey
+    ws['G2'].style = ali_grey
+    ws['H2'].style = ali_grey
+    ws['I2'].style = ali_grey
+    ws['J2'].style = ali_grey
+    ws['K2'].style = ali_grey
+    ws['L2'].style = ali_grey
+    ws['M2'].style = ali_grey
+    ws['N2'].style = ali_grey
+    
+    ws.merge_cells('B3:N3')
+    ws['B3'] =u'Шапка отчёта'
+    ws['B3'].style = ali_grey
+    ws['C3'].style = ali_grey
+    ws['D3'].style = ali_grey
+    ws['E3'].style = ali_grey
+    ws['F3'].style = ali_grey
+    ws['G3'].style = ali_grey
+    ws['H3'].style = ali_grey
+    ws['I3'].style = ali_grey
+    ws['J3'].style = ali_grey
+    ws['K3'].style = ali_grey
+    ws['L3'].style = ali_grey
+    ws['M3'].style = ali_grey
+    ws['N3'].style = ali_grey
+
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Квартира'
+    ws['B4'].style = ali_grey
+    ws['B5'].style = ali_grey
+    
+    ws.merge_cells('C4:E4')
+    ws['C4'] = u'ГВС'
+    ws['C4'].style = ali_grey
+    
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Нач, показание Т1 (м^3)'
+    ws['D5'].style = ali_grey
+
+    ws['E5'] = 'Дата/Время'
+    ws['E5'].style = ali_grey
+    
+    ws.merge_cells('F4:H4')
+    ws['F4'] = 'ГВС'
+    ws['F4'].style = ali_grey
+    
+    ws['F5'] = 'Кон, показание Т1 (м^3)'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Дата/Время'
+    ws['G5'].style = ali_grey
+
+    ws['H5'] = 'Разница ГВС'
+    ws['H5'].style = ali_grey
+    
+    ws.merge_cells('I4:K4')
+    ws['I4'] = 'ХВС'
+    ws['I4'].style = ali_grey
+    
+    ws['I5'] = 'Счётчик'
+    ws['I5'].style = ali_grey
+    
+    ws['J5'] = 'Нач, показание Т1 (м^3)'
+    ws['J5'].style = ali_grey
+
+    ws['K5'] = 'Дата/Время'
+    ws['K5'].style = ali_grey
+    
+    ws.merge_cells('L4:N4')
+    ws['L4'] = 'ХВС'
+    ws['L4'].style = ali_grey
+    ws['N4'].style = ali_grey
+    
+    ws['L5'] = 'Кон, показание Т1 (м^3)'
+    ws['L5'].style = ali_grey
+    
+    ws['M5'] = 'Дата/Время'
+    ws['M5'].style = ali_grey
+
+    ws['N5'] = 'Разница ХВС'
+    ws['N5'].style = ali_grey
+    
+#Запрашиваем данные для отчета
+
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title                = request.GET.get('obj_title')
+    electric_data_end        = request.GET.get("electric_data_end")
+    electric_data_start      = request.GET.get("electric_data_start")             
+    obj_key                 = request.GET.get('obj_key')
+
+    data_table=[]      
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+
+    
+ #Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % ((data_table[row-6][3]).strftime("%d-%m-%Y"))  # заводской номер
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][4])  # заводской номер
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % ((data_table[row-6][5]).strftime("%d-%m-%Y"))  # заводской номер
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][6])  # заводской номер
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-6][7])  # заводской номер
+            ws.cell('I%s'%(row)).style = ali_white
+        except:
+            ws.cell('I%s'%(row)).style = ali_white
+            next
+            
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-6][8])  # заводской номер
+            ws.cell('J%s'%(row)).style = ali_white
+        except:
+            ws.cell('J%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % ((data_table[row-6][9]).strftime("%d-%m-%Y"))  # заводской номер
+            ws.cell('K%s'%(row)).style = ali_white
+        except:
+            ws.cell('K%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % (data_table[row-6][10])  # заводской номер
+            ws.cell('L%s'%(row)).style = ali_white
+        except:
+            ws.cell('L%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % ((data_table[row-6][11]).strftime("%d-%m-%Y")) # заводской номер
+            ws.cell('M%s'%(row)).style = ali_white
+        except:
+            ws.cell('M%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % (data_table[row-6][12])  # заводской номер
+            ws.cell('N%s'%(row)).style = ali_white
+        except:
+            ws.cell('N%s'%(row)).style = ali_white
+            next
+
+     
+#    ws.row_dimensions[5].height = 41
+    #ws.row_dimensions[5].height = 41
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 17
+    #ws.column_dimensions['F'].width = 35
+    ws.column_dimensions['F'].width = 25
+    ws.column_dimensions['H'].width = 18 
+    
+    ws.column_dimensions['J'].width = 25    
+    ws.column_dimensions['K'].width = 17
+    #ws.column_dimensions['L'].width = 35
+    ws.column_dimensions['L'].width = 25
+    ws.column_dimensions['N'].width = 18 
+        
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    
+    output_name = u'pulsar_water_report_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
+    file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
