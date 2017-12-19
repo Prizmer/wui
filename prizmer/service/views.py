@@ -321,6 +321,7 @@ def LoadObjectsAndAbons(sPath, sSheet):
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
     for i in range(1,len(dtAll)):
+        #print  dtAll[i][2],dtAll[i][3]
         writeToLog( u'Обрабатываем строку ' + dtAll[i][2]+' - '+dtAll[i][3])
         obj_l0=dtAll[i][0]
         writeToLog( obj_l0)
@@ -400,8 +401,10 @@ def load_electric_objects(request):
     counter_status    = ""
     result="Не загружено"
     writeToLog('test1')
+    
     if request.is_ajax():
         if request.method == 'GET':
+            
             request.session["choice_file"]    = fileName    = request.GET['choice_file']
             request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
             request.session["tcp_ip_status"]    = tcp_ip_status    = request.GET['tcp_ip_status']
@@ -411,7 +414,8 @@ def load_electric_objects(request):
             directory=os.path.join(BASE_DIR,'static/cfg/')
             sPath=directory+fileName
             writeToLog(sPath)
-            #print 'Path:_____',sPath, sheet
+                        
+            print 'Path:_____',sPath, sheet
             result=LoadObjectsAndAbons(sPath, sheet)
     
     object_status=result#"Загрузка объектов условно прошла"
@@ -430,12 +434,13 @@ def LoadElectricMeters(sPath, sSheet):
     global cfg_sheet_name
     cfg_sheet_name=sSheet
     result=u"Счётчики не загружены"
-    #print type(sPath), sPath, type(sSheet), sSheet
+    print type(sPath), sPath, type(sSheet), sSheet
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     met=0
-    #print 'load dt - ok'
+    print 'load dt - ok'
     for i in range(1,len(dtAll)):
         writeToLog(u'Обрабатываем строку ' + unicode(dtAll[i][3])+' - '+unicode(dtAll[i][6]))
+        print unicode(dtAll[i][3]), unicode(dtAll[i][6])
         obj_l2=unicode(dtAll[i][2]) #корпус
         abon=unicode(dtAll[i][3]) #квартира
         meter=unicode(dtAll[i][6]) #номер счётчика

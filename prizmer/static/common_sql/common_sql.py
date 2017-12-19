@@ -2480,7 +2480,7 @@ def get_k_t_n(meter_name):
                         WHERE 
                           link_abonents_taken_params.guid_taken_params = taken_params.guid AND
                           meters.guid = taken_params.guid_meters AND
-                          meters.name = %s
+                          meters.factory_number_manual = %s
                           LIMIT 1;""", [meter_name])
     simpleq = simpleq.fetchall()
     return simpleq[0][0]
@@ -2497,7 +2497,7 @@ def get_k_t_t(meter_name):
                         WHERE 
                           link_abonents_taken_params.guid_taken_params = taken_params.guid AND
                           meters.guid = taken_params.guid_meters AND
-                          meters.name = %s
+                          meters.factory_number_manual = %s
                           LIMIT 1;""", [meter_name])
     simpleq = simpleq.fetchall()
     return simpleq[0][0]
@@ -2544,7 +2544,7 @@ def get_serial_number_by_meter_name(meters_name):
                        FROM 
                          public.meters
                        WHERE 
-                         meters.name = %s LIMIT 1; """,[meters_name])
+                         meters.factory_number_manual = %s LIMIT 1; """,[meters_name])
     simpleq = simpleq.fetchall()
     if simpleq:
         return simpleq[0][0]

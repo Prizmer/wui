@@ -1215,7 +1215,9 @@ def report_rejim_day(request): # Отчет по режимному дню
     electric_data_end   = request.session["electric_data_end"]
 #    electric_data_start = request.session['electric_data_start']
     data_table = []
-    general_k = common_sql.get_k_t_t(meters_name) * common_sql.get_k_t_n(meters_name)
+    #print meters_name
+    
+    general_k = common_sql.get_k_t_t(meters_name) * common_sql.get_k_t_n(meters_name)#поменяла функцию: в запросе нужен factory namber manual, а не name в meters
 # Шапка отчета
     ws['A1'] = u"ЗАО 'Кировская керамика'"
     ws['H1'] = u'Шифр'
@@ -1250,7 +1252,7 @@ def report_rejim_day(request): # Отчет по режимному дню
     ws['G46'] = u'фамилия ______________ подпись ______________'
 
     ws['D10'] = ws['G10'] = general_k # Общий коэффициент
-    ws['D9'] = ws['G9'] = str(common_sql.get_serial_number_by_meter_name(meters_name)) #Серийный номер прибора
+    ws['D9'] = ws['G9'] = str(common_sql.get_serial_number_by_meter_name(meters_name)) #Серийный номер прибора #поменяла функцию: в запросе нужен factory namber manual, а не name в meters
         
     ws['A13'] = u'0' 
     ws['A14'] = u'1' 
