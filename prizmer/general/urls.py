@@ -105,6 +105,8 @@ urlpatterns = patterns('',
     url(r'^66/$', views.heat_water_elf_daily), # Показание на дату по Эльф-тепло и вода
     
     url(r'^67/$', views.water_pulsar_potreblenie_skladochnaya),#67. Складочная. Потребление ХВС, ГВС (с водосчётчика Пульсар)
+    
+     url(r'^68/$', views.rejim_day), #режимный день-не переделывала
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

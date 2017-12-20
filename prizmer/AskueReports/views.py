@@ -10212,3 +10212,224 @@ def report_water_pulsar_potreblenie_skladochnaya(request):
     file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    
+    
+def report_rejim_electro(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title                = request.GET.get('obj_title')
+    electric_data_end        = request.GET.get("electric_data_end")    
+
+
+#Шапка
+ 
+    ws['A2'] = u"Адрес"
+    #ws['H1'] = u'Шифр'
+    ws['G2'] = u'Абонент'
+    ws['G3'] = u'Питающий центр'
+    #ws['G3'] = u'№ фидера'
+    
+    ws['D5'] = u'Протокол (первичный)'
+    ws['D5'].style = ali_white_size_18
+    
+    ws['E7'] = u'трансформаторного напряжения _____ вольт'
+    
+    ws['B6'] = u'записей показаний электросчетчиков и вольтметров, а также определения нагрузок'
+    ws['B7'] = u"и тангенса 'фи' за " + str(electric_data_end) + u'г'
+    ws['B9'] = u'Счётчик Акт. и Реакт. энергии № '# + str(common_sql.get_serial_number_by_meter_name(meters_name)) 
+    #ws['E9'] = u'Реакт. Счетчик № '# + str(common_sql.get_serial_number_by_meter_name(meters_name))
+    ws['B10'] = u'КТТ' 
+    ws['B11'] = u'КТН'
+    ws['B12'] = u'Расч. коэффициент трансформации'
+
+    #ws['A11'] = u'Время' 
+    ws['A17'] = u'час'
+    ws['B14'] = u'30-минутные срезы мощности (график мощности'
+    ws['B15'] = u'              в памяти счетчика)'
+    ws['B16'] = u' активная, Вт'
+    ws['B17'] = u'отпуск'
+    ws['C17'] = u'приём'
+    ws['D16'] = u' реактивная, ВАр'
+    ws['D17'] = u'отпуск'
+    ws['E17'] = u'приём'
+    
+    ws['F15'] = u' Расход энергии'
+    ws['F16'] = u' активная, '
+    ws['G16'] = u' реактивная, '
+    ws['F17'] = u'   КВтч'
+    ws['G17'] = u'   КВАрч'
+    
+    ws['H15'] = u'тангенс'
+    ws['I15'] = u'косинус'
+    ws['H17'] = u'    фи'
+    ws['I17'] = u'    фи'
+    
+    ws['J15'] = u' Полная'
+    ws['J16'] = u' мощность'  
+    ws['J17'] = u'   КВа'
+    
+    ws['K15'] = u' Показания'
+    ws['K16'] = u' вольтметров '    
+    ws['K17'] = u'   в/н'
+    ws['L17'] = u'   н/н'
+    
+    ws['M15'] = u' Мощность'
+    ws['M16'] = u'компен.устр'  
+    ws['M17'] = u'   КВаh'
+    
+    ws['A18'] = u'0-1' 
+    ws['A19'] = u'1-2' 
+    ws['A20'] = u'2-3'
+    ws['A21'] = u'3-4' 
+    ws['A22'] = u'4-5'
+    ws['A23'] = u'5-6' 
+    ws['A24'] = u'6-7'
+    ws['A25'] = u'7-8' 
+    ws['A26'] = u'8-9'
+    ws['A27'] = u'9-10' 
+    ws['A28'] = u'10-11'
+    ws['A29'] = u'11-12' 
+    ws['A30'] = u'12-13'
+    ws['A31'] = u'13-14' 
+    ws['A32'] = u'14-15'
+    ws['A33'] = u'15-16' 
+    ws['A34'] = u'16-17'
+    ws['A35'] = u'17-18' 
+    ws['A36'] = u'18-19'
+    ws['A37'] = u'19-20' 
+    ws['A38'] = u'20-21'
+    ws['A39'] = u'21-22' 
+    ws['A40'] = u'22-23'
+    ws['A41'] = u'23-24' 
+    #ws['A37'] = u'24'
+    
+    
+
+    ws.column_dimensions['A'].width = 7            
+    ws.column_dimensions['B'].width = 11
+    ws.column_dimensions['C'].width = 11
+    ws.column_dimensions['D'].width = 11
+    ws.column_dimensions['E'].width = 11
+    ws.column_dimensions['F'].width = 11
+    ws.column_dimensions['G'].width = 11
+    ws.column_dimensions['H'].width = 8
+    ws.column_dimensions['I'].width = 8
+    ws.column_dimensions['J'].width = 11  
+    ws.column_dimensions['K'].width = 7 
+    ws.column_dimensions['L'].width = 7 
+    ws.row_dimensions[5].height = 30
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')      
+    obj_key                 = request.GET.get('obj_key')
+    dt_activ=[]
+    dt_reactiv=[]
+    if (bool(is_abonent_level.search(obj_key))):
+        dt_activ=common_sql.get_data_table_rejim( obj_title, electric_data_end, 'A+ Профиль')
+        dt_reactiv=common_sql.get_data_table_rejim( obj_title, electric_data_end, 'R+ Профиль')
+    
+    if len(dt_activ)>0: 
+#Заполняем отчет значениями
+        try:
+            ws.cell('E9').value = '%s' % (obj_title)  # Абонент грщ
+            ws.cell('E9').style = ali_white
+        except:
+            ws.cell('E9').style = ali_white
+            next
+    
+        try:
+            ws.cell('C10').value = '%s' % (dt_activ[0][1])  # ктт
+            ws.cell('C10').style = ali_white
+        except:
+            ws.cell('C10').style = ali_white
+            next
+            
+        try:
+            ws.cell('C11').value = '%s' % (dt_activ[0][2])  # ктн
+            ws.cell('C11').style = ali_white
+        except:
+            ws.cell('C11').style = ali_white
+            next
+            
+        try:
+            ws.cell('E12').value = '%s' % (dt_activ[0][2]*dt_activ[0][1])  # ктн
+            ws.cell('E12').style = ali_white
+        except:
+            ws.cell('E12').style = ali_white
+            next
+          
+        try:
+            t_pred=dt_activ[0][0]+dt_activ[0][7]
+            ws.cell('F18').value = '%s' % (t_pred) #сумма первой получасовки/2 и значения на полнось на начало месяца
+            ws.cell('F18').style = ali_white
+        except:
+            ws.cell('F18').style = ali_white
+                
+        for row in range(18, 42): 
+            n=row-11
+            
+            try:
+                ws.cell('C%s'%(row)).value = '%s' % (dt_activ[0][n]*2) # сумма получасовок за час
+                ws.cell('C%s'%(row)).style = ali_white
+            except:
+                ws.cell('C%s'%(row)).style = ali_white
+                
+            try:
+                ws.cell('E%s'%(row)).value = '%s' % (dt_reactiv[0][n]*2) # сумма получасовок за час
+                ws.cell('E%s'%(row)).style = ali_white
+            except:
+                ws.cell('E%s'%(row)).style = ali_white
+        
+        
+        try:
+            t_pred_act=dt_activ[0][0]+dt_activ[0][7]
+            ws.cell('F18').value = '%s' % (t_pred_act) #сумма первой получасовки/2 и значения на полнось на начало месяца
+            ws.cell('F18').style = ali_white
+        except:
+            ws.cell('F18').style = ali_white
+            
+        try:
+            t_pred_react=dt_reactiv[0][0]+dt_reactiv[0][7]
+            ws.cell('G18').value = '%s' % (t_pred_react) #сумма первой получасовки/2 и значения на полнось на начало месяца
+            ws.cell('G18').style = ali_white
+        except:
+            ws.cell('G18').style = ali_white
+            
+        for row in range(19, 42): 
+            n=row-11
+            try:
+                t_pred_act+=dt_activ[0][n]
+                ws.cell('F%s'%(row)).value = '%s' % (t_pred_act) # 
+                ws.cell('F%s'%(row)).style = ali_white
+            except:
+                ws.cell('F%s'%(row)).style = ali_white
+                
+            try:
+                t_pred_react+=dt_reactiv[0][n]                
+                ws.cell('G%s'%(row)).value = '%s' % (t_pred_react) # 
+                ws.cell('G%s'%(row)).style = ali_white
+            except:
+                ws.cell('G%s'%(row)).style = ali_white
+            
+        
+    
+    
+    
+    
+    
+    for col_idx in range(1, 14):
+        col = get_column_letter(col_idx)
+        for row in range(18, 42):
+            ws.cell('%s%s'%(col, row)).style = ali_white
+            
+            
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    
+    output_name = u'protokol_rejim_den_'+translate(obj_parent_title)+'_'+'_'+electric_data_end
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

@@ -80,6 +80,8 @@ urlpatterns = patterns('',
     url(r'^66/$', views.report_heat_water_elf_daily), # Показание на дату Эльф-тепло и вода
     
     url(r'^67/$', views.report_water_pulsar_potreblenie_skladochnaya), #skladochnaya - otch`t za period
+    
+    url(r'^68/$', views.report_rejim_electro), #отчёт-режимный день
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),
