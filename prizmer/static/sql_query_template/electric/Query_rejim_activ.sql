@@ -24,9 +24,9 @@ WHERE
   abonents.guid_objects = objects.guid AND
   params.guid_names_params = names_params.guid AND
   various_values."time" =  '00:00:00' AND 
-  various_values.date = ('01.'::text||(extract(month from timestamp '02.12.2017'))::text||'.'||(extract(year from timestamp '02.12.2017'))::text)::timestamp AND 
-  names_params.name = 'A+ Профиль' and
-  abonents.name='Эл.щит. ГРЩ 31632596'
+  various_values.date = ('01.'::text||(extract(month from timestamp '19.12.2017'))::text||'.'||(extract(year from timestamp '19.12.2017'))::text)::timestamp AND 
+  names_params.name = 'R+ Профиль' and
+  abonents.name='ГРЩ 1 Ввод2'
   )
   
 SELECT 
@@ -77,9 +77,9 @@ WHERE
   taken_params.guid_params = params.guid AND
   various_values.id_taken_params = taken_params.id AND
   params.guid_names_params = names_params.guid AND
-  various_values.date = '02.12.2017' AND 
-  names_params.name = 'A+ Профиль' and
-  abonents.name='Эл.щит. ГРЩ 31632596'
+  various_values.date = '19.12.2017' AND 
+  names_params.name = 'R+ Профиль' and
+  abonents.name='ГРЩ 1 Ввод2'
 
   group by   objects.name, 
   abonents.name,   

@@ -26,7 +26,7 @@ cfg_sheet_name=""
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Create your views here.
 
-
+isService=False
     
     
 class UploadFileForm(forms.Form):
@@ -545,6 +545,8 @@ def LoadElectricMeters(sPath, sSheet):
 
 
 def load_electric_counters(request):
+    global isService
+    isService=True
     args={}
     fileName=""
     sheet    = ""
@@ -570,6 +572,7 @@ def load_electric_counters(request):
     args["tcp_ip_status"]=tcp_ip_status
     args["object_status"]=object_status
     args["counter_status"]=counter_status
+    isService=False
     return render_to_response("service/service_electric.html", args)
 
 
@@ -579,6 +582,7 @@ def service_water(request):
     return render_to_response("service/service_water.html", args)
     
 def add_link_meter(sender, instance, created, **kwargs):
+    print u'Vi v f-ii add_link_meter'
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     writeToLog( unicode(dtAll[1][1]))
     if (dtAll[1][1] == u'Объект'): #вода
@@ -663,7 +667,25 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
             else:
                 pass
             
-signals.post_save.connect(add_link_meter, sender=Meters)
+def add_link_taken_params(sender, instance, created, **kwargs):
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    if (dtAll[1][1] == u'Объект'): #вода
+        add_link_abonents_taken_params2(sender, instance, created, **kwargs)
+    else:# электрика
+        add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs)
+
+
+signals.post_save.disconnect(add_link_meter, sender=Meters) 
+signals.post_save.disconnect(add_link_taken_params, sender=TakenParams) 
+print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+print isService 
+        
+if (isService):
+    signals.post_save.connect(add_link_taken_params, sender=TakenParams)
+    signals.post_save.connect(add_link_meter, sender=Meters)
+else:
+    signals.post_save.disconnect(add_link_meter, sender=Meters)
+    signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)
 
 
 def add_link_abonents_taken_params(sender, instance, created, **kwargs):
@@ -765,12 +787,7 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
 #    else:
 #        pass
 
-def add_link_taken_params(sender, instance, created, **kwargs):
-    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    if (dtAll[1][1] == u'Объект'): #вода
-        add_link_abonents_taken_params2(sender, instance, created, **kwargs)
-    else:# электрика
-        add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs)
+
 
 
 def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs):
@@ -799,7 +816,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             else:
                 pass
     
-signals.post_save.connect(add_link_taken_params, sender=TakenParams)
+
 
 def load_water_objects(request):
     args={}
@@ -945,6 +962,8 @@ def LoadObjectsAndAbons_water(sPath, sheet):
     return result
     
 def load_water_pulsar(request):
+    global isService
+    isService=True
     args={}
     result=""
     if request.is_ajax():
@@ -965,6 +984,8 @@ def load_water_pulsar(request):
     args["tcp_ip_status"]=tcp_ip_status
     args["object_status"]=object_status
     args["counter_status"]=counter_status
+    isService=False
+    
     return render_to_response("service/service_water.html", args)
     
 def LoadWaterPulsar(sPath, sSheet):
@@ -995,7 +1016,7 @@ def LoadWaterPulsar(sPath, sSheet):
         if not (isNewAbon):
             return u"Сначала создайте стурктуру объектов и счётчиков"
         if not (isNewPulsar):
-            writeToLog(u'Обрабатываем строку '+unicode(obj_l2) +' '+ unicode(numPulsar))
+            print (u'Обрабатываем строку '+unicode(obj_l2) +' '+ unicode(numPulsar))
             if unicode(typePulsar) == u'Пульсар 10M':
                     add_meter = Meters(name = unicode(typePulsar) + u' ' + unicode(numPulsar), address = unicode(numPulsar), factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
                     add_meter.save()
