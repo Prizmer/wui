@@ -1287,10 +1287,11 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         
     
     else:
-        print u'Тип счётчика не определен'
+        pass
+        #print u'Тип счётчика не определен'
     
            
-signals.post_save.connect(add_taken_param, sender=Meters)    
+#signals.post_save.connect(add_taken_param, sender=Meters)    
         
 
 cfg_excel_name = 'D:\\Work\\18092017 GSM\\prizmer\\static\cfg\\omon.xlsx'

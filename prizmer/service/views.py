@@ -676,9 +676,7 @@ def add_link_taken_params(sender, instance, created, **kwargs):
 
 
 signals.post_save.disconnect(add_link_meter, sender=Meters) 
-signals.post_save.disconnect(add_link_taken_params, sender=TakenParams) 
-print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print isService 
+signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)  
         
 if (isService):
     signals.post_save.connect(add_link_taken_params, sender=TakenParams)
