@@ -4824,7 +4824,9 @@ def pokazaniya_heat_report_v2(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'heat_report' 
+    output_name = u'heat_report_'+translate(parent_name)+'_'+translate(meters_name)+'-'+electric_data_end
+
+    #output_name = u'heat_report' 
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -7026,7 +7028,8 @@ def report_potreblenie_heat_v2(request):
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'potreblenie_heat_report'
+    #output_name = u'potreblenie_heat_report'
+    output_name = u'potreblenie_heat_report_'+translate(parent_name)+'_'+translate(meters_name)+'_'+electric_data_start+'-'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
