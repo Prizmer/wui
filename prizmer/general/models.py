@@ -1285,7 +1285,7 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5fc2ff3b-999e-4154-ba49-84d3971369b0"))
         add_param.save()
         
-    
+     
     else:
         pass
         #print u'Тип счётчика не определен'

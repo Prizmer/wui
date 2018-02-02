@@ -9843,10 +9843,14 @@ def report_heat_water_elf_daily(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-
+    
+    obj_parent_title    = request.GET.get('obj_parent_title')
+    obj_title           = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')            
+    obj_key             = request.GET.get('obj_key')
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Теплосчётчик Эльф. Показания по теплу и воде на ' + str(request.session["electric_data_end"])
+    ws['A2'] = 'Теплосчётчик Эльф. Показания по теплу и воде на ' + str(electric_data_end)
     
     ws['A5'] = 'Абонент'
     ws['A5'].style = ali_grey
@@ -9854,22 +9858,22 @@ def report_heat_water_elf_daily(request):
     ws['B5'] = 'Счётчик'
     ws['B5'].style = ali_grey
     
-    ws['C5'] = 'Показания Энергии на ' + str(request.session["electric_data_end"])+', Гкал'
+    ws['C5'] = 'Показания Энергии на ' + str(electric_data_end)+', Гкал'
     ws['C5'].style = ali_grey
         
-    ws['D5'] = 'Показания Объёма на ' + str(request.session["electric_data_end"])+', м3'
+    ws['D5'] = 'Показания Объёма на ' + str(electric_data_end)+', м3'
     ws['D5'].style = ali_grey
     
     ws['E5'] = 'Счётчик ХВС'
     ws['E5'].style = ali_grey
     
-    ws['f5'] = 'Значение на '+ str(request.session["electric_data_end"])
+    ws['f5'] = 'Значение на '+ str(electric_data_end)
     ws['f5'].style = ali_grey
         
     ws['g5'] = 'Счётчик ГВС'
     ws['g5'].style = ali_grey
     
-    ws['h5'] = 'Значение на '+ str(request.session["electric_data_end"])
+    ws['h5'] = 'Значение на '+ str(electric_data_end)
     ws['h5'].style = ali_grey
 
     
@@ -9877,10 +9881,10 @@ def report_heat_water_elf_daily(request):
     is_abonent_level = re.compile(r'abonent')
     is_object_level_2 = re.compile(r'level2')
     
-    obj_parent_title         = request.session['obj_parent_title']
-    obj_title         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']            
-    obj_key             = request.session['obj_key']
+#    obj_parent_title         = request.session['obj_parent_title']
+#    obj_title         = request.session['obj_title']
+#    electric_data_end   = request.session['electric_data_end']            
+#    obj_key             = request.session['obj_key']
     #electric_data_start = request.session['electric_data_start']
     
 #    print unicode(request.session.items())
