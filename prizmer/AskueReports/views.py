@@ -6902,10 +6902,12 @@ def report_potreblenie_heat_v2(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-
+    
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Потребление тепловой энергии в период с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    ws['A2'] = 'Потребление тепловой энергии в период с ' + str(electric_data_start)  + ' по ' + str(electric_data_end)
     
 
     ws['A5'] = 'Абонент'
@@ -6914,14 +6916,32 @@ def report_potreblenie_heat_v2(request):
     ws['B5'] = 'Счётчик'
     ws['B5'].style = ali_grey
     
-    ws['C5'] = 'Показания на '  + str(request.session["electric_data_start"])
+    ws['C5'] = 'Показания на '  + str(electric_data_start)  + u', Гкал'
     ws['C5'].style = ali_grey
     
-    ws['D5'] = 'Показания на '  + str(request.session["electric_data_end"])
+    ws['D5'] = 'Показания на '  + str(electric_data_end) + u', Гкал'
     ws['D5'].style = ali_grey
     
     ws['E5'] = 'Потребление, Гкал'
     ws['E5'].style = ali_grey
+    
+    ws['f5'] = 'Объём на '  + str(electric_data_start)  + u', м3'
+    ws['f5'].style = ali_grey
+    
+    ws['g5'] = 'Объём на '  + str(electric_data_end) + u', м3'
+    ws['g5'].style = ali_grey
+    
+    ws['h5'] = 'Потребленный объём, м3'
+    ws['h5'].style = ali_grey
+    
+    ws['i5'] = 'Время работы на '  + str(electric_data_start) + u', ч'
+    ws['i5'].style = ali_grey
+    
+    ws['j5'] = 'Время работы на '  + str(electric_data_end) + u', ч'
+    ws['j5'].style = ali_grey
+    
+    ws['k5'] = 'Время работы с ' + str(electric_data_start) + ' по ' + str(electric_data_end) + ', ч'
+    ws['k5'].style = ali_grey
     
 #    ws['F5'] = 'Время работы с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"]) + ' ,ч'
 #    ws['F5'].style = ali_grey
@@ -6936,8 +6956,8 @@ def report_potreblenie_heat_v2(request):
     
     parent_name         = request.session['obj_parent_title']
     meters_name         = request.session['obj_title']
-    electric_data_end   = request.session['electric_data_end']
-    electric_data_start   = request.session['electric_data_start']                        
+#    electric_data_end   = request.session['electric_data_end']
+#    electric_data_start   = request.session['electric_data_start']                        
     obj_key             = request.session['obj_key']
     #is_electric_monthly = request.session['is_electric_monthly']
     #is_electric_daily   = request.session['is_electric_daily']
@@ -6954,14 +6974,9 @@ def report_potreblenie_heat_v2(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
                      
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table = common_sql.get_data_table_for_period_for_abon_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
-
+        data_table = common_sql.get_data_table_for_period_v3(meters_name, parent_name, electric_data_start, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_for_period_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
-        for row in data_table:
-            for x in list_except:
-                if x==row[2]:
-                    data_table.remove(x)
+        data_table = common_sql.get_data_table_for_period_v3(meters_name, parent_name, electric_data_start, electric_data_end, False)
     else:
         data_table = []
 
@@ -7003,12 +7018,47 @@ def report_potreblenie_heat_v2(request):
             ws.cell('E%s'%(row)).style = ali_white
             next
         
-#        try:
-#            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][6])  # Время работы
-#            ws.cell('F%s'%(row)).style = ali_white
-#        except:
-#            ws.cell('F%s'%(row)).style = ali_white
-#            next
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][6])  # Объём на начало
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][7])  #Объём на конец
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('h%s'%(row)).value = '%s' % (data_table[row-6][8])  # Объём - дельта
+            ws.cell('h%s'%(row)).style = ali_white
+        except:
+            ws.cell('h%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('i%s'%(row)).value = '%s' % (data_table[row-6][9])  # Время работы на начао
+            ws.cell('i%s'%(row)).style = ali_white
+        except:
+            ws.cell('i%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('j%s'%(row)).value = '%s' % (data_table[row-6][10])  # Время работы на конец 
+            ws.cell('j%s'%(row)).style = ali_white
+        except:
+            ws.cell('j%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('k%s'%(row)).value = '%s' % (data_table[row-6][11])  # Время работы - дельта
+            ws.cell('k%s'%(row)).style = ali_white
+        except:
+            ws.cell('k%s'%(row)).style = ali_white
+            next
 
     ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 17 

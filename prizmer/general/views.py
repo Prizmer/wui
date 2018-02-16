@@ -10711,13 +10711,18 @@ def potreblenie_heat_v2(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
             request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']           
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
-                     
+#                     
+#    if (bool(is_abonent_level.search(obj_key))):        
+#        data_table = common_sql.get_data_table_for_period_for_abon_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
+#
+#    elif (bool(is_object_level_2.search(obj_key))):
+#        data_table = common_sql.get_data_table_for_period_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
+
+                 
     if (bool(is_abonent_level.search(obj_key))):        
-        data_table = common_sql.get_data_table_for_period_for_abon_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
-
+        data_table = common_sql.get_data_table_for_period_v3(meters_name, parent_name, electric_data_start, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_for_period_heat_v2(meters_name, parent_name, electric_data_start, electric_data_end)
-
+        data_table = common_sql.get_data_table_for_period_v3(meters_name, parent_name, electric_data_start, electric_data_end, False)
     else:
         data_table = []
     
