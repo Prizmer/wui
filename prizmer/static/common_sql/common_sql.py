@@ -5392,7 +5392,7 @@ def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric
 
 def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3)
 from water_pulsar_abons
 left join
 (SELECT 
@@ -5433,7 +5433,7 @@ water_pulsar_abons.ab_name='%s'
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, z1.value,water_pulsar_abons.ab_guid
+    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid
 from water_pulsar_abons
 left join 
 (SELECT 
@@ -5487,7 +5487,7 @@ def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,ele
     #print obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1]
     #print obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1]    
     sQuery="""
-    Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,z1.value_start,z2.value_end, z2.value_end-z1.value_start as delta
+    Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,round(z1.value_start::numeric,3),round(z2.value_end::numeric,3), round((z2.value_end-z1.value_start)::numeric,3) as delta
 from
 (select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value as value_start
 from water_pulsar_abons
@@ -5568,7 +5568,7 @@ where z1.factory_number_manual=z2.factory_number_manual
     
 def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-   Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,z1.value_start,z2.value_end, z2.value_end-z1.value_start as delta
+   Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,round(z1.value_start::numeric,3),round(z2.value_end::numeric,3), round((z2.value_end-z1.value_start)::numeric,3) as delta
 from
 (select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value as value_start
 from water_pulsar_abons
@@ -5661,7 +5661,7 @@ def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric
     
 def MakeSqlQuery_water_pulsar_period_for_abonent_Skladochnaya(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-    select z_start.ab_name,  z_start.gvs_1_num, z_start.gvs_1, z_start.date_start,z_end.gvs_1, z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , z_end.hvs_1_num, z_start.hvs_1, z_start.date_start,   z_end.hvs_1,  z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
+    select z_start.ab_name,  z_start.gvs_1_num, round(z_start.gvs_1::numeric,3), z_start.date_start, round(z_end.gvs_1::numeric,3), z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , z_end.hvs_1_num, round(z_start.hvs_1::numeric,3), z_start.date_start, round(z_end.hvs_1::numeric,3),  z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
 from
 
 (select water_pulsar_abons.ab_name,water_pulsar_abons.ab_guid, z3.gvs_1_num, z3.gvs_1, z3.date, z3.hvs_1_num, z3.hvs_1,   z3.date as date_start
@@ -5770,7 +5770,7 @@ where z_end.ab_guid=z_start.ab_guid
 def MakeSqlQuery_water_pulsar_period_for_all_Skladochnaya(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     
     sQuery="""
-select z_start.ab_name,  z_start.gvs_1_num, z_start.gvs_1, z_start.date_start,z_end.gvs_1, z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , z_end.hvs_1_num, z_start.hvs_1, z_start.date_start,   z_end.hvs_1,  z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
+select z_start.ab_name,  z_start.gvs_1_num, round(z_start.gvs_1::numeric,3), z_start.date_start,round(z_end.gvs_1::numeric,3), z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , z_end.hvs_1_num, round(z_start.hvs_1::numeric,3), z_start.date_start, round(z_end.hvs_1::numeric,3),  z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
 from
 (select water_pulsar_abons.ab_name,water_pulsar_abons.ab_guid, z3.gvs_1_num, z3.gvs_1, z3.date, z3.hvs_1_num, z3.hvs_1,   z3.date as date_start
 from water_pulsar_abons

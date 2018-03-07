@@ -38,6 +38,9 @@ def MakeSheet(request):
     args={}
     fileName=""
     sheets=""
+    print request.GET['choice_file']
+    print '___________'
+    print request.GET.get('choice_file')
     if request.is_ajax():
         if request.method == 'GET':
             request.session["choice_file"]    = fileName    = request.GET['choice_file']
@@ -68,11 +71,12 @@ def writeToLog(msg):
 def choose_service(request):
     args={}
     directory=os.path.join(BASE_DIR,'static\\cfg\\')
+    
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
-
+    print directory
     files = os.listdir(directory) 
-    
+    print files
     args['filesFF']= files
     return render_to_response("choose_service.html", args)
 
@@ -1481,11 +1485,11 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         
         #-------------Мощность        
         #А+ Профиль
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"922ad57c-8f5e-4f00-a78d-e3ba89ef859f")) # A+ 30-мин. срез мощности
-        add_param.save()        
-        #R+ Профиль
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"61101fa3-a96a-4934-9482-e32036c12829")) # R+ 30-мин. срез мощности
-        add_param.save()
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"922ad57c-8f5e-4f00-a78d-e3ba89ef859f")) # A+ 30-мин. срез мощности
+#        add_param.save()        
+#        #R+ Профиль
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"61101fa3-a96a-4934-9482-e32036c12829")) # R+ 30-мин. срез мощности
+#        add_param.save()
         
     elif instance.guid_types_meters.name == u'Пульсар Теплосчётчик':
         #Добавляем параметры для Теплосчётчика Пульсар.
