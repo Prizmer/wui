@@ -14,6 +14,7 @@ import datetime
 import calendar
 import common_sql
 from django.shortcuts import redirect
+
 #---------
 
 from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters
@@ -5063,7 +5064,7 @@ def economic_electric(request):
                   end_date,
                   step=datetime.timedelta(days=1),
                   inclusive=True)]
-
+    #print dates
                   
     for x in range(len(dates)):
         try:
@@ -11409,6 +11410,10 @@ def resources_water_by_date(request):
       
     return render_to_response("data_table/46.html", args)
     
+    
+    
+
+        
 def resources_heat_by_date(request):
     args= {}
     electric_data_end   = request.GET['electric_data_end']            
@@ -11418,8 +11423,37 @@ def resources_heat_by_date(request):
         if request.method == 'GET':
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
+            #data_table = common_sql.get_data_table_by_date_heat_sayany_v2(meters_name, parent_name, electric_data_end, False)
+   
+   #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
 
-    #zamenyem None na N/D vezde
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    
+      
+    return render_to_response("data_table/48.html", args)
+    
+def resources_heat_by_date_2(request):
+    args= {}
+    electric_data_end   = request.GET['electric_data_end']            
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
+         
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        if (data_table[i][5] is None):            
+            dt=common_sql.get_data_table_by_date_heat_sayany_for_buhgaltery(data_table[i][0], data_table[i][8])         
+            if (len(dt)>0):                
+                data_table[i]=dt[0]
+        data_table[i]=tuple(data_table[i])
+            
+   #zamenyem None na N/D vezde
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table, None)
 
@@ -11735,7 +11769,7 @@ def water_pulsar_potreblenie_skladochnaya(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']              
     if (bool(is_abonent_level.search(obj_key))):
@@ -11833,7 +11867,7 @@ def pulsar_water_daily(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True)
@@ -11877,7 +11911,7 @@ def pulsar_water_period(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']              
     if (bool(is_abonent_level.search(obj_key))):
@@ -11922,7 +11956,7 @@ def pulsar_water_daily_row(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, True)
@@ -11966,7 +12000,7 @@ def heat_elf_daily(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_elf_heat_daily(obj_parent_title, obj_title, electric_data_end, True)
@@ -12010,7 +12044,7 @@ def heat_elf_period(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']   
             request.session["electric_data_end"]   = electric_data_start   = request.GET['electric_data_start'] 
     if (bool(is_abonent_level.search(obj_key))):
@@ -12055,7 +12089,7 @@ def heat_water_elf_daily(request):
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
-            request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_elf_heat_water_daily(obj_parent_title, obj_title, electric_data_end, True)
@@ -12078,3 +12112,87 @@ def heat_water_elf_daily(request):
    
 
     return render_to_response("data_table/66.html", args)
+
+def MakeGraphicCoords(graphic_data,numField1,numField2):
+    data_table=set()  
+    #print graphic_data
+    for i in range(len(graphic_data)):
+        graphic_data[i]=list(graphic_data[i])     
+        
+        if (graphic_data[i][numField2] == None) or (graphic_data[i][numField2] is None) or (graphic_data[i][numField2] == u'Н/Д'):
+            continue
+        else:
+            date=calendar.timegm(graphic_data[i][numField1].timetuple()) * 1000
+            #print type(date)
+            print date
+            print graphic_data[i][numField2]
+            data_table.add([date,float(unicode(graphic_data[i][numField2]))])
+            
+    #data_table=json.dumps(data_table) 
+    print type(data_table)
+    print data_table            
+    return data_table
+    
+def electric_daily_graphic(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():        
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   = request.GET['is_electric_delta']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            #request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']         
+    
+            if (is_electric_daily == '1') & (bool(is_abonent_level.search(obj_key))):   # daily for abonents
+                print obj_title, obj_parent_title,electric_data_start, electric_data_end
+                data_table = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end)
+            else:
+                pass
+            
+    #print data_table
+    print u'!!!!!!'     
+    graphic_data=[]    
+    graph_data1=MakeGraphicCoords(data_table,0,12)    
+    graph_data2=MakeGraphicCoords(data_table,0,13) 
+    graph_data3=MakeGraphicCoords(data_table,0,14) 
+    graph_data4=MakeGraphicCoords(data_table,0,15) 
+    graphic_data.append(graph_data1)
+    graphic_data.append(graph_data2)
+    graphic_data.append(graph_data3)
+    graphic_data.append(graph_data4)
+    #graphic_data=json.dumps(graphic_data) 
+    print graphic_data
+    
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['graphic_data'] = graphic_data
+    args['graph_data1'] = graphic_data
+   
+
+    return render_to_response("data_table/electric/69.html", args)

@@ -30,7 +30,7 @@ WHERE
   params.guid_names_params = names_params.guid AND
 
   types_meters.name = 'Sayany' AND 
-  daily_values.date = '31.03.2017' and 
+  daily_values.date = '26.03.2018' and 
   names_params.name = 'Q Система1'
   group by daily_values.date, 
   objects.name, 

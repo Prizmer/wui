@@ -31,9 +31,9 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   meters.guid_types_meters = types_meters.guid AND
   params.guid_names_params = names_params.guid AND
-  objects.name = 'Корпус 2' AND 
+  objects.name = 'Корпус 1А' AND 
   types_meters.name = 'Sayany' AND 
-  daily_values.date = '06.12.2016'  
+  daily_values.date = '19.03.2017'  
   group by daily_values.date,
   objects.name, 
   abonents.name,   
@@ -41,6 +41,6 @@ WHERE
   types_meters.name
   order by abonents.name) as z1
 on heat_abons.ab_name=z1.ab_name
-where heat_abons.obj_name='Корпус 2'
+where heat_abons.obj_name='Корпус 1А'
 order by heat_abons.ab_name
   

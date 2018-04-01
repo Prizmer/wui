@@ -2966,6 +2966,58 @@ def get_data_table_by_date_heat_sayany_v2(obj_title, obj_parent_title, electric_
     
     return data_table
     
+def makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params):
+    sQuery="""
+    SELECT 
+  account_2, 
+  '2015-01-01'::date AS date_install,
+  factory_number_manual,
+  'Отопление'::text AS type_energo,
+  meters.name,
+  daily_values.value ,
+  daily_values.date, 
+  substring(abonents.name from 10 for char_length(abonents.name)), 
+  objects.name
+ 
+ 
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  params.guid_names_params = names_params.guid AND
+  objects.name = '%s' AND 
+  types_meters.name = '%s' AND 
+  abonents.account_2  = '%s' and
+  names_params.name = '%s' 
+  
+ order by daily_values.date DESC
+    """%(obj_parent_title,my_params[0],account,my_params[1])
+    #print sQuery
+    return sQuery
+    
+def get_data_table_by_date_heat_sayany_for_buhgaltery(account, obj_parent_title):
+    my_params=[u'Sayany',u'Q Система1' ,u'M Система1',u'T Канал1',u'T Канал2' ]
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params))
+    data_table = cursor.fetchall()
+            
+    return data_table
+    
 def makeSqlQuery_heat_sayany_period_for_abon(obj_title, obj_parent_title , electric_data_start, electric_data_end, my_params):
     sQuery="""
     Select z1.ab_name,z1.zav_num, z1.Q1, z2.Q1 as q2, z2.Q1-z1.Q1 as deltaQ, 

@@ -629,7 +629,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
     for i in range(1,len(dtAll)):
-        writeToLog(u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7]))
+        print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         meter=dtAll[i][6] #счётчик
         #print dtAll[0][11], dtAll[0][12]
         PortType=dtAll[0][11] # com или tcp-ip
@@ -665,7 +665,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                     guid_ip_port_from_excel.execute(sQuery)
                     guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
             
-                    #print guid_ip_port_from_excel
+                    print guid_ip_port_from_excel
                     if (len(guid_ip_port_from_excel)>0):
                         guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
                         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
@@ -1087,11 +1087,11 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6e7f0d37-df5c-4850-991e-b5d7cb793924"))
         #add_param.save()
         # "Канал 1"      Импульсный вход 1 суточный
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9af27a62-d6c8-4b67-bd36-da7103e0b1f1"))
-        add_param.save()
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9af27a62-d6c8-4b67-bd36-da7103e0b1f1"))
+#        add_param.save()
         # "Канал 2"      Импульсный вход 2 суточный
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"86acc33d-7bea-4977-a5b5-c5858ce9a09d"))
-        add_param.save()
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"86acc33d-7bea-4977-a5b5-c5858ce9a09d"))
+#        add_param.save()
         # "Канал 2"      Импульсный вход 2 текущий
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"de7bfdfd-c17f-4a7c-942d-b28e85db33cb"))
         #add_param.save()

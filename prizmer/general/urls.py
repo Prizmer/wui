@@ -79,7 +79,7 @@ urlpatterns = patterns('',
     url(r'^42/$', views.resources_all_by_date), # Отчёт по всем ресурсам на дату
     url(r'^44/$', views.resources_electric_by_date), # Отчёт по электрике
     url(r'^46/$', views.resources_water_by_date), # Отчёт по воде
-    url(r'^48/$', views.resources_heat_by_date), # Отчёт по теплу
+    url(r'^48/$', views.resources_heat_by_date_2), # Отчёт по теплу за последнюю дату для бухгалтерии
     
     url(r'^50/$', views.tekon_heat_by_date), # показания по теплу -Текон 
     url(r'^51/$', views.tekon_heat_potreblenie), # потребление по теплу -Текон 
@@ -106,7 +106,12 @@ urlpatterns = patterns('',
     
     url(r'^67/$', views.water_pulsar_potreblenie_skladochnaya),#67. Складочная. Потребление ХВС, ГВС (с водосчётчика Пульсар)
     
-     url(r'^68/$', views.rejim_day), #режимный день-не переделывала
+    url(r'^68/$', views.rejim_day), #режимный день
+    
+    url(r'^69/$', views.electric_daily_graphic), #график потребления электроэнергии по дням
+    
+    
+    
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
 

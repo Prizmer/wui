@@ -6452,16 +6452,16 @@ def report_heat_all_by_date(request):
     ws['P1'].style = ali_grey
 #Запрашиваем данные для отчета
 
-           
     
-    data_table = []
     data_table = common_sql.get_data_table_report_heat_res_by_date(electric_data_end)
-
+         
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
-        for j in range(1,len(data_table[i])):
-            if (data_table[i][j] == None) or (data_table[i][j] is None):
-                data_table[i][j]=u''
+        if (data_table[i][5] is None):            
+            dt=common_sql.get_data_table_by_date_heat_sayany_for_buhgaltery(data_table[i][0], data_table[i][8])         
+            if (len(dt)>0):                
+                data_table[i]=dt[0]
+        data_table[i]=tuple(data_table[i])
 
 
 # Заполняем отчет значениями
@@ -6512,7 +6512,7 @@ def report_heat_all_by_date(request):
             next
             
         try:
-            ws.cell('H%s'%(row)).value = '%s' % electric_data_end  # дата снятия показаний
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][6]) # дата снятия показаний
             ws.cell('H%s'%(row)).style = ali_white
         except:
             ws.cell('H%s'%(row)).style = ali_white
