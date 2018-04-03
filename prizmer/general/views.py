@@ -11448,7 +11448,7 @@ def resources_heat_by_date_2(request):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
         if (data_table[i][5] is None):            
-            dt=common_sql.get_data_table_by_date_heat_sayany_for_buhgaltery(data_table[i][0], data_table[i][8])         
+            dt=common_sql.get_data_table_by_date_heat_sayany_for_buhgaltery(data_table[i][0], data_table[i][8],electric_data_end)         
             if (len(dt)>0):                
                 data_table[i]=dt[0]
         data_table[i]=tuple(data_table[i])

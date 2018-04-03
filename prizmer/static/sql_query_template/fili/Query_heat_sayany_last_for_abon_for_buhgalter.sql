@@ -33,5 +33,8 @@ WHERE
   types_meters.name = 'Sayany' AND 
   abonents.account_2 = '5501001' and
    names_params.name = 'Q Система1' 
+   and (daily_values.date='03.04.2018'::date-interval '1 day'
+   or daily_values.date='03.04.2018'::date-interval '2 day'
+   or daily_values.date='03.04.2018'::date-interval '3 day')
   
  order by daily_values.date DESC

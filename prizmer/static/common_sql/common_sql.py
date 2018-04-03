@@ -2966,7 +2966,7 @@ def get_data_table_by_date_heat_sayany_v2(obj_title, obj_parent_title, electric_
     
     return data_table
     
-def makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params):
+def makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params,electric_data_end):
     sQuery="""
     SELECT 
   account_2, 
@@ -3002,18 +3002,20 @@ WHERE
   objects.name = '%s' AND 
   types_meters.name = '%s' AND 
   abonents.account_2  = '%s' and
-  names_params.name = '%s' 
+  names_params.name = '%s'    and (daily_values.date='%s'::date-interval '1 day'
+   or daily_values.date='%s'::date-interval '2 day'
+   or daily_values.date='%s'::date-interval '3 day')
   
  order by daily_values.date DESC
-    """%(obj_parent_title,my_params[0],account,my_params[1])
+    """%(obj_parent_title,my_params[0],account,my_params[1],electric_data_end,electric_data_end,electric_data_end)
     #print sQuery
     return sQuery
     
-def get_data_table_by_date_heat_sayany_for_buhgaltery(account, obj_parent_title):
+def get_data_table_by_date_heat_sayany_for_buhgaltery(account, obj_parent_title,electric_data_end):
     my_params=[u'Sayany',u'Q Система1' ,u'M Система1',u'T Канал1',u'T Канал2' ]
     cursor = connection.cursor()
     data_table=[]
-    cursor.execute(makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params))
+    cursor.execute(makeSqlQuery_heat_sayany_by_last_date_for_buhgaltery(account, obj_parent_title ,  my_params,electric_data_end))
     data_table = cursor.fetchall()
             
     return data_table
