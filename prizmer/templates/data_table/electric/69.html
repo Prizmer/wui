@@ -9,68 +9,38 @@
 {% load staticfiles %}  <script src="{%static "../../static/flot/jquery.flot.time.js" %}" type="text/javascript" ></script>
 {% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.categories.js" %}" type="text/javascript" ></script>
 {% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.axislabels.js" %}" type="text/javascript" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
 
 	<script type="text/javascript">
-
-	$(function() {
-
-		<!-- var data = {{economic_graph_data|safe}}; -->
-		var all_data = <!-- [ --> 
-		             <!-- { "data":[[1, 0], [2, 14.01], [3.5, 3.14]]},
-                     <!-- { "data":[[1, 0.5], [2, 6], [3, 8]]}, -->
-                     {{graphic_data}};					 
-					<!--  ]; -->
-					 
-        var options={	
-            	
-			xaxis: {
-			    mode: "time",
-                timeformat: "%y/%m/%d",
-                label: "линейный график"
-                <!-- labelPos: "high",
-				<!-- mode: "categories",
-				<!-- tickLength: 0 -->
-			}
-			};
-			
-		$.plot("#placeholder_line",  [all_data] , options);
+	
+    var ctx = document.getElementById("myChart").getContext('2d');
+	var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+	labels:{{label}}
+	datasets:{{data}},
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+	}
+});
 		
-		$.plot("#placeholder_bar",  [all_data] , {
-			
-			
-			series: {
-				bars: {
-					show: true,
-					barWidth: 0.6,
-					align: "center"
-				}
-			},
-			xaxis: {
-                label: "ступенчатый график",
-                labelPos: "high",
-				mode: "categories",
-				tickLength: 0
-			}
-		});
-	});
 
 	</script>
  
 </head>
 <body>
 <br>
-<div id="content">
-        <div id="choices" style=" width:135px;"></div>
-		<div class="demo-container">
-			<div id="placeholder_line" class="demo-placeholder" style="width:95%;"></div>						
-		</div>
-<br>		
-		<div id="choices" style=" width:135px;"></div>
-		<div class="demo-container">
-			<div id="placeholder_bar" class="demo-placeholder" style="width:95%;"></div>
-		</div>
+			<canvas id="myChart" width="400" height="200"></canvas>						
 		
-</div>
+<br>		
+		
 
 <br>
 {% if data_table %}

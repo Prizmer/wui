@@ -171,7 +171,7 @@ def get_data_table_by_date_heat(obj_title, obj_parent_title, electric_data):
 def makeSqlQuery_heat_parametr_for_period_for_abon_daily(obj_title, obj_parent_title , electric_data_start,electric_data_end,my_params):
     sQuery="""
 Select z_start.obj_name, z_start.ab_name, z_start.factory_number_manual, 
-z_start.energy_start, z_end.energy_end, round((z_end.energy_end-z_start.energy_start)::numeric, 2) as energy_delta,
+z_start.energy_start/100, z_end.energy_end/100, round(((z_end.energy_end-z_start.energy_start)/100)::numeric, 2) as energy_delta,
 z_start.volume_start, z_end.volume_end, round((z_end.volume_end-z_start.volume_start)::numeric, 2) as volume_delta,
 z_start.ton_start, z_end.ton_end, z_end.ton_end-z_start.ton_start as ton_delta
  
@@ -275,7 +275,7 @@ def makeSqlQuery_heat_by_date_daily_for_abon(obj_title, obj_parent_title, electr
     sQuery="""SELECT abonents.name,
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy/100,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
@@ -313,7 +313,7 @@ left join
 (SELECT 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy/100,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
@@ -359,7 +359,7 @@ def makeSqlQuery_heat_parametr_for_period_for_all(obj_title, electric_data_start
     
     sQuery="""
    Select z_start.obj_name, z_start.ab_name, z_start.factory_number_manual, 
-z_start.energy_start, z_end.energy_end, round((z_end.energy_end-z_start.energy_start)::numeric, 2) as energy_delta,
+z_start.energy_start/100, z_end.energy_end/100, round(((z_end.energy_end-z_start.energy_start)/100)::numeric, 2) as energy_delta,
 z_start.volume_start, z_end.volume_end, round((z_end.volume_end-z_start.volume_start)::numeric, 2) as volume_delta,
 z_start.ton_start, z_end.ton_end, z_end.ton_end-z_start.ton_start as ton_delta
  
@@ -4009,6 +4009,7 @@ WHERE
   order by objects.name, 
   abonents.name) z1
 on heat_abons_report.meter_name=z1.meter_name
+order by account_2
 
 
     """%(my_params[0], electric_data_end, my_params[1])
@@ -6092,7 +6093,7 @@ def get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_
     
 def MakeSqlQuery_heat_elf_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-    Select z_end.ab_name, z_end.factory_number_manual, z_end.energy_end,z_start.energy_start,z_end.energy_end-z_start.energy_start as delta_energy, z_end.volume_end,z_start.volume_start,z_end.volume_end-z_start.volume_start as delta_volume
+    Select z_end.ab_name, z_end.factory_number_manual, z_end.energy_end/100,z_start.energy_start/100,(z_end.energy_end-z_start.energy_start)/100 as delta_energy, z_end.volume_end,z_start.volume_start,z_end.volume_end-z_start.volume_start as delta_volume
 from
 (select heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy_end, z2.volume_end
 from heat_abons
@@ -6183,7 +6184,7 @@ WHERE
 def MakeSqlQuery_heat_elf_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
 
     sQuery="""
-    select heat_abons.ab_name, heat_abons.factory_number_manual,z3.energy_start, z3.energy_end, z3.delta_energy, z3.volume_start, z3.volume_end, z3.delta_volume
+    select heat_abons.ab_name, heat_abons.factory_number_manual,z3.energy_start/100, z3.energy_end/100, z3.delta_energy/100, z3.volume_start, z3.volume_end, z3.delta_volume
 from heat_abons
 left join
 (Select z1.ab_name, z1.factory_number_manual, z1.energy as energy_end,z2.energy as energy_start, z1.energy-z2.energy as delta_energy, z1.volume as volume_end,z2.volume as volume_start, z1.volume-z2.volume as delta_volume
@@ -6280,7 +6281,7 @@ SELECT
 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
@@ -6313,7 +6314,7 @@ WHERE
     
 def MakeSqlQuery_heat_elf_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select heat_abons.ab_name, heat_abons.factory_number_manual, z1.energy, z1.volume
+    Select heat_abons.ab_name, heat_abons.factory_number_manual, z1.energy/100, z1.volume
 
 from heat_abons
 left join

@@ -12113,25 +12113,35 @@ def heat_water_elf_daily(request):
 
     return render_to_response("data_table/66.html", args)
 
-def MakeGraphicCoords(graphic_data,numField1,numField2):
-    data_table=set()  
-    #print graphic_data
+#def MakeGraphicCoords(graphic_data,numField1,numField2):
+#    data_table=set()  
+#    #print graphic_data
+#    for i in range(len(graphic_data)):
+#        graphic_data[i]=list(graphic_data[i])     
+#        
+#        if (graphic_data[i][numField2] == None) or (graphic_data[i][numField2] is None) or (graphic_data[i][numField2] == u'Н/Д'):
+#            continue
+#        else:
+#            date=graphic_data[i][numField1]
+#            #print type(date)
+#            print date
+#            print graphic_data[i][numField2]
+#            data_table.add([date,float(unicode(graphic_data[i][numField2]))])
+#            
+#    #data_table=json.dumps(data_table) 
+#    print type(data_table)
+#    print data_table            
+#    return data_table
+    
+def makeOneCoords(graphic_data,numField1):
+    labels=set()
     for i in range(len(graphic_data)):
-        graphic_data[i]=list(graphic_data[i])     
-        
-        if (graphic_data[i][numField2] == None) or (graphic_data[i][numField2] is None) or (graphic_data[i][numField2] == u'Н/Д'):
-            continue
-        else:
-            date=calendar.timegm(graphic_data[i][numField1].timetuple()) * 1000
-            #print type(date)
-            print date
-            print graphic_data[i][numField2]
-            data_table.add([date,float(unicode(graphic_data[i][numField2]))])
-            
-    #data_table=json.dumps(data_table) 
-    print type(data_table)
-    print data_table            
-    return data_table
+        graphic_data[i]=list(graphic_data[i]) 
+        date=graphic_data[i][numField1]            
+        print date       
+        labels.add(date)
+    print labels
+    return labels
     
 def electric_daily_graphic(request):
     args = {}
@@ -12169,17 +12179,21 @@ def electric_daily_graphic(request):
             
     #print data_table
     print u'!!!!!!'     
-    graphic_data=[]    
-    graph_data1=MakeGraphicCoords(data_table,0,12)    
-    graph_data2=MakeGraphicCoords(data_table,0,13) 
-    graph_data3=MakeGraphicCoords(data_table,0,14) 
-    graph_data4=MakeGraphicCoords(data_table,0,15) 
-    graphic_data.append(graph_data1)
-    graphic_data.append(graph_data2)
-    graphic_data.append(graph_data3)
-    graphic_data.append(graph_data4)
+    #graphic_data=makeOneCoords(data_table,0)   
+    
+    label=["""text""","""тест""","""1"""]
+    data=[1,2,3]
+    
+#    graph_data1=MakeGraphicCoords(data_table,0,12)    
+#    graph_data2=MakeGraphicCoords(data_table,0,13) 
+#    graph_data3=MakeGraphicCoords(data_table,0,14) 
+#    graph_data4=MakeGraphicCoords(data_table,0,15) 
+#    graphic_data.append(graph_data1)
+#    graphic_data.append(graph_data2)
+#    graphic_data.append(graph_data3)
+#    graphic_data.append(graph_data4)
     #graphic_data=json.dumps(graphic_data) 
-    print graphic_data
+    #print graphic_data
     
     args['data_table'] = data_table
     args['obj_title'] = obj_title
@@ -12191,8 +12205,8 @@ def electric_daily_graphic(request):
     args['is_electric_delta'] = is_electric_delta
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
-    args['graphic_data'] = graphic_data
-    args['graph_data1'] = graphic_data
+    args['label'] = label
+    args['data'] = data
    
 
     return render_to_response("data_table/electric/69.html", args)
