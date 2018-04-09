@@ -274,8 +274,8 @@ order by z_start.ab_name
 def makeSqlQuery_heat_by_date_daily_for_abon(obj_title, obj_parent_title, electric_data_end,my_params):
     sQuery="""SELECT abonents.name,
                           abonents.name as ab_name, 
-                          meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy/100,
+                          meters.factory_number_manual,                          
+                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
