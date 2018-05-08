@@ -313,7 +313,7 @@ left join
 (SELECT 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy/100,
+                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
                           sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
@@ -1641,7 +1641,7 @@ where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name, z2.daily_date  ASC) z3
 on z4.c_date=z3.daily_date 
 order by z4.c_date""" % (data_start,data_end,params[0],params[1],params[2],params[3],unicode(params[4]),unicode(obj_title), unicode(obj_parent_title), data_start,data_end,unicode(obj_title), unicode(obj_parent_title))
-
+    #print sQuery
     return sQuery
 
 def get_data_table_electric_between(obj_title, obj_parent_title,data_start, data_end):
@@ -5483,7 +5483,7 @@ where
 water_pulsar_abons.obj_name='%s'and
 water_pulsar_abons.ab_name='%s' 
     """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
-
+    print sQuery
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
@@ -5820,6 +5820,7 @@ order by water_pulsar_abons.ab_name) as z_end
 where z_end.ab_guid=z_start.ab_guid
     """%(my_params[2], my_params[2],my_params[3],my_params[3], obj_parent_title,electric_data_start,my_params[0],my_params[1],obj_parent_title,
          my_params[2], my_params[2],my_params[3],my_params[3], obj_parent_title,electric_data_end,my_params[0],my_params[1],obj_parent_title, obj_title)
+    #print sQuery    
     return sQuery
     
 def MakeSqlQuery_water_pulsar_period_for_all_Skladochnaya(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
@@ -6730,6 +6731,15 @@ def get_data_table_rejim( obj_title, electric_data_end, energy):
     cursor = connection.cursor()
     data_table=[]    
     cursor.execute(MakeSqlQuery_rejim(obj_title, electric_data_end, energy))   
+    data_table = cursor.fetchall()
+    
+    return data_table
+    
+def get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end):
+    #my_params=[u'Энергия',u'Объем',u'Эльф 1.08']
+    cursor = connection.cursor()
+    data_table=[]    
+    cursor.execute(MakeSqlQuery_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end))   
     data_table = cursor.fetchall()
     
     return data_table

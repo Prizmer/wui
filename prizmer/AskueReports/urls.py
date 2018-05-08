@@ -82,6 +82,8 @@ urlpatterns = patterns('',
     url(r'^67/$', views.report_water_pulsar_potreblenie_skladochnaya), #skladochnaya - otch`t za period
     
     url(r'^68/$', views.report_rejim_electro), #отчёт-режимный день
+    url(r'^71/$', views.report_electric_potreblenie_3_zones_v2), # отчёт 17, Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
+    url(r'^73/$', views.report_pulsar_water_period), # отчёт 57, Показание за период с водосчётчиков Пульсар    
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

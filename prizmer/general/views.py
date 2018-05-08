@@ -10,6 +10,7 @@ from django.db import connection
 import re
 from excel_response import ExcelResponse
 import datetime
+
 #---------
 import calendar
 import common_sql
@@ -12112,37 +12113,41 @@ def heat_water_elf_daily(request):
    
 
     return render_to_response("data_table/66.html", args)
-
-#def MakeGraphicCoords(graphic_data,numField1,numField2):
-#    data_table=set()  
-#    #print graphic_data
-#    for i in range(len(graphic_data)):
-#        graphic_data[i]=list(graphic_data[i])     
-#        
-#        if (graphic_data[i][numField2] == None) or (graphic_data[i][numField2] is None) or (graphic_data[i][numField2] == u'Н/Д'):
-#            continue
-#        else:
-#            date=graphic_data[i][numField1]
-#            #print type(date)
-#            print date
-#            print graphic_data[i][numField2]
-#            data_table.add([date,float(unicode(graphic_data[i][numField2]))])
-#            
-#    #data_table=json.dumps(data_table) 
-#    print type(data_table)
-#    print data_table            
-#    return data_table
     
 def makeOneCoords(graphic_data,numField1):
-    labels=set()
+    labels=[]
     for i in range(len(graphic_data)):
         graphic_data[i]=list(graphic_data[i]) 
         date=graphic_data[i][numField1]            
-        print date       
-        labels.add(date)
-    print labels
+       #print date 
+        if (date==u'Н/Д' or date is None or date==None): 
+            labels.append(str(0))
+        else:
+            labels.append(str(date))
+    #print labels
     return labels
-    
+  
+def get_rgba_color(num_color):
+    transp=str("0.3")
+    if num_color == 1: return  str("rgba(255, 0, 0,"+ transp+")") #red
+    if num_color == 2: return  str("rgba(50, 205, 50,"+ transp+")") #limeGreen
+    if num_color == 3: return  str("rgba(255, 255, 0,"+ transp+")") #yellow
+    if num_color == 4: return  str("rgba(0, 255, 255,"+ transp+")") #aqua
+    if num_color == 5: return  str("rgba(70, 130, 180,"+ transp+")") #steelBlue
+    if num_color == 6: return  str("rgba(0, 0, 128,"+ transp+")") #darkBlue
+    if num_color == 7: return  str("128, 0, 0,"+ transp+")") #darkRed
+    if num_color == 8: return  str("rgba(255, 0, 255,"+ transp+")") #fuksiya
+    if num_color == 9: return  str("rgba(128, 0, 128,"+ transp+")") #purple
+    if num_color == 10: return  str("rgba(255, 165, 0,"+ transp+")") #orange
+    if num_color == 11: return  str("rgba(0, 255, 0,"+ transp+")") #lime
+    if num_color == 12: return  str("rgba(255, 215, 0,"+ transp+")") #gold
+    if num_color == 13: return  str("rgba(255, 20, 147,"+ transp+")") #deepPink
+    if num_color == 14: return  str("rgba(127, 255, 212,"+ transp+")") #aquamarine
+    if num_color == 15: return  str("rgba(210, 105, 30,"+ transp+")") #chocolate
+    else: return str("rgba(0, 0, 0,"+ transp+")")
+            
+        
+        
 def electric_daily_graphic(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
@@ -12169,31 +12174,23 @@ def electric_daily_graphic(request):
             request.session["is_electric_delta"]   = is_electric_delta   = request.GET['is_electric_delta']
             request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
-            #request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']         
-    
+              
             if (is_electric_daily == '1') & (bool(is_abonent_level.search(obj_key))):   # daily for abonents
                 print obj_title, obj_parent_title,electric_data_start, electric_data_end
                 data_table = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end)
             else:
                 pass
             
-    #print data_table
-    print u'!!!!!!'     
-    #graphic_data=makeOneCoords(data_table,0)   
+    AllData=[]
+    Xcoord=[]
     
-    label=["""text""","""тест""","""1"""]
-    data=[1,2,3]
+    if (len(data_table) >0):
+        Xcoord=makeOneCoords(data_table,0) #label 
     
-#    graph_data1=MakeGraphicCoords(data_table,0,12)    
-#    graph_data2=MakeGraphicCoords(data_table,0,13) 
-#    graph_data3=MakeGraphicCoords(data_table,0,14) 
-#    graph_data4=MakeGraphicCoords(data_table,0,15) 
-#    graphic_data.append(graph_data1)
-#    graphic_data.append(graph_data2)
-#    graphic_data.append(graph_data3)
-#    graphic_data.append(graph_data4)
-    #graphic_data=json.dumps(graphic_data) 
-    #print graphic_data
+        AllData=[{str("data"):makeOneCoords(data_table,12), str("label"):str("delta T0"), str("backgroundColor"): get_rgba_color(5)},
+             {str("data"):makeOneCoords(data_table,13), str("label"):str("delta T1"),  str("backgroundColor"): get_rgba_color(1)},
+             {str("data"):makeOneCoords(data_table,14), str("label"):str("delta T2"),  str("backgroundColor"): get_rgba_color(10)},
+             {str("data"):makeOneCoords(data_table,15), str("label"):str("delta T3"),  str("backgroundColor"): get_rgba_color(8)}]       
     
     args['data_table'] = data_table
     args['obj_title'] = obj_title
@@ -12205,8 +12202,157 @@ def electric_daily_graphic(request):
     args['is_electric_delta'] = is_electric_delta
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
-    args['label'] = label
-    args['data'] = data
+    args['label'] = Xcoord
+    args['AllData']=AllData
    
 
     return render_to_response("data_table/electric/69.html", args)
+    
+def electric_potreblenie_3_zones_v3(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u'1'
+    electric_data_start = u''
+    electric_data_end = u''
+    
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            
+            res='Электричество'
+            data_table_graphic = []
+            if (is_electric_monthly=="1"):
+                dm='monthly'
+            else:
+                dm='daily'
+            if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
+                    isAbon=True                    
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table      
+                                        
+                    data_table_graphic = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end)
+                       
+            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+                    isAbon=False
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table
+            #*********************************************************************************************************************************************************************
+            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):
+                    data_table=common_sql.get_data_table_electric_period_for_group(obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
+            else:
+                pass
+        else:
+            obj_title = u'Не выбран'
+            obj_parent_title = u'Не выбран'
+            obj_key = u'Не выбран'
+            is_electric_monthly = 0
+            is_electric_daily = 0 
+            is_electric_current = 0
+            is_electric_delta = 0
+    
+    AllData=[]
+    Xcoord=[]
+    
+    if (len( data_table_graphic) >0) & (bool(is_abonent_level.search(obj_key))):
+        Xcoord=makeOneCoords(data_table_graphic,0) #label 
+    
+        AllData=[{str("data"):makeOneCoords(data_table_graphic,12), str("label"):str("potreblenie T0"), str("backgroundColor"): get_rgba_color(5)},
+             {str("data"):makeOneCoords(data_table_graphic,13), str("label"):str("potreblenie T1"),  str("backgroundColor"): get_rgba_color(1)},
+             {str("data"):makeOneCoords(data_table_graphic,14), str("label"):str("potreblenie T2"),  str("backgroundColor"): get_rgba_color(10)},
+             {str("data"):makeOneCoords(data_table_graphic,15), str("label"):str("potreblenie T3"),  str("backgroundColor"): get_rgba_color(8)}]
+             
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    return render_to_response("data_table/electric/71.html", args)
+    
+def pulsar_water_period_2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    data_table_graphic =[]
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']            
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']              
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+        data_table_graphic = common_sql.get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end)
+                      
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    AllData=[]
+    Xcoord=[]
+    
+    if (len( data_table_graphic) >0) & (bool(is_abonent_level.search(obj_key))):
+        Xcoord=makeOneCoords(data_table_graphic,0) #label 
+    
+        AllData=[{str("data"):makeOneCoords(data_table_graphic,12), str("label"):str("potreblenie T0"), str("backgroundColor"): get_rgba_color(5)},
+             {str("data"):makeOneCoords(data_table_graphic,13), str("label"):str("potreblenie T1"),  str("backgroundColor"): get_rgba_color(1)},
+             {str("data"):makeOneCoords(data_table_graphic,14), str("label"):str("potreblenie T2"),  str("backgroundColor"): get_rgba_color(10)},
+             {str("data"):makeOneCoords(data_table_graphic,15), str("label"):str("potreblenie T3"),  str("backgroundColor"): get_rgba_color(8)}]
+                 
+    
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+
+    return render_to_response("data_table/water/57.html", args)

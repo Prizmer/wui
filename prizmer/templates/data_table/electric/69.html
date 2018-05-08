@@ -4,21 +4,15 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Удельный расход</title>
 <!-- Graph plugin-->
-{% load staticfiles %}	<link href="{%static "../../static/flot/examples.css"%}" rel="stylesheet" type="text/css">
-{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.js" %}" type="text/javascript" ></script>
-{% load staticfiles %}  <script src="{%static "../../static/flot/jquery.flot.time.js" %}" type="text/javascript" ></script>
-{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.categories.js" %}" type="text/javascript" ></script>
-{% load staticfiles %}	<script src="{%static "../../static/flot/jquery.flot.axislabels.js" %}" type="text/javascript" ></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
 
 	<script type="text/javascript">
-	
+	{% if AllData %}
     var ctx = document.getElementById("myChart").getContext('2d');
 	var myChart = new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-	labels:{{label}}
-	datasets:{{data}},
+		labels:{{label|safe}},
+		datasets: {{AllData|safe}},
     options: {
         scales: {
             yAxes: [{
@@ -30,26 +24,26 @@
     }
 	}
 });
-		
+	{% endif %}	
 
 	</script>
  
 </head>
 <body>
 <br>
-			<canvas id="myChart" width="400" height="200"></canvas>						
-		
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>{% if AllData %}
+			<canvas id="myChart" width="300" height="100"></canvas>						
+	{% endif %}
 <br>		
 		
 
 <br>
 {% if data_table %}
 <span>Таблица значений профиля показаний за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}  без учёта Кт</span> 
-<br>
-<span>Абонент: <strong>{{obj_title}}</strong></span>
-<br>
-<span>Заводской номер: <strong>{{value.4}}</strong></span>
-<br>
+
 <table class="content" id="data-table" >
 <tr>
 <th>Дата</th>
