@@ -12275,7 +12275,7 @@ def electric_daily_graphic(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
               
             if (is_electric_daily == '1') & (bool(is_abonent_level.search(obj_key))):   # daily for abonents
-                print obj_title, obj_parent_title,electric_data_start, electric_data_end
+                #print obj_title, obj_parent_title,electric_data_start, electric_data_end
                 data_table = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end)
             else:
                 pass

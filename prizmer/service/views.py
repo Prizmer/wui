@@ -594,7 +594,7 @@ def add_link_meter(sender, instance, created, **kwargs):
     writeToLog( unicode(dtAll[1][1]))
     if (dtAll[1][1] == u'Объект'): #вода
         print(u'Добавляем связь портов по воде')
-        add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs)
+        add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwargs)
     else:# электрика
         print(u'Добавляем связь портов по электрике')
         add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs)
@@ -607,7 +607,7 @@ def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwa
         #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         #print dtAll[i]
         meter=dtAll[i][5] #счётчик
-        print meter
+        #print meter
         #print instance.factory_number_manual
         #print dtAll[0][5], dtAll[0][4]       
         ip_adr=unicode(dtAll[i][7]).strip()
@@ -626,14 +626,16 @@ def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwa
     #print sQuery
                  guid_ip_port_from_excel.execute(sQuery)
                  guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-
+                 #print guid_ip_port_from_excel
+                 
                  IsExistLink=SimpleCheckIfExist("Link_Meters_Tcpip_Settings","guid_meters",instance.guid,"","guid_tcpip_settings", guid_ip_port_from_excel)
+                 #print IsExistLink
                  if IsExistLink: break
                  if guid_ip_port_from_excel:
                      guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
                      add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
                      add_ip_port_link.save()
-                     print u'Связь добавлена'
+                     print u'Связь добавлена ', meter, ip_adr, ip_port
                  else: writeToLog(u'Не прогружен порт')
                  
            
