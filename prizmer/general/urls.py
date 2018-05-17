@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^water/$', views.water),
     url(r'^heat/$', views.heat),
     url(r'^gas/$', views.gas),
+    url(r'^comment/$', views.comment),
 
 
 
@@ -110,6 +111,7 @@ urlpatterns = patterns('',
     
     url(r'^69/$', views.electric_daily_graphic), #график потребления электроэнергии по дням
     url(r'^71/$', views.electric_potreblenie_3_zones_v3), # отчёт 17, но с графиком!! Потребление по электричеству за период. 3 тарифа
+    url(r'^72/$', views.electric_simple_3_zones_v3), # Показания по электричеству на дату. 3 тарифа
     url(r'^73/$', views.pulsar_water_period_2), # отчёт 57, но с графиком!  Показание за период с водосчётчиков Пульсар
     
    #---- Test urls

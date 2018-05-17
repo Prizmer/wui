@@ -593,16 +593,56 @@ def add_link_meter(sender, instance, created, **kwargs):
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     writeToLog( unicode(dtAll[1][1]))
     if (dtAll[1][1] == u'Объект'): #вода
-        writeToLog(u'Добавляем связь портов по воде')
+        print(u'Добавляем связь портов по воде')
         add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs)
     else:# электрика
-        writeToLog(u'Добавляем связь портов по электрике')
+        print(u'Добавляем связь портов по электрике')
         add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs)
 
+def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwargs):
+    """Делаем привязку счётчика к порту по excel файлу ведомости"""
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    print u'test'
+    for i in range(1,len(dtAll)):
+        #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
+        #print dtAll[i]
+        meter=dtAll[i][5] #счётчик
+        print meter
+        #print instance.factory_number_manual
+        #print dtAll[0][5], dtAll[0][4]       
+        ip_adr=unicode(dtAll[i][7]).strip()
+        ip_port=unicode(dtAll[i][8]).strip()
+        # Привязка к tpc порту
+        if meter is not None:
+            if unicode(meter) == instance.factory_number_manual :
+                 guid_ip_port_from_excel = connection.cursor()
+                 sQuery="""SELECT 
+                                      tcpip_settings.guid
+                                    FROM 
+                                      public.tcpip_settings
+                                    WHERE 
+                                      tcpip_settings.ip_address = '%s' AND 
+                                      tcpip_settings.ip_port = '%s';"""%(unicode(ip_adr), unicode(ip_port))
+    #print sQuery
+                 guid_ip_port_from_excel.execute(sQuery)
+                 guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+
+                 IsExistLink=SimpleCheckIfExist("Link_Meters_Tcpip_Settings","guid_meters",instance.guid,"","guid_tcpip_settings", guid_ip_port_from_excel)
+                 if IsExistLink: break
+                 if guid_ip_port_from_excel:
+                     guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+                     add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+                     add_ip_port_link.save()
+                     print u'Связь добавлена'
+                 else: writeToLog(u'Не прогружен порт')
+                 
+           
+           
 def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     i=3
+    #здесь ошибка-привязки по одному и тому же порту
     ip_adr=unicode(dtAll[i][7]).strip()
     ip_port=unicode(dtAll[i][8]).strip()
 # Привязка к tpc порту
@@ -670,7 +710,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                         guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
                         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
                         add_ip_port_link.save()
-                    else: writeToLog( u'Вы забыли загрузить порты')
+                    else: print u'Привязки по портам не добавлены'
             else:
                 pass
             
@@ -1600,7 +1640,7 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
     writeToLog(instance.name)
     isExistTakenParam=SimpleCheckIfExist('taken_params','name',instance.name,"","","")
     if not isExistTakenParam:
-        writeToLog(u'Параметра не существует!!! Связать невозможно')
+        print(u'Параметра не существует!!! Связать невозможно')
         return None
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     for i in range(2,len(dtAll)):
@@ -1888,20 +1928,20 @@ def LoadWaterPulsar(sPath, sSheet):
             if unicode(typePulsar) == u'Пульсар 10M':
                     add_meter = Meters(name = unicode(typePulsar) + u' ' + unicode(numPulsar), address = unicode(numPulsar), factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
                     add_meter.save()
-                    writeToLog( u'OK Прибор добавлен в базу')
+                    print (u'OK Прибор добавлен в базу')
                     met+=1
             elif unicode(typePulsar) == u'Пульсар 16M':
                    add_meter = Meters(name = unicode(unicode(typePulsar) + u' ' + unicode(numPulsar)), address = unicode(numPulsar),  factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
                    add_meter.save()
-                   writeToLog(u'OK  Прибор добавлен в базу')
+                   print (u'OK Прибор добавлен в базу')
                    met+=1
             elif unicode(typePulsar) == u'Пульсар 2M':
                    add_meter = Meters(name = unicode(unicode(typePulsar) + u' ' + unicode(numPulsar)), address = unicode(numPulsar),  factory_number_manual = unicode(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = u"6599be9a-1f4d-4a6e-a3d9-fb054b8d44e8") )
                    add_meter.save()
-                   writeToLog(u'OK Прибор добавлен в базу')
+                   print (u'OK Прибор добавлен в базу')
                    met+=1
             else:
-                writeToLog(u'Такой Пульсар уже есть')
+                print(u'Такой Пульсар уже есть')
         else:
             # надо проверить каналы и подсоединить их 
             #Пульсар 16M 029571 Пульсар 16M Канал 16 Суточный -- adress: 16  channel: 0
@@ -1909,12 +1949,12 @@ def LoadWaterPulsar(sPath, sSheet):
             pulsarName=unicode(dtAll[i][6])
             abonent_name=unicode(dtAll[i][2])
             taken_param = pulsarName + u' ' + unicode(dtAll[i][5]) + u' '+ pulsarName + u' ' + u'Канал ' + chanel+ u' Суточный -- adress: ' +chanel+u'  channel: 0'
-            writeToLog(taken_param)
+            print(taken_param)
             #Sravnenie(taken_param)
             dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
             #writeToLog(bool(dtTakenParam))
             if dtTakenParam:                
-                writeToLog(u'taken param найден')
+                print(u'taken param найден')
                 guid_taken_param=dtTakenParam[0][1]
                 dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
                 if (dtLink):

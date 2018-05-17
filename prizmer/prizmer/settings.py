@@ -12,11 +12,35 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, "templates")
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [   
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',            
+                'django.template.context_processors.request',                
+            ],
+        },
+    },
+]
+
+#TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
 #STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),                    
 					) 
+
+					
 
 import sys
 #sys.path.append("C:\Work\mitino\prizmer\static\common_sql")

@@ -63,7 +63,26 @@ class Abonents(models.Model):
         
     def __unicode__(self):
         return self.name
+@autoconnect 
+class Comments(models.Model):
+    guid = UUIDField(primary_key=True, max_length=38)
+    name=models.CharField('Имя', max_length=50, blank=True)
+    comment = models.TextField('Комментарий')
+    date = models.DateTimeField('Дата комментария', auto_now_add=True)
+    guid_abonents = models.ForeignKey('Abonents', db_column='guid_abonents')
+    class Meta:
+        db_table = 'comments'
+        verbose_name = u'Комментарии'
+        verbose_name_plural = u'Комментарии'
         
+    def pre_save(self):
+        self.name =  u'%s - %s' % (self.guid_abonents.name, self.guid_abonents.guid_objects.name)
+       
+    def __unicode__(self):
+        return self.name  
+#        return u'%s %s %s %s %s' % (self.id_taken_params.guid_meters.name ,self.id_taken_params.guid_meters.factory_number_manual , self.id_taken_params.guid_params.guid_names_params.name, self.date, self.value )
+     
+
 class TypesAbonents(models.Model):
     guid = UUIDField(primary_key=True, max_length=38)
     name = models.CharField(unique=True, max_length=50)
