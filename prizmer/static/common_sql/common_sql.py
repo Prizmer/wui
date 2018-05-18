@@ -2578,6 +2578,7 @@ where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name ASC;""" % (params[0],params[1],params[2],params[3],obj_title, obj_parent_title, electric_data, obj_title,obj_parent_title )
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('daily',dm)
+        #print sQuery
         return sQuery
     else: return """Select 'Н/Д'"""
 
@@ -2639,6 +2640,7 @@ ORDER BY electric_abons.ab_name ASC;
 
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('monthly',dm)
+        #print sQuery
         return sQuery
     else: return """Select 'Н/Д'"""
 
