@@ -113,7 +113,7 @@ urlpatterns = patterns('',
     url(r'^71/$', views.electric_potreblenie_3_zones_v3), # отчёт 17, но с графиком!! Потребление по электричеству за период. 3 тарифа
     url(r'^72/$', views.electric_simple_3_zones_v3), # Показания по электричеству на дату. 3 тарифа
     url(r'^73/$', views.pulsar_water_period_2), # отчёт 57, но с графиком!  Показание за период с водосчётчиков Пульсар
-    url(r'^74/$', views.electric_current_3_zones_v2), # Показания текущие для М-200 по электричеству на дату. 3 тарифа
+    #url(r'^74/$', views.electric_current_3_zones_v2), # Показания текущие для М-200 по электричеству на дату. 3 тарифа
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),

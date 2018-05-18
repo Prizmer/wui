@@ -10435,12 +10435,10 @@ def electric_simple_3_zones_v2(request):
                 
             elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):   # daily for abonents
                 data_table = common_sql.get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, electric_data_end, 'daily')
-                #print len(data_table)
-#                if not data_table: #для меркуриев 200 нет суточных, но есть текущие!!!!
-#                     data_table = common_sql.get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, electric_data_end, 'current')
+                
 
             elif (is_electric_current == "1") & (bool(is_abonent_level.search(obj_key))):
-                pass
+                data_table = common_sql.get_data_table_by_date_monthly_3_zones_v2(obj_title, obj_parent_title, electric_data_end, 'current')
                             
             elif (is_electric_period == "1") & (is_electric_daily =="1") & (bool(is_abonent_level.search(obj_key))): # pokazaniya za period
                 pass
@@ -10456,9 +10454,8 @@ def electric_simple_3_zones_v2(request):
 #*********************************************************************************************************************************************************************
             elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for abonents group
                     data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'daily')
-#                    if not data_table:
-#                        data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'current')
-#                        #data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+                    if not data_table:                       
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
 
             elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # поиск по баланскной группе
                     data_table= common_sql.get_data_table_by_date_for_group_3_zones_v2(obj_title, electric_data_end, 'daily')
@@ -10471,7 +10468,7 @@ def electric_simple_3_zones_v2(request):
                         data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
 
             elif (is_electric_current == '1') & (bool(is_object_level.search(obj_key))): # текущие для объекта учёта
-                    pass
+                     data_table= common_sql.get_data_table_by_date_for_object_3_zones_v2(obj_title, electric_data_end, 'current')
 
 #*********************************************************************************************************************************************************************
             else:

@@ -4705,145 +4705,162 @@ def get_data_table_water_by_date(meters_name, parent_name, electric_data_end, is
 
     return data_table
 def MakeSqlQuery_water_period_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
-    sQuery="""
-    Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value, z2.value_old,z2.delta,date_install,z2.date_old
-from water_abons_report
+    sQuery="""  
 
+Select z_st.ab_name, z_st.account_2,z_st.date, z_st.meter_name,z_st.type_energo, z_st.value,z_end.value,round(z_end.value::numeric-z_st.value::numeric,3) as delta, z_st.date_install, z_end.date
+from 
+(Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value,date_install
+from water_abons_report
 LEFT JOIN (
-with z1 as (SELECT 
-  meters.name, 
-  daily_values.date, 
-  daily_values.value, 
-  abonents.name, 
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
   abonents.guid
-FROM 
-  public.meters, 
-  public.taken_params, 
-  public.daily_values, 
-  public.abonents, 
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
   public.link_abonents_taken_params,
   params,
   names_params,
   resources
-WHERE 
+WHERE
   taken_params.guid_meters = meters.guid AND
   daily_values.id_taken_params = taken_params.id AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid 
+  link_abonents_taken_params.guid_abonents = abonents.guid
 and
   params.guid=taken_params.guid_params  and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
   resources.name='%s'
-  and date='%s')
+  and date='%s'
 
-SELECT 
-  meters.name as meter, 
-  daily_values.date as date_old, 
-  daily_values.value as value_old, 
-  abonents.name as ab_name, 
-  abonents.guid,
-  daily_values.value-z1.value as delta,
-  z1.value,
-  z1.date
-FROM 
-  public.meters, 
-  public.taken_params, 
-  public.daily_values, 
-  public.abonents, 
+)z2
+on z2.ab_name=water_abons_report.ab_name
+where water_abons_report.name='%s'
+order by account_2, obj_name) z_st,
+(
+Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value,date_install
+from water_abons_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
   public.link_abonents_taken_params,
   params,
   names_params,
-  resources, 
-  z1
-WHERE 
-  z1.guid=abonents.guid and
+  resources
+WHERE
   taken_params.guid_meters = meters.guid AND
   daily_values.id_taken_params = taken_params.id AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid 
+  link_abonents_taken_params.guid_abonents = abonents.guid
 and
   params.guid=taken_params.guid_params  and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
-  resources.name='%s' 
-  and daily_values.date='%s'
+  resources.name='%s'
+  and date='%s'
+
 )z2
 on z2.ab_name=water_abons_report.ab_name
 where water_abons_report.name='%s'
-order by account_2, obj_name
-    """%(my_param[0],electric_data_start, my_param[0], electric_data_end, meters_name )
+order by account_2, obj_name) z_end
+where z_st.meter_name=z_end.meter_name
+    """%( my_param[0], electric_data_start,meters_name,my_param[0], electric_data_end,meters_name)
+    
+  
     return sQuery
 def MakeSqlQuery_water_period_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
     sQuery="""
-    Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value, z2.value_old,z2.delta,date_install,z2.date_old
-from water_abons_report
+    
 
+Select z_st.ab_name, z_st.account_2,z_st.date, z_st.meter_name,z_st.type_energo, z_st.value,z_end.value,round(z_end.value::numeric-z_st.value::numeric,3) as delta, z_st.date_install, z_end.date
+from 
+(Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value,date_install
+from water_abons_report
 LEFT JOIN (
-with z1 as (SELECT 
-  meters.name, 
-  daily_values.date, 
-  daily_values.value, 
-  abonents.name, 
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
   abonents.guid
-FROM 
-  public.meters, 
-  public.taken_params, 
-  public.daily_values, 
-  public.abonents, 
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
   public.link_abonents_taken_params,
   params,
   names_params,
   resources
-WHERE 
+WHERE
   taken_params.guid_meters = meters.guid AND
   daily_values.id_taken_params = taken_params.id AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid 
+  link_abonents_taken_params.guid_abonents = abonents.guid
 and
   params.guid=taken_params.guid_params  and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
   resources.name='%s'
-  and date='%s')
+  and date='%s'
 
-SELECT 
-  meters.name as meter, 
-  daily_values.date as date_old, 
-  daily_values.value as value_old, 
-  abonents.name as ab_name, 
-  abonents.guid,
-  daily_values.value-z1.value as delta,
-  z1.value,
-  z1.date
-FROM 
-  public.meters, 
-  public.taken_params, 
-  public.daily_values, 
-  public.abonents, 
+)z2
+on z2.ab_name=water_abons_report.ab_name
+where water_abons_report.name='%s' and water_abons_report.obj_name='%s' 
+
+order by account_2, obj_name) z_st,
+(
+Select  obj_name as ab_name, account_2,z2.date, water_abons_report.ab_name as meter_name,type_energo, z2.value,date_install
+from water_abons_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
   public.link_abonents_taken_params,
   params,
   names_params,
-  resources, 
-  z1
-WHERE 
-  z1.guid=abonents.guid and
+  resources
+WHERE
   taken_params.guid_meters = meters.guid AND
   daily_values.id_taken_params = taken_params.id AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid 
+  link_abonents_taken_params.guid_abonents = abonents.guid
 and
   params.guid=taken_params.guid_params  and
   names_params.guid=params.guid_names_params and
   resources.guid=names_params.guid_resources and
-  resources.name='%s' 
-  and daily_values.date='%s'
+  resources.name='%s'
+  and date='%s'
+
 )z2
 on z2.ab_name=water_abons_report.ab_name
-where water_abons_report.name='%s'
-and water_abons_report.obj_name='%s'
-order by account_2, obj_name
-    """%(my_param[0],electric_data_start, my_param[0], electric_data_end,parent_name, meters_name )
+where water_abons_report.name='%s' and water_abons_report.obj_name='%s' 
+order by account_2, obj_name) z_end
+where z_st.meter_name=z_end.meter_name
+    """%(my_param[0], electric_data_start, parent_name, meters_name,   my_param[0], electric_data_end,parent_name, meters_name )
     return sQuery
 def get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_start, electric_data_end, isAbon):
     cursor = connection.cursor()
