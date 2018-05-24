@@ -32,5 +32,6 @@ urlpatterns = patterns('',
     url(r'^get_electric_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
     url(r'^get_water_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
     url(r'^get_heat_progruz/$', views.replace_electric_meters), # прогрузочная ведомость в эксель
+    url(r'^service_balance_load/$', views.load_balance_group), # загрузка портов по элетрике
     
 )

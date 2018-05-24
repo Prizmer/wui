@@ -539,6 +539,10 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
                 add_meter.save()
                 writeToLog(u'Прибор добавлен' + ' --->   ' + u'Пульсар Теплосчётчик')
+            elif unicode(type_meter) == u'Карат 307':
+                add_meter = Meters(name = unicode(type_meter) + u' ' + unicode(meter), address = unicode(adr), factory_number_manual = unicode(meter), guid_types_meters = TypesMeters.objects.get(guid = u"84fb7a85-ab91-4e93-9154-76ddee35a316") )
+                add_meter.save()
+                writeToLog(u'Прибор добавлен' + ' --->   ' + u'Карат 307')
             else:
                 writeToLog(u'Не найдено совпадение с существующим типом прибора')
                 met-=1
@@ -640,31 +644,31 @@ def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwa
                  
            
            
-def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
-    """Делаем привязку счётчика к порту по excel файлу ведомости"""
-    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    i=3
-    #здесь ошибка-привязки по одному и тому же порту
-    ip_adr=unicode(dtAll[i][7]).strip()
-    ip_port=unicode(dtAll[i][8]).strip()
-# Привязка к tpc порту
-    guid_ip_port_from_excel = connection.cursor()
-    sQuery="""SELECT 
-                                      tcpip_settings.guid
-                                    FROM 
-                                      public.tcpip_settings
-                                    WHERE 
-                                      tcpip_settings.ip_address = '%s' AND 
-                                      tcpip_settings.ip_port = '%s';"""%(unicode(ip_adr), unicode(ip_port))
-    #print sQuery
-    guid_ip_port_from_excel.execute(sQuery)
-    guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-
-    if guid_ip_port_from_excel:
-        guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
-        add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
-        add_ip_port_link.save()
-    else: writeToLog(u'Нет tcp-ip порта, создайте его!')
+#def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
+#    """Делаем привязку счётчика к порту по excel файлу ведомости"""
+#    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+#    i=3
+#    #здесь ошибка-привязки по одному и тому же порту
+#    ip_adr=unicode(dtAll[i][7]).strip()
+#    ip_port=unicode(dtAll[i][8]).strip()
+## Привязка к tpc порту
+#    guid_ip_port_from_excel = connection.cursor()
+#    sQuery="""SELECT 
+#                                      tcpip_settings.guid
+#                                    FROM 
+#                                      public.tcpip_settings
+#                                    WHERE 
+#                                      tcpip_settings.ip_address = '%s' AND 
+#                                      tcpip_settings.ip_port = '%s';"""%(unicode(ip_adr), unicode(ip_port))
+#    #print sQuery
+#    guid_ip_port_from_excel.execute(sQuery)
+#    guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+#
+#    if guid_ip_port_from_excel:
+#        guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+#        add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+#        add_ip_port_link.save()
+#    else: writeToLog(u'Нет tcp-ip порта, создайте его!')
 
 def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""    
@@ -778,10 +782,10 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e7617c95-7e42-4cfa-9acd-5bc119261c6d")) # Q Реактивная мощность
         #add_param.save()
     #Получасовки
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6af9ddce-437a-4e07-bd70-6cf9dcc10b31")) # A+ 30-мин. срез мощности
-        add_param.save()
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"66e997c0-8128-40a7-ae65-7e8993fbea61")) # R+ 30-мин. срез мощности
-        add_param.save()
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6af9ddce-437a-4e07-bd70-6cf9dcc10b31")) # A+ 30-мин. срез мощности
+#        add_param.save()
+#        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"66e997c0-8128-40a7-ae65-7e8993fbea61")) # R+ 30-мин. срез мощности
+#        add_param.save()
     elif instance.guid_types_meters.name == u'Меркурий 233':
         #Добавляем параметры для Меркурия 233
         pass
@@ -1083,7 +1087,7 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
     elif instance.guid_types_meters.name == u'Меркурий 200':
         #Добавляем параметры для Меркурий 200
 
-    # Значения текущие
+    # Значения суточные (текущие)
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9cbc001d-a262-481f-a1aa-47d02bf18af1")) #T0
         add_param.save()
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"b65d4227-69a5-487b-9999-5539ca3fc004")) #T1
@@ -1102,7 +1106,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"0c28c135-58f2-4dff-a222-9f3d9f3c742b")) #T3
         add_param.save()
     # Значения на начало суток
-        #Не поддерживается прибором
+        #Не поддерживается прибором, но текущие переделаны на суточные
+        
 
     elif instance.guid_types_meters.name == u'Эльф 1.08':
         #Добавляем параметры для счётчика тепла Elf 108
@@ -1566,7 +1571,30 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"5fc2ff3b-999e-4154-ba49-84d3971369b0"))
         add_param.save()
         
-     
+    elif instance.guid_types_meters.name == u'Карат 307':
+        print u'Добавляем параметры для счётчика Карат 307'
+        #Суточные 
+        #Объём     
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"3024fd72-d1e8-4476-a876-4bc09553dde9"))
+        add_param.save()
+        #Тепло
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"46a63ef5-5761-4e16-a854-1979ddc9668f"))
+        add_param.save()
+        #Tout
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"6dd6ea63-20dc-46d0-b56e-6890a2b83f48"))
+        add_param.save()
+        #Tin
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"8a5f5921-5b70-410d-83de-8403ec2a4d87"))
+        add_param.save()
+        #Ton наработка в минутах
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"9c86e183-dd53-4c7f-b728-ffe75a55c633"))
+        add_param.save()
+        #Terr время работы в ошибке
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"abd41546-02f6-4e2c-8bd2-a60ab80ffe66"))
+        add_param.save()
+        #Масса 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"eb617f04-14a3-403c-90e8-286412872232"))
+        add_param.save()
     else:
         pass
         #print u'Тип счётчика не определен'
@@ -1726,6 +1754,34 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
     
 
+def load_balance_group(request):
+    args={}
+    fileName=""
+    sheet    = ""
+    balance_status    = ""
+    result="Не загружено"
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["choice_file"]    = fileName    = request.GET['choice_file']
+            request.session["choice_sheet"]    = sheet    = request.GET.get('choice_sheet')
+            request.session["balance_status"]    = balance_status    = request.GET['balance_status']
+
+            
+            directory=os.path.join(BASE_DIR,'static/cfg/')
+            sPath=directory+fileName
+            result=LoadBalance(sPath, sheet)
+    
+    balance_status=result
+
+    #print fileName
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["port_status"]=balance_status
+
+    return render_to_response("service/service_balance_load.html", args)
+
+def LoadBalance(sPath, sheet):
+    pass
 
 def load_water_objects(request):
     args={}

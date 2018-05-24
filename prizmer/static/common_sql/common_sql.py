@@ -7049,3 +7049,377 @@ def get_data_table_comments_for_abon(guid_abonent):
     data_table = cursor.fetchall()
     
     return data_table
+
+def MakeSqlQuery_karat_for_abon(obj_parent_title, obj_title, electric_data_end,  my_params):
+    sQuery="""
+    Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.ab_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name
+    """%(electric_data_end, my_params[0],obj_parent_title, obj_title, my_params[0])
+    return sQuery
+    
+def MakeSqlQuery_karat_for_korp(obj_parent_title, obj_title, electric_data_end,  my_params):
+    sQuery="""
+    Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name
+    """%(electric_data_end, my_params[0], obj_title, my_params[0])
+    return sQuery
+    
+def get_data_table_karat_heat_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+    my_params=[u'Карат 307']    
+    cursor = connection.cursor()
+    data_table=[]    
+    if isAbon:
+        cursor.execute(MakeSqlQuery_karat_for_abon(obj_parent_title, obj_title, electric_data_end, my_params))  
+    else:
+         cursor.execute(MakeSqlQuery_karat_for_korp(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+
+def MakeSqlQuery_karat_for_abon_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z_start.ab_name, z_start.factory_number_manual, z_start.Q, z_end.Q, round((Z_end.Q-z_start.Q)::numeric,2), z_start.M, z_end.M, round((Z_end.M-z_start.M)::numeric,2), 
+z_start.ton, z_end.ton, round((Z_end.ton-z_start.ton)::numeric,2)
+from
+(Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr, heat_abons.ab_guid
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.ab_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name) z_start,
+(Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr, heat_abons.ab_guid
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.ab_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name) z_end
+where z_start.ab_guid=z_end.ab_guid
+    """%(electric_data_start, my_params[0],obj_parent_title, obj_title, my_params[0],electric_data_end, my_params[0],obj_parent_title, obj_title, my_params[0])
+    return sQuery
+    
+def MakeSqlQuery_karat_for_korp_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z_start.ab_name, z_start.factory_number_manual, z_start.Q, z_end.Q, round((Z_end.Q-z_start.Q)::numeric,2), z_start.M, z_end.M, round((Z_end.M-z_start.M)::numeric,2), 
+z_start.ton, z_end.ton, round((Z_end.ton-z_start.ton)::numeric,2)
+from
+(Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr, heat_abons.ab_guid
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name) z_start,
+(Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr, heat_abons.ab_guid
+from heat_abons
+left join
+(SELECT 
+daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
+sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+abonents.guid
+FROM 
+  public.objects, 
+  public.abonents, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.params, 
+  public.meters, 
+  public.types_params, 
+  public.resources, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_types_params = types_params.guid AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid_types_meters = types_meters.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  types_meters.name = '%s'
+
+  group by   
+  daily_values.date,
+  objects.name, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  types_meters.name,
+  abonents.guid 
+) z1
+on z1.guid=heat_abons.ab_guid
+where heat_abons.obj_name='%s' and
+heat_abons.type_meters = '%s'
+order by heat_abons.ab_name) z_end
+where z_start.ab_guid=z_end.ab_guid
+    """%(electric_data_start, my_params[0], obj_title, my_params[0],electric_data_end, my_params[0], obj_title, my_params[0])
+    return sQuery   
+    
+def get_karat_potreblenie(obj_parent_title, obj_title,electric_data_start, electric_data_end, isAbon):
+    my_params=[u'Карат 307']    
+    cursor = connection.cursor()
+    data_table=[]    
+    if isAbon:
+        cursor.execute(MakeSqlQuery_karat_for_abon_for_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params))  
+    else:
+         cursor.execute(MakeSqlQuery_karat_for_korp_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+    

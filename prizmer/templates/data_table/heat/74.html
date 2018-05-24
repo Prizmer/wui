@@ -1,0 +1,49 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания по счётчикам Карат-307 на  <strong>{{electric_data_end}}</strong> </span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+
+<th>Дата</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Тепловая Энергия, Гкал</th>
+<th>Масса, кг</th>
+<th>Температура вход</th>
+<th>Температура выход</th>
+<th>Время наработки, мин.</th>
+<th>Код ошибки (0-ошибок нет)</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<!-- <td>{{value.0}}</td> -->
+<td>{{value.0}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4}}</strong></td>
+<td>{{value.5}}</td>
+<td>{{value.6|floatformat:2}}</td>
+<td>{{value.7|floatformat:2}}</td>
+<td>{{value.8}}</td>
+<td><strong>{{value.9|floatformat:0}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,23 @@
+
+{% load staticfiles %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load staticfiles %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load staticfiles %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
+<script src="/static/liHighLight.js" type=text/javascript></script>
+
+<br>
+<span><strong> Балансные группы | Прогрузка</strong> </span>
+<br><br>
+
+<p>
+ <div>
+        <span><strong>Загрузка балансной группы &nbsp;</strong></span>
+        <span onclick="load_service('load_balance_group')" class="button" id="balance-button">Загрузить</span> &nbsp;{{balance_status}}
+		<br>
+</div>
+
+</form>
+<br>
+<br>
+<br>
