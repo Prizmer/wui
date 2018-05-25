@@ -7,22 +7,19 @@
 <br>
 <span>Абонент: <strong>{{obj_title}}</strong></span>
 <br>
+<br>
+<br>
 {% if data_table %} 
 <table class="content" id="data-table" >
 <tr>
 <th>Абонент</th>
 <th>Счётчик</th>
-<!-- <th>Показания Энергии на {{electric_data_start}}, Гкал</th>
-<th>Показания Энергии на {{electric_data_end}}, Гкал</th>
-<th>Расход Энергии, Гкал</th>
-<th>Показания Объёма на {{electric_data_start}}, м3</th>
-<th>Показания Объёма на {{electric_data_end}}, м3</th> -->
 <th>Тепловая Энергия на {{electric_data_start}}, Гкал</th>
 <th>Тепловая Энергия на {{electric_data_end}}, Гкал</th>
-<th>Расход Энергии, Гкал</th>
+<th>Потребление Энергии, Гкал</th>
 <th>Масса на {{electric_data_start}}, кг</th>
 <th>Масса на {{electric_data_end}}, кг</th>
-<th>Расход Массы, кг</th>
+<th>Потребление Массы, кг</th>
 
 
 
@@ -48,5 +45,7 @@
 <span><strong>Нет данных.</strong></span>
 <br>
 {% endif %}
+<br>
+<br>
 </body>
 </html>

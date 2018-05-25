@@ -1,4 +1,4 @@
-﻿Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr
+﻿Select z1.date,heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual,  z1.Q,z1.M,z1.ti,z1.to,z1.ton,z1.terr, heat_abons.ab_guid
 from heat_abons
 left join
 (SELECT 

@@ -10711,3 +10711,265 @@ def report_rejim_electro(request):
     file_ext = u'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    
+def report_heat_karat_potreblenie(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title                = request.GET.get('obj_title')
+    electric_data_end        = request.GET.get("electric_data_end")
+    electric_data_start      = request.GET.get("electric_data_start")
+    obj_key                  = request.GET.get('obj_key')
+#Шапка    
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A1'] = unicode(obj_parent_title) + " " + unicode(obj_title)
+    ws['A2'] = 'Карат 307. Потребление тепла в период с ' + str(electric_data_start) + ' по ' + str(electric_data_end)
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Тепловая Энергия на '  + str(electric_data_start)
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Тепловая Энергия на '  + str(electric_data_end)
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Потребление Энергии, Гкал'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Масса на '  + str(electric_data_start)
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Масса на '  + str(electric_data_end)
+    ws['G5'].style = ali_grey
+    
+    ws['H5'] = 'Потребление Массы, кг'
+    ws['H5'].style = ali_grey
+    
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_karat_potreblenie(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_karat_potreblenie(obj_parent_title, obj_title,electric_data_start, electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Показания по теплу на начало
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][6])  # Показания по теплу на конец
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][7])  # Потребление
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+    ws.row_dimensions[5].height = 41
+    
+    ws.column_dimensions['A'].width = 20 
+    ws.column_dimensions['B'].width = 17 
+#    ws.column_dimensions['C'].width = 20
+#    ws.column_dimensions['D'].width = 35
+#    ws.column_dimensions['E'].width = 18
+#    ws.column_dimensions['F'].width = 18
+             
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'potreblenie_heat_karat_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+ str(electric_data_start) + "-" + str(electric_data_end)
+    file_ext = u'xlsx'
+ 
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_heat_karat_daily(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title                = request.GET.get('obj_title')
+    electric_data_end        = request.GET.get("electric_data_end")
+    #electric_data_start      = request.GET.get("electric_data_start")
+    obj_key                  = request.GET.get('obj_key')
+#Шапка    
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A1'] = unicode(obj_parent_title) + " " + unicode(obj_title)
+    ws['A2'] = 'Карат 307. Показания на ' + str(electric_data_end)
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Тепловая Энергия, Гкал'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Масса, кг '
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Температура вход'
+    ws['E5'].style = ali_grey
+    
+    ws['F5'] = 'Температура выход'
+    ws['F5'].style = ali_grey
+    
+    ws['G5'] = 'Время наработки, мин.'
+    ws['G5'].style = ali_grey
+    
+    ws['H5'] = 'Код ошибки (0-ошибок нет)'
+    ws['H5'].style = ali_grey
+    
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_karat_heat_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_karat_heat_water_daily(obj_parent_title, obj_title, electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][2])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу 
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][5])  # Показания по массе
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][6])  # tin
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][7])  # tout
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-6][8])  # twork
+            ws.cell('G%s'%(row)).style = ali_white
+        except:
+            ws.cell('G%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-6][9])  # ошибки
+            ws.cell('H%s'%(row)).style = ali_white
+        except:
+            ws.cell('H%s'%(row)).style = ali_white
+            next
+    ws.row_dimensions[5].height = 41
+    
+    ws.column_dimensions['A'].width = 20 
+    ws.column_dimensions['B'].width = 17 
+#    ws.column_dimensions['C'].width = 20
+#    ws.column_dimensions['D'].width = 35
+#    ws.column_dimensions['E'].width = 18
+#    ws.column_dimensions['F'].width = 18
+             
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'heat_karat_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+ str(electric_data_end)
+    file_ext = u'xlsx'
+ 
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

@@ -20,6 +20,7 @@ from django.db.models.signals import post_save
 from django.db.models import signals
 import datetime
 from django.db.models import Max 
+import uuid
 
 cfg_excel_name=""
 cfg_sheet_name=""
@@ -1754,34 +1755,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
                 pass
     
 
-def load_balance_group(request):
-    args={}
-    fileName=""
-    sheet    = ""
-    balance_status    = ""
-    result="Не загружено"
-    if request.is_ajax():
-        if request.method == 'GET':
-            request.session["choice_file"]    = fileName    = request.GET['choice_file']
-            request.session["choice_sheet"]    = sheet    = request.GET.get('choice_sheet')
-            request.session["balance_status"]    = balance_status    = request.GET['balance_status']
 
-            
-            directory=os.path.join(BASE_DIR,'static/cfg/')
-            sPath=directory+fileName
-            result=LoadBalance(sPath, sheet)
-    
-    balance_status=result
-
-    #print fileName
-    args["choice_file"]    = fileName
-    args["choice_sheet"]    = sheet
-    args["port_status"]=balance_status
-
-    return render_to_response("service/service_balance_load.html", args)
-
-def LoadBalance(sPath, sheet):
-    pass
 
 def load_water_objects(request):
     args={}
@@ -2353,4 +2327,167 @@ def get_info(request):
     
 
     return render_to_response("service/service_get_info.html", args)
+    
+def load_balance_group(request):
+    args={}
+    fileName=""
+    sheet    = ""
+    balance_status    = ""
+    result="Не загружено"
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["choice_file"]    = fileName    = request.GET['choice_file']
+            request.session["choice_sheet"]    = sheet    = request.GET.get('choice_sheet')
+            request.session["balance_status"]    = balance_status    = request.GET['balance_status']            
+            directory=os.path.join(BASE_DIR,'static/cfg/')
+            sPath=directory+fileName
+            result=LoadBalance(sPath, sheet)
+    
+    balance_status=result
+
+    #print fileName
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["port_status"]=balance_status
+
+    return render_to_response("service/service_balance_load.html", args)
+
+def InsertIntoBalanceGroup(guid,name):
+    result=u''
+    cursor = connection.cursor()
+    sQuery="""
+    INSERT INTO balance_groups(
+            guid, name)
+    VALUES ('%s', '%s');
+    """%(guid,name)   
+    
+    cursor.execute(sQuery)
+    cursor.close()
+    connection.commit()
+    result =u'Создана балансная группа '+unicode(name)
+    return result
+
+def InsertIntoTypesAbonents(guid,name):
+    result=u''
+    cursor = connection.cursor()
+    sQuery="""
+    INSERT INTO types_abonents(
+            guid, name)
+    VALUES ('%s', '%s');
+    """%(guid,name)   
+    
+    cursor.execute(sQuery)
+    cursor.close()
+    connection.commit()
+    result =u'Создан тип '+unicode(name)
+    return result
+
+def GetGuidFromFirstTableCrossWithSecondTable(table1,table2,field1,val1,field2,val2):
+    dt=[]
+    cursor = connection.cursor()
+    sQuery="""
+        SELECT 
+  %s.guid
+FROM 
+  public.%s, 
+  public.%s
+WHERE 
+  %s.guid_%s = %s.guid AND
+  %s.%s = '%s' AND 
+  %s.%s = '%s'"""%(table1, table1, table2,table1, table2,table2,table1,field1,val1,table2,field2,val2)
+    #print sQuery
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+    return dt
+   
+def UpdateSimpleTable(table,guid,field,val):
+    result=False
+    cursor = connection.cursor()
+    sQuery="""
+    UPDATE %s
+    SET %s = '%s'
+    WHERE guid = '%s'
+    """%(table,field,val,guid)   
+    
+    cursor.execute(sQuery)
+    cursor.close()
+    connection.commit()
+    result =True
+    return result
+    
+       
+    
+def LoadBalance(sPath, sheet):
+    result=u""
+    count_new_link=0
+    dtAll=GetTableFromExcel(sPath, sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    if len(dtAll)==0: return u'Таблица пуста!'
+    for i in range(1,len(dtAll)):        
+        balance_group=unicode(dtAll[i][0])
+        znak=unicode(dtAll[i][1])
+        object_name=unicode(dtAll[i][2])
+        abonent_name=unicode(dtAll[i][3])
+        meter=unicode(dtAll[i][4])
+        type_abonent=unicode(dtAll[i][5])
+        print balance_group, znak, abonent_name,meter, type_abonent
+        isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
+        isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
+        isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
+        print u'isNewBalanceGroup: ', isNewBalanceGroup
+        print u'isNewTypeAbonent: ', isNewTypeAbonent
+        print u'isNewMeter: ', isNewMeter
+        if isNewBalanceGroup: #если балансной группы ещё не существует, то создаём её
+            balance_group_guid=uuid.uuid4()
+            result += InsertIntoBalanceGroup(balance_group_guid, balance_group)
+            print u'Создана балансная группа '+balance_group
+        if isNewTypeAbonent: #если такого типа абонента не существует, то создаём
+            types_abonents_guid=uuid.uuid4()
+            result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)
+            print u'Создан тип абонента ' + type_abonent       
+        if isNewMeter:#ничего не создаём, добавляем сообщение, что абонента надо создать
+           result += u'Счётчика '+meter+u' (в таблице должен принадлежать абоненту '+abonent_name+u') не существует. В балансную группу не добавлен!'
+           continue
+       
+        types_abonents_guid=GetSimpleTable('types_abonents','name',type_abonent)[0][0]
+        guid_abonent=GetGuidFromFirstTableCrossWithSecondTable('abonents','objects','name',abonent_name,'name',object_name)[0][0]
+        isOk=UpdateSimpleTable('abonents', guid_abonent,'guid_types_abonents',types_abonents_guid)
+        print u'type of abonents changed: ', isOk 
+        
+        
+        guid_meters=GetSimpleTable('meters','factory_number_manual',meter)[0][0]        
+        if not isNewBalanceGroup:
+           balance_group_guid=GetSimpleTable('balance_groups','name',balance_group)[0][0]
+       
+        #проверяем нет ли такой связи уже
+        dt_link=GetSimpleTable('link_balance_groups_meters',"guid_meters",guid_meters[0][0])
+        isNewLink=True
+        for j in range(1,len(dt_link)):
+            print dt_link[j][3]
+            if dt_link[j][3] == balance_group_guid:
+                isNewLink=False
+                result+= u'Счётчик ' + meter + u' уже принадлежит балансной группе ' + balance_group
+                break
+        if isNewLink:
+            print balance_group, meter
+            cursor = connection.cursor()
+            isZnak=True        
+            if znak=='0' or znak == 0:
+                isZnak=False
+            sQuery="""
+                  INSERT INTO link_balance_groups_meters(
+                  guid, type, guid_balance_groups, guid_meters)
+                  VALUES ('%s', '%s', '%s', '%s');
+                  """%(uuid.uuid4(),isZnak,balance_group_guid,guid_meters)      
+            cursor.execute(sQuery)
+            cursor.close()
+            connection.commit()
+            count_new_link+=1
+    result+= u'  В балансную группу добавлено счётчиков: '+ unicode(count_new_link)    
+         
+    return result
+
+def service_balance_load(request):    
+    args={}
+    
+    return render_to_response("service/service_balance_load.html", args)
 
