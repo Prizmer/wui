@@ -10,6 +10,7 @@ from django.db import connection
 import re
 from excel_response import ExcelResponse
 import datetime
+import decimal
 
 #---------
 import calendar
@@ -12274,6 +12275,101 @@ def heat_water_elf_daily(request):
    
 
     return render_to_response("data_table/66.html", args)
+def translate(name):
+ 
+    #Заменяем пробелы и преобразуем строку к нижнему регистру
+    name = name.replace(' ','-').lower()
+ 
+    #
+    transtable = (
+        ## Большие буквы
+        (u"Щ", u"Sch"),
+        (u"Щ", u"SCH"),
+        # two-symbol
+        (u"Ё", u"Yo"),
+        (u"Ё", u"YO"),
+        (u"Ж", u"Zh"),
+        (u"Ж", u"ZH"),
+        (u"Ц", u"Ts"),
+        (u"Ц", u"TS"),
+        (u"Ч", u"Ch"),
+        (u"Ч", u"CH"),
+        (u"Ш", u"Sh"),
+        (u"Ш", u"SH"),
+        (u"Ы", u"Yi"),
+        (u"Ы", u"YI"),
+        (u"Ю", u"Yu"),
+        (u"Ю", u"YU"),
+        (u"Я", u"Ya"),
+        (u"Я", u"YA"),
+        # one-symbol
+        (u"А", u"A"),
+        (u"Б", u"B"),
+        (u"В", u"V"),
+        (u"Г", u"G"),
+        (u"Д", u"D"),
+        (u"Е", u"E"),
+        (u"З", u"Z"),
+        (u"И", u"I"),
+        (u"Й", u"J"),
+        (u"К", u"K"),
+        (u"Л", u"L"),
+        (u"М", u"M"),
+        (u"Н", u"N"),
+        (u"О", u"O"),
+        (u"П", u"P"),
+        (u"Р", u"R"),
+        (u"С", u"S"),
+        (u"Т", u"T"),
+        (u"У", u"U"),
+        (u"Ф", u"F"),
+        (u"Х", u"H"),
+        (u"Э", u"E"),
+        (u"Ъ", u"`"),
+        (u"Ь", u"'"),
+        ## Маленькие буквы
+        # three-symbols
+        (u"щ", u"sch"),
+        # two-symbols
+        (u"ё", u"yo"),
+        (u"ж", u"zh"),
+        (u"ц", u"ts"),
+        (u"ч", u"ch"),
+        (u"ш", u"sh"),
+        (u"ы", u"yi"),
+        (u"ю", u"yu"),
+        (u"я", u"ya"),
+        # one-symbol
+        (u"а", u"a"),
+        (u"б", u"b"),
+        (u"в", u"v"),
+        (u"г", u"g"),
+        (u"д", u"d"),
+        (u"е", u"e"),
+        (u"з", u"z"),
+        (u"и", u"i"),
+        (u"й", u"j"),
+        (u"к", u"k"),
+        (u"л", u"l"),
+        (u"м", u"m"),
+        (u"н", u"n"),
+        (u"о", u"o"),
+        (u"п", u"p"),
+        (u"р", u"r"),
+        (u"с", u"s"),
+        (u"т", u"t"),
+        (u"у", u"u"),
+        (u"ф", u"f"),
+        (u"х", u"h"),
+        (u"ъ", u"`"),
+        (u"ь", u"'"),
+        (u"э", u"e"),
+    )
+    #перебираем символы в таблице и заменяем
+    for symb_in, symb_out in transtable:
+        name = name.replace(symb_in, symb_out)
+    #возвращаем переменную
+    return name
     
 def makeOneCoords(graphic_data,numField1):
     labels=[]
@@ -12284,7 +12380,15 @@ def makeOneCoords(graphic_data,numField1):
         if (date==u'Н/Д' or date is None or date==None): 
             labels.append(str(0))
         else:
-            labels.append(str(date))
+            #labels.append(str((date)))
+            #print type(date)
+            if type(date)==datetime.date:
+                labels.append(date.strftime("%d-%m-%Y"))
+            elif type(date)==float or type(date)==decimal.Decimal:
+                labels.append(str(date))
+            elif type(date)==unicode:
+                labels.append(str(translate(date)))
+            #labels.append(translate(unicode(((date)))))
     #print labels
     return labels
   
@@ -12621,3 +12725,116 @@ def heat_karat_potreblenie(request):
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
     return render_to_response("data_table/heat/75.html", args)
+    
+    
+def balance_daily_electric(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+    print obj_title
+    type_resource=u'Электричество'
+    if not(bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_balance_electric_daily(obj_parent_title, obj_title, electric_data_end,type_resource)
+                  
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+        
+    AllData=[]
+    Xcoord=[]
+    data_table_graphic=data_table
+    if len( data_table_graphic) > 0:
+        Xcoord=makeOneCoords(data_table_graphic,2) #label 
+    
+        AllData=[{str("data"):makeOneCoords(data_table_graphic,3), str("label"):str("summa T0"), str("backgroundColor"): get_rgba_color(5)}]#,
+#             {str("data"):makeOneCoords(data_table_graphic,13), str("label"):str("potreblenie T1"),  str("backgroundColor"): get_rgba_color(1)},
+#             {str("data"):makeOneCoords(data_table_graphic,14), str("label"):str("potreblenie T2"),  str("backgroundColor"): get_rgba_color(10)},
+#             {str("data"):makeOneCoords(data_table_graphic,15), str("label"):str("potreblenie T3"),  str("backgroundColor"): get_rgba_color(8)}]
+             
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    return render_to_response("data_table/electric/76.html", args)
+
+def balance_period_electric(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+   
+    AllData=[]
+    Xcoord=[]    
+    dtAll=[]
+    dt_type_abon=common_sql.GetSimpleTable('types_abonents',"","")
+    
+    for i in range(0,len(dt_type_abon)):
+         guid_type_abon=dt_type_abon[i][0]         
+         if not(bool(is_abonent_level.search(obj_key))):
+             data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
+             type_abon=translate(dt_type_abon[i][1])             
+             if len(data_table)>0: data_table=common_sql.ChangeNull(data_table, None) 
+             dtAll.append(data_table)
+             AllData.append({str("data"):makeOneCoords(data_table,6), str("label"):str(type_abon), str("backgroundColor"): get_rgba_color(i+2)})
+             if i==1:
+                 Xcoord=makeOneCoords(data_table,5)
+           
+#    if len(dtAll)>0: 
+#        dtAll=common_sql.ChangeNull_and_LeaveEmptyCol(dtAll,None,6)        
+#   
+    
+             
+    args['data_table'] = dtAll
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    return render_to_response("data_table/electric/77.html", args)

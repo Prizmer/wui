@@ -1,0 +1,73 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Баланс по электричеству на <strong>{{electric_data_end}}</strong> по сумме T0 тарифов</span>
+<br>
+<span>Балансная группа: <strong>{{obj_title}}</strong></span>
+<br>
+<script type="text/javascript">
+	{% if AllData %}
+    var ctx = document.getElementById("myChart").getContext('2d');
+	var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+		labels:{{label|safe}},
+		datasets: {{AllData|safe}},
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+	}
+});
+	{% endif %}	
+
+	</script>
+	<br>
+	<br>{% if AllData %}
+			<canvas id="myChart" width="300" height="100"></canvas>						
+	{% endif %}
+	<br>
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Балансная группа</th>
+<th>Тип</th>
+<th>Сумма T0</th>
+<th>Дата</th>
+<th>Потребление T0</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.5}}</td>
+<td><strong>{{value.6}}</strong></td>
+
+<!--<td><strong>{{value.8}}</strong></td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+
+
+
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

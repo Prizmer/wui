@@ -1637,7 +1637,7 @@ where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name, z2.daily_date  ASC) z3
 on z4.c_date=z3.daily_date 
 order by z4.c_date""" % (data_start,data_end,params[0],params[1],params[2],params[3],unicode(params[4]),unicode(obj_title), unicode(obj_parent_title), data_start,data_end,unicode(obj_title), unicode(obj_parent_title))
-    #print sQuery
+    print sQuery
     return sQuery
 
 def get_data_table_electric_between(obj_title, obj_parent_title,data_start, data_end):
@@ -7422,4 +7422,141 @@ def get_karat_potreblenie(obj_parent_title, obj_title,electric_data_start, elect
     data_table = cursor.fetchall()
     
     return data_table
+ 
+def MakeSqlQuery_balance_electric(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    SELECT 
+  balance_groups.name, 
+  link_balance_groups_meters.type, 
+  types_abonents.name, 
+  sum(daily_values.value * link_abonents_taken_params.coefficient), 
+  names_params.name, 
+  resources.name
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.link_balance_groups_meters, 
+  public.taken_params, 
+  public.meters, 
+  public.balance_groups, 
+  public.types_abonents, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.resources
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  abonents.guid_types_abonents = types_abonents.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_balance_groups_meters.guid_meters = meters.guid AND
+  link_balance_groups_meters.guid_balance_groups = balance_groups.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  balance_groups.name = '%s' AND 
+  daily_values.date = '%s' AND 
+  names_params.name = '%s' 
+  group by  balance_groups.name, 
+  link_balance_groups_meters.type, 
+  types_abonents.name, 
+
+  names_params.name, 
+  resources.name
+
+    """%(obj_title,electric_data_end,my_params[1])
+    return sQuery
+def get_data_table_balance_electric_daily(obj_parent_title, obj_title, electric_data_end,type_resource):
+    my_params=[type_resource, u'T0 A+']    
+    cursor = connection.cursor()
+    data_table=[]    
+    cursor.execute(MakeSqlQuery_balance_electric(obj_parent_title, obj_title, electric_data_end, my_params))    
+    data_table = cursor.fetchall()
     
+    return data_table
+    
+def GetSimpleTable(table,fieldName,value):
+    dt=[]
+    cursor = connection.cursor()
+    if len(fieldName)>0:
+        sQuery="""
+        Select *
+        from %s
+        where %s.%s='%s'"""%(table, table, fieldName, value)
+    else: sQuery="""
+        Select *
+        from %s"""%(table)
+        
+    #print sQuery
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+    return dt
+
+def MakeSqlQuery_balance_electric_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, guid_type_abon):
+    sQuery="""
+    select balance_name,type,type_abon,sumT,res_name, date,
+round((z1.sumT-lag(sumT) over (order by date))::numeric,3) as delta,
+guid_types_abonents
+from
+(SELECT 
+  balance_groups.name as balance_name, 
+  link_balance_groups_meters.type, 
+  types_abonents.name as type_abon,
+  sum(daily_values.value * link_abonents_taken_params.coefficient) as sumT, 
+  names_params.name as param_name, 
+  resources.name AS res_name, 
+  daily_values.date,
+  abonents.guid_types_abonents
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.link_balance_groups_meters, 
+  public.taken_params, 
+  public.meters, 
+  public.balance_groups, 
+  public.types_abonents, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.resources
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  abonents.guid_types_abonents = types_abonents.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_balance_groups_meters.guid_meters = meters.guid AND
+  link_balance_groups_meters.guid_balance_groups = balance_groups.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  balance_groups.name = '%s' AND 
+  resources.name='%s' and
+  daily_values.date between '%s' and '%s' AND 
+  names_params.name = '%s' and 
+  types_abonents.guid='%s'
+  group by  balance_groups.name, 
+  link_balance_groups_meters.type, 
+  types_abonents.name, 
+  abonents.guid_types_abonents,
+  names_params.name, 
+  resources.name,daily_values.date
+  order by types_abonents.name,date) z1"""%(obj_title,my_params[0], electric_data_start, electric_data_end,my_params[1],guid_type_abon)
+    #print sQuery
+    return sQuery
+        
+def get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon):
+    my_params=[u'Электричество', u'T0 A+']    
+    cursor = connection.cursor()
+    data_table=[]  
+    
+    cursor.execute(MakeSqlQuery_balance_electric_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, guid_type_abon))    
+    data_table = cursor.fetchall()
+    
+    return data_table
+  

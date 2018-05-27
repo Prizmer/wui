@@ -2348,7 +2348,7 @@ def load_balance_group(request):
     #print fileName
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
-    args["port_status"]=balance_status
+    args["balance_status"]=balance_status
 
     return render_to_response("service/service_balance_load.html", args)
 

@@ -117,6 +117,9 @@ urlpatterns = patterns('',
     
     url(r'^74/$', views.heat_karat_daily),
     url(r'^75/$', views.heat_karat_potreblenie),
+
+ 
+    url(r'^77/$', views.balance_period_electric),
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),
