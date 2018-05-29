@@ -1,8 +1,7 @@
 ﻿SELECT 
-  balance_groups.name, 
-  link_balance_groups_meters.type, 
-  types_abonents.name, 
-  sum(daily_values.value), 
+  balance_groups.name,
+  types_abonents.name,
+  sum(case when link_balance_groups_meters.type=True then (0+daily_values.value * link_abonents_taken_params.coefficient) else (0-daily_values.value * link_abonents_taken_params.coefficient) end), 
   names_params.name, 
   resources.name
 FROM 
@@ -30,12 +29,10 @@ WHERE
   daily_values.id_taken_params = taken_params.id AND
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
-  balance_groups.name = 'Баланс Корпус 5 Жилые' AND 
+  balance_groups.name = 'Баланс Корпус 5-1' AND 
   daily_values.date = '25.05.2018' AND 
   names_params.name = 'T0 A+' 
   group by  balance_groups.name, 
-  link_balance_groups_meters.type, 
-  types_abonents.name, 
-
-  names_params.name, 
-  resources.name
+    names_params.name, 
+  resources.name,
+   types_abonents.name

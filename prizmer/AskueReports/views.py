@@ -10973,3 +10973,13 @@ def report_heat_karat_daily(request):
  
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    
+def report_empty_alert(request):
+   
+    #response = StringIO.StringIO()
+    response = HttpResponse('Отчёт не предусмотрен', content_type="text/plain")
+    output_name = u'empty'
+    file_ext = u'txt'
+ 
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+    return response

@@ -21,6 +21,7 @@ from django.shortcuts import redirect
 
 from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters
 
+ 
 def dictfetchall(cursor):
 #"Returns all rows from a cursor as a dict"
     desc = cursor.description
@@ -12795,7 +12796,7 @@ def balance_period_electric(request):
     is_electric_delta = u''
     electric_data_start = u''
     electric_data_end = u''
-
+    decimal.getcontext().prec = 3
     if request.is_ajax():
         if request.method == 'GET':
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']
@@ -12812,19 +12813,40 @@ def balance_period_electric(request):
     for i in range(0,len(dt_type_abon)):
          guid_type_abon=dt_type_abon[i][0]         
          if not(bool(is_abonent_level.search(obj_key))):
+#             electric_data_end2=datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")+datetime.timedelta(days=1)
+#             print electric_data_end2
              data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
              type_abon=translate(dt_type_abon[i][1])             
-             if len(data_table)>0: data_table=common_sql.ChangeNull(data_table, None) 
+             if len(data_table)>0: data_table=common_sql.ChangeNull(data_table, None)            
+             
              dtAll.append(data_table)
              AllData.append({str("data"):makeOneCoords(data_table,6), str("label"):str(type_abon), str("backgroundColor"): get_rgba_color(i+2)})
              if i==1:
                  Xcoord=makeOneCoords(data_table,5)
+    dt_delta=[]   
+   
+    if len(dtAll)>0:
+        for j in range(1,len(dtAll[0])):
+            sumD=0
+            vv=0
+            for i in range(0,len(dtAll)):
+                #print i, j
+                if (dtAll[i][j][6] == 'Н/Д' or dtAll[i][j][6] == None  or dtAll[i][j][6] == 'None'): 
+                    if (j+1)<len(dtAll[0]): j+=1
+                #print dtAll[i][j][1]               
+                if dtAll[i][j][1] == True:                   
+                    sumD+=decimal.Decimal(dtAll[i][j][6])
+                    vv=decimal.Decimal(dtAll[i][j][6])                    
+                else:
+                    sumD-=decimal.Decimal(dtAll[i][j][6])
+            #считаем проценты
+            percent=0           
+            if (vv > decimal.Decimal(0)):
+                percent=sumD*100/vv
+               
+            dt_delta.append([Xcoord[j],sumD, decimal.Decimal(percent)])
            
-#    if len(dtAll)>0: 
-#        dtAll=common_sql.ChangeNull_and_LeaveEmptyCol(dtAll,None,6)        
-#   
-    
-             
+    args['dt_delta'] = dt_delta #небаланс по группе        
     args['data_table'] = dtAll
     args['obj_title'] = obj_title
     args['obj_key'] = obj_key

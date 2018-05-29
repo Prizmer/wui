@@ -1704,7 +1704,7 @@ group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.n
 on electric_abons.ab_name=z2.name_abonents
 where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name ASC;""" % (params[0],params[1],params[2],params[3],obj_title, obj_parent_title, electric_data, obj_title,obj_parent_title )
-    print sQuery    
+    #print sQuery    
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('daily',dm)
         return sQuery
@@ -4112,6 +4112,7 @@ Select z3.account_2,z3.date_install, z3.factory_number,z3.type_energo,z3.meters_
 from z3 
 order by account_2, obj_name, abonent, type_energo
     """%(my_params[0], electric_data_end, my_params[1], electric_data_end, my_params[2], electric_data_end, my_params[3])
+    #print sQuery
     return sQuery
 def get_data_table_report_all_res_by_date(electric_data_end):
     cursor = connection.cursor()
@@ -5760,7 +5761,7 @@ where
 water_pulsar_abons.obj_name='%s'and
 water_pulsar_abons.ab_name='%s' 
     """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
-    print sQuery
+    #print sQuery
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
@@ -7499,6 +7500,7 @@ def MakeSqlQuery_balance_electric_period(obj_parent_title, obj_title,electric_da
     sQuery="""
     select balance_name,type,type_abon,sumT,res_name, date,
 round((z1.sumT-lag(sumT) over (order by date))::numeric,3) as delta,
+countAbon,
 guid_types_abonents
 from
 (SELECT 
@@ -7506,6 +7508,7 @@ from
   link_balance_groups_meters.type, 
   types_abonents.name as type_abon,
   sum(daily_values.value * link_abonents_taken_params.coefficient) as sumT, 
+  count(daily_values.value) as countAbon,
   names_params.name as param_name, 
   resources.name AS res_name, 
   daily_values.date,

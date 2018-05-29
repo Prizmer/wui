@@ -3,7 +3,7 @@
     </head>
     <body>
 <script src="/static/liHighLight.js" type=text/javascript></script>
-<span>Баланс по электричеству на <strong>{{electric_data_end}}</strong> по сумме T0 тарифов</span>
+<span>Баланс по электричеству c <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong> по сумме T0 тарифов</span>
 <br>
 <span>Балансная группа: <strong>{{obj_title}}</strong></span>
 <br>
@@ -11,7 +11,7 @@
 	{% if AllData %}
     var ctx = document.getElementById("myChart").getContext('2d');
 	var myChart = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: {
 		labels:{{label|safe}},
 		datasets: {{AllData|safe}},
@@ -34,15 +34,36 @@
 			<canvas id="myChart" width="300" height="100"></canvas>						
 	{% endif %}
 	<br>
+	
+{% if dt_delta %}
+<table class="content" id="data-table">
+<tr>
+<th>Дата</th>
+<th>Небаланс, кВт*ч</th>
+<th>Процент</th>
+
+</tr>
+{% for value in dt_delta %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}} &#037;</td>
+
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+	
 {% if data_table %}
 {% for val in data_table %}
 <table class="content" id="data-table" >
 <tr>
 <th>Балансная группа</th>
 <th>Тип</th>
-<th>Сумма T0</th>
+<th>Сумма T0, кВт*ч</th>
 <th>Дата</th>
-<th>Потребление T0</th>
+<th>Потребление T0, кВт*ч</th>
+<th>Опрошено счётчиков</th>
 
 </tr>
 
@@ -53,6 +74,7 @@
 <td>{{value.3}}</td>
 <td>{{value.5}}</td>
 <td><strong>{{value.6}}</strong></td>
+<td><strong>{{value.7}}</strong></td>
 
 <!--<td><strong>{{value.8}}</strong></td>-->
 </tr>

@@ -1,5 +1,6 @@
 ﻿select balance_name,type,type_abon,sumT,res_name, date,
 round((z1.sumT-lag(sumT) over (order by date))::numeric,3) as delta,
+countAbon,
 guid_types_abonents
 from
 (SELECT 
@@ -7,6 +8,7 @@ from
   link_balance_groups_meters.type, 
   types_abonents.name as type_abon,
   sum(daily_values.value * link_abonents_taken_params.coefficient) as sumT, 
+  count(daily_values.value) as countAbon,
   names_params.name as param_name, 
   resources.name AS res_name, 
   daily_values.date,

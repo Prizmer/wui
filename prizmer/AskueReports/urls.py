@@ -87,6 +87,9 @@ urlpatterns = patterns('',
     #url(r'^74/$', views.report_current_3_zones_v2), # Электрика. Простой отчет по показаниям на дату. 3 Тарифа   
     url(r'^74/$', views.report_heat_karat_daily), #karat307 pokazaniya
     url(r'^75/$', views.report_heat_karat_potreblenie),#karat307 potreblenie
+    
+    url(r'^40/$', views.report_empty_alert),
+    url(r'^77/$', views.report_empty_alert),#voznrashaet pustoy txt
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),
