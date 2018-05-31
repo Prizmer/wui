@@ -12860,3 +12860,58 @@ def balance_period_electric(request):
     args['label'] = Xcoord
     args['AllData']=AllData
     return render_to_response("data_table/electric/77.html", args)
+    
+def all_res_by_date(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    decimal.getcontext().prec = 3
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+   
+    data_table=[]
+    obj_parent_title_water=u""
+    obj_parent_title_electric=u""
+    if (bool(is_abonent_level.search(obj_key))):      
+            obj_parent_title_water=unicode(obj_parent_title)+u" Вода"
+            obj_parent_title_electric=obj_parent_title
+            #print  obj_parent_title_water, obj_parent_title_electric, len( obj_parent_title_electric)
+            data_table = common_sql.get_data_table_all_res_for_abon(obj_parent_title_water, obj_parent_title_electric, obj_title, electric_data_end)
+    if (bool(is_object_level.search(obj_key))):
+        #здесь условно на уровне абонента
+        n=unicode(obj_parent_title).find(u'Вода')
+        #print obj_parent_title, n
+        if (n>0):
+            obj_parent_title_water=obj_parent_title
+            obj_parent_title_electric=obj_parent_title[0:n-1]
+            #print  obj_parent_title_water, obj_parent_title_electric, len( obj_parent_title_electric)
+        data_table = common_sql.get_data_table_all_res_for_abon(obj_parent_title_water, obj_parent_title_electric, obj_title, electric_data_end)
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)         
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['data_table'] = data_table
+    
+    return render_to_response("data_table/76.html", args)
