@@ -12658,7 +12658,7 @@ def heat_karat_daily(request):
     is_electric_delta = u''
     electric_data_start = u''
     electric_data_end = u''
-
+    data_table=[]
     if request.is_ajax():
         if request.method == 'GET':
             request.session["obj_title"]           = obj_title           = request.GET['obj_title']

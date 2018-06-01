@@ -10887,7 +10887,7 @@ def report_heat_karat_daily(request):
 #Запрашиваем данные для отчета
     is_abonent_level = re.compile(r'abonent')
     is_object_level_2 = re.compile(r'level2')
-    
+    data_table=[]
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_karat_heat_water_daily(obj_parent_title, obj_title, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):

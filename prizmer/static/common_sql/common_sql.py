@@ -5901,87 +5901,90 @@ where z1.factory_number_manual=z2.factory_number_manual
     
 def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-   Select z1.ab_name, z1.type_meter, z1.attr1, z1.factory_number_manual,round(z1.value_start::numeric,3),round(z2.value_end::numeric,3), round((z2.value_end-z1.value_start)::numeric,3) as delta
+Select z_start.ab_name, z_start.type_meter, z_start.attr1, z_start.factory_number_manual,round(z_start.value::numeric,3),round(z_end.value::numeric,3), round((z_end.value-z_start.value)::numeric,3) as delta
 from
-(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value as value_start
-from water_pulsar_abons
-left join
+(SELECT water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+from
+water_pulsar_abons
+Left join
 (SELECT 
-  daily_values.date,  
+  objects.name, 
   abonents.name, 
-  substring(types_meters.name from 9 for 11)as type_meters,   
-  meters.attr1,
-  meters.factory_number_manual,   
-  daily_values.value,   
-  abonents.guid
+  daily_values.date, 
+  daily_values.value, 
+  meters.name,
+  meters.factory_number_manual, 
+  resources.name
 FROM 
   public.abonents, 
   public.objects, 
   public.link_abonents_taken_params, 
   public.taken_params, 
-  public.daily_values, 
   public.meters, 
-  public.types_meters
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.resources
 WHERE 
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
   daily_values.id_taken_params = taken_params.id AND
-  meters.guid_types_meters = types_meters.guid AND
-  objects.name = '%s' AND 
-
-  daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
-) as z0
-on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
-where water_pulsar_abons.obj_name='%s' 
-
-) as z1,
-(select water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value as value_end
-from water_pulsar_abons
-left join
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  (resources.name = '%s' OR 
+  resources.name = '%s'))as z1
+  on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  order by ab_name) as z_end,
+(SELECT water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+from
+water_pulsar_abons
+Left join
 (SELECT 
-  daily_values.date,  
+  objects.name, 
   abonents.name, 
-  substring(types_meters.name from 9 for 11)as type_meters,
-   
-  meters.attr1,
-  meters.factory_number_manual,   
-  daily_values.value,   
-  abonents.guid
+  daily_values.date, 
+  daily_values.value, 
+  meters.name,
+  meters.factory_number_manual, 
+  resources.name
 FROM 
   public.abonents, 
   public.objects, 
   public.link_abonents_taken_params, 
   public.taken_params, 
-  public.daily_values, 
   public.meters, 
-  public.types_meters
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.resources
 WHERE 
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
   daily_values.id_taken_params = taken_params.id AND
-  meters.guid_types_meters = types_meters.guid AND
-  objects.name = '%s' AND 
-
-  daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
-) as z1
-on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
-where water_pulsar_abons.obj_name='%s' 
-
-) as z2
-where z1.factory_number_manual=z2.factory_number_manual
-order by z1.ab_name, z1.attr1,z1.type_meter
-    """%(obj_title, electric_data_start, my_params[0], my_params[1],obj_title, obj_title, electric_data_end, my_params[0], my_params[1],obj_title)
-      
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND 
+  (resources.name = '%s' OR 
+  resources.name = '%s'))as z1
+  on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  order by ab_name) as z_start
+where z_end.factory_number_manual=z_start.factory_number_manual
+order by z_start.ab_name, z_start.attr1, z_start.type_meter 
+    """%(electric_data_end , my_params[2], my_params[3], obj_title, electric_data_start, my_params[2], my_params[3],obj_title)
+    #print sQuery 
     return sQuery
     
 def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
-    my_params=[u'Пульсар ГВС', u'Пульсар ХВС']
+    my_params=[u'Пульсар ГВС', u'Пульсар ХВС', u'ГВС', u'ХВС']
     cursor = connection.cursor()
     data_table=[]
     if (isAbon):
