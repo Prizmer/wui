@@ -72,7 +72,7 @@ urlpatterns = patterns('',
     url(r'^60/$', views.report_pulsar_water_daily_row),# Показания по стоякам в одну строку на дату с водосчётчиков Пульсар   
     
     url(r'^62/$', views.report_pulsar_heat_daily_2), # Показание на дату с теплосчётчиков Пульсар
-    url(r'^61/$', views.report_pulsar_heat_period_2), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^61/$', views.report_pulsar_heat_period_2), # Показание за период  с теплосчётчиков Пульсар
     
     url(r'^63/$', views.report_heat_elf_period_2), # Показание за период Эльф-тепло
     url(r'^64/$', views.report_heat_elf_daily), # Показание на дату Эльф-тепло 
@@ -90,6 +90,10 @@ urlpatterns = patterns('',
     
     url(r'^40/$', views.report_empty_alert),
     url(r'^77/$', views.report_empty_alert),#voznrashaet pustoy txt
+    
+    url(r'^79/$', views.report_water_potreblenie_pulsar), #выгрузка данных за период по воде Импульсные
+    
+    url(r'^81/$', views.report_pulsar_heat_period), # Показание за период с теплосчётчиков Пульсар
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

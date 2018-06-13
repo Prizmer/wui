@@ -120,6 +120,11 @@ urlpatterns = patterns('',
 
     url(r'^76/$', views.all_res_by_date), 
     url(r'^77/$', views.balance_period_electric),
+
+    url(r'^79/$', views.water_potreblenie_pulsar_with_graphic), # вода, показания за период Импульсные, отчёт как 39
+    
+    url(r'^81/$', views.pulsar_heat_period_with_graphic), # Показание на дату с теплосчётчиков Пульсар, отчёт как 59
+    
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),

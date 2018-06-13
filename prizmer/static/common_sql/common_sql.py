@@ -4112,7 +4112,7 @@ Select z3.account_2,z3.date_install, z3.factory_number,z3.type_energo,z3.meters_
 from z3 
 order by account_2, obj_name, abonent, type_energo
     """%(my_params[0], electric_data_end, my_params[1], electric_data_end, my_params[2], electric_data_end, my_params[3])
-    print sQuery
+    #print sQuery
     return sQuery
 def get_data_table_report_all_res_by_date(electric_data_end):
     cursor = connection.cursor()
@@ -7714,6 +7714,253 @@ def get_data_table_all_res_for_abon(obj_parent_title_water, obj_parent_title_ele
     data_table=[]  
     
     cursor.execute(MakeSqlQuery_all_res_by_date_for_abon(obj_parent_title_water, obj_parent_title_electric, obj_title, electric_data_end, my_params))    
+    data_table = cursor.fetchall()
+    
+    return data_table
+ 
+def MakeSqlQuery_water_period_with_delta_for_abon(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z3.c_date,z3.ab_name,z3.obj_name, z3.res_name, z3.gvs,z3.hvs,
+round((z3.gvs-lag(gvs)over (order by c_date))::numeric,3)  as delta_gvs,
+round((z3.hvs-lag(hvs) over (order by c_date))::numeric,3) as delta_hvs
+from
+(Select z_date.c_date,z1.ab_name,z1.obj_name, z1.res_name, z1.gvs,z1.hvs
+from
+(select c_date::date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
+left join
+(
+SELECT
+  daily_values.date,
+  obj_name as ab_name,  
+  water_abons_report.name as obj_name,
+  resources.name as res_name,
+  sum(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
+  sum(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  AND
+  daily_values.date between '%s' and '%s' and
+  water_abons_report.name='%s'
+  and obj_name='%s'
+  group by  
+  daily_values.date,
+  obj_name,  
+  water_abons_report.name,
+  resources.name) z1
+  on z1.date=z_date.c_date
+  order by z_date.c_date) z3"""%(electric_data_start, electric_data_end,my_params[1],my_params[1],my_params[2],electric_data_start, electric_data_end,obj_parent_title,obj_title)
+    #print sQuery    
+    return sQuery
+def MakeSqlQuery_water_period_with_delta_for_all(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z3.c_date,z3.obj_name,z3.obj_name, z3.res_name, z3.gvs,z3.hvs,
+round((z3.gvs-lag(gvs)over (order by c_date))::numeric,3)  as delta_gvs,
+round((z3.hvs-lag(hvs) over (order by c_date))::numeric,3) as delta_hvs
+from
+(Select z_date.c_date,z1.obj_name, z1.res_name, z1.gvs,z1.hvs
+from
+(select c_date::date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
+left join
+(
+SELECT
+  daily_values.date, 
+  water_abons_report.name as obj_name,
+  resources.name as res_name,
+  sum(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
+  sum(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  AND
+  daily_values.date between '%s' and '%s' and
+  water_abons_report.name='%s'
+  
+  group by  
+  daily_values.date,  
+  water_abons_report.name,
+  resources.name) z1
+  on z1.date=z_date.c_date
+  order by z_date.c_date) z3"""%(electric_data_start, electric_data_end,my_params[1],my_params[1],my_params[2],electric_data_start, electric_data_end,obj_title)
+    #print sQuery    
+    return sQuery
+    
+def get_data_table_water_between(obj_title,obj_parent_title,electric_data_start, electric_data_end,isAbon):
+    my_params=[u'%ХВС%', u'%ГВС%', u'Импульс', ]    
+    cursor = connection.cursor()
+    data_table=[]  
+    if isAbon:
+        cursor.execute(MakeSqlQuery_water_period_with_delta_for_abon(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params))  
+    else:
+        cursor.execute(MakeSqlQuery_water_period_with_delta_for_all(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params))  
+    data_table = cursor.fetchall()
+    
+    return data_table
+
+def MakeSqlQuery_heat_period_with_delta_for_abon(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z3.c_date,z3.name_abonents,z3.name_objects, z3.number_manual, z3.energy,z3.volume,
+round((z3.energy-lag(energy)over (order by c_date))::numeric,3)  as delta_energy,
+round((z3.volume-lag(volume) over (order by c_date))::numeric,3) as delta_volume
+from
+(
+Select *
+from
+(select c_date::date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
+left join
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
+            			  objects.name as name_objects, 
+            			  abonents.name as name_abonents, 
+            			  daily_values.value as value_daily, 
+            			  meters.factory_number_manual as number_manual, 
+            			  names_params.name as params_name, 
+            			  types_meters.name as meter_type
+            			FROM 
+            			  public.daily_values, 
+            			  public.taken_params, 
+            			  public.abonents, 
+            			  public.link_abonents_taken_params, 
+            			  public.objects, 
+            			  public.params, 
+            			  public.names_params, 
+            			  public.meters, 
+            			  public.types_meters
+            			WHERE 
+            			  daily_values.id_taken_params = taken_params.id AND
+            			  taken_params.guid_params = params.guid AND
+            			  taken_params.guid_meters = meters.guid AND
+            			  abonents.guid_objects = objects.guid AND
+            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            			  params.guid_names_params = names_params.guid AND
+            			  meters.guid_types_meters = types_meters.guid AND
+            			  objects.name = '%s' AND
+            			  abonents.name = '%s' and 
+            			  types_meters.name = '%s' AND 
+            			  daily_values.date between '%s' and '%s'
+                                    ) z1                      
+group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+order by z1.name_abonents) z2
+on z2.daily_date=z_date.c_date
+ order by z_date.c_date) z3
+    """%(electric_data_start, electric_data_end,my_params[1],my_params[2],my_params[3],my_params[4], obj_parent_title, obj_title,my_params[0],electric_data_start, electric_data_end)
+    #print sQuery
+    return sQuery
+
+def MakeSqlQuery_heat_period_with_delta_for_all(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params):
+    sQuery="""
+    Select z3.c_date,z3.name_objects,z3.name_objects,z3.name_objects,  z3.energy,z3.volume,
+round((z3.energy-lag(energy)over (order by c_date))::numeric,3)  as delta_energy,
+round((z3.volume-lag(volume) over (order by c_date))::numeric,3) as delta_volume
+from
+(
+Select *
+from
+(select c_date::date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
+left join
+(SELECT z1.daily_date, z1.name_objects,  
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
+            			  objects.name as name_objects, 
+            			  
+            			  daily_values.value as value_daily, 
+            			 
+            			  names_params.name as params_name, 
+            			  types_meters.name as meter_type
+            			FROM 
+            			  public.daily_values, 
+            			  public.taken_params, 
+            			  public.abonents, 
+            			  public.link_abonents_taken_params, 
+            			  public.objects, 
+            			  public.params, 
+            			  public.names_params, 
+            			  public.meters, 
+            			  public.types_meters
+            			WHERE 
+            			  daily_values.id_taken_params = taken_params.id AND
+            			  taken_params.guid_params = params.guid AND
+            			  taken_params.guid_meters = meters.guid AND
+            			  abonents.guid_objects = objects.guid AND
+            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            			  params.guid_names_params = names_params.guid AND
+            			  meters.guid_types_meters = types_meters.guid AND
+            			  objects.name = '%s' AND            		
+            			  types_meters.name = '%s' AND 
+            			  daily_values.date between '%s' and '%s'
+                                    ) z1                      
+group by  z1.daily_date, z1.name_objects) z2
+on z2.daily_date=z_date.c_date
+ order by z_date.c_date) z3
+    """%(electric_data_start, electric_data_end,my_params[1],my_params[2],my_params[3],my_params[4], obj_title,my_params[0],electric_data_start, electric_data_end)
+    #print sQuery
+    return sQuery
+    
+def get_data_table_heat_between(obj_parent_title, obj_title,electric_data_start, electric_data_end,isAbon):
+    my_params=[u'Пульсар Теплосчётчик', u'Энергия', u'Объем', u'Ti',u'To' ]    
+    cursor = connection.cursor()
+    data_table=[]  
+    if isAbon:
+        cursor.execute(MakeSqlQuery_heat_period_with_delta_for_abon(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params))  
+    else:
+        cursor.execute(MakeSqlQuery_heat_period_with_delta_for_all(obj_parent_title, obj_title, electric_data_start, electric_data_end, my_params))  
     data_table = cursor.fetchall()
     
     return data_table

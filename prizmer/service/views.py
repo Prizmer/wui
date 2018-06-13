@@ -222,6 +222,7 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
             ip_adr=sheet_ranges[u'K%s'%(row)].value
             ip_port=sheet_ranges[u'L%s'%(row)].value
             com_port=sheet_ranges[u'M%s'%(row)].value
+            #print ip_adr, ip_port
             if portType==u'Com-port': #добавление com-порта
                 writeToLog(com_port)
                 if not com_port or com_port==None: 
@@ -2170,7 +2171,7 @@ def load_tcp_ip_water_ports_from_excel(sPath, sheet):
         if sheet_ranges[u'H%s'%(row)].value is not None:
             ip_adr=unicode(sheet_ranges[u'H%s'%(row)].value)
             ip_port=unicode(sheet_ranges[u'I%s'%(row)].value)
-            
+            #print ip_adr, ip_port
             writeToLog(u'Обрабатываем адрес ' +ip_adr + ip_port)
             
             # проверка есть ли уже такой порт, запрос в БД с адресом и портом, если ответ пустой-добавляем, в противном случае continue

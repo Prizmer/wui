@@ -1,0 +1,75 @@
+<html>
+<head>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<script type="text/javascript">
+	{% if AllData %}
+    var ctx = document.getElementById("myChart").getContext('2d');
+	var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+		labels:{{label|safe}},
+		datasets: {{AllData|safe}},
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+	}
+});
+	{% endif %}	
+	</script>
+</head>
+<body>
+
+<span>Показания по цифровым счётчикам Пульсар на  <strong>{{electric_data_end}}</strong> </span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+
+<br>
+<br>{% if AllData %}
+			<canvas id="myChart" width="300" height="100"></canvas>						
+	{% endif %}
+<br>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Показания Энергии на {{electric_data_start}}, Гкал</th>
+<th>Показания Энергии на {{electric_data_end}}, Гкал</th>
+<th>Расход Энергии, Гкал</th>
+<th>Показания Объёма на {{electric_data_start}}, м3</th>
+<th>Показания Объёма на {{electric_data_end}}, м3</th>
+<th>Расход Объёма, м3</th>
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4}}</strong></td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td><strong>{{value.7}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+</body>
+</html>
