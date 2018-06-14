@@ -22,7 +22,8 @@ urlpatterns = patterns('',
     url(r'^heat/$', views.heat),
     url(r'^gas/$', views.gas),
     url(r'^comment/$', views.comment),
-
+    url(r'^instruction_user/$', views.instruction_user),
+    url(r'^instruction_admin/$', views.instruction_admin),
 
 
 

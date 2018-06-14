@@ -13041,3 +13041,17 @@ def pulsar_heat_period_with_graphic(request):
     
 
     return render_to_response("data_table/heat/81.html", args)
+    
+def instruction_user(request):
+    with open('static/User_manual_Prizmer.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename=instruction.pdf'
+        return response
+    pdf.closed
+    
+def instruction_admin(request):
+    with open('static/Admin_manual_Prizmer.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename=instruction.pdf'
+        return response
+    pdf.closed
