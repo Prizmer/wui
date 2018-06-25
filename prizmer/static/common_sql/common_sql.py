@@ -7964,3 +7964,124 @@ def get_data_table_heat_between(obj_parent_title, obj_title,electric_data_start,
     data_table = cursor.fetchall()
     
     return data_table
+    
+def generate_monthly_range(electric_data_start,electric_data_end):
+    cursor = connection.cursor()
+    data_table=[]  
+    sQuery="""
+    SELECT generate_series((Select * from 
+make_date(extract(year from '%s'::timestamp)::int,extract(month from '%s'::timestamp)::int, 1)), 
+(Select * from 
+make_date(extract(year from '%s'::timestamp)::int,extract(month from '%s'::timestamp)::int, 1)), '1 month')::timestamp without time zone
+    """%(electric_data_start,electric_data_start,electric_data_end,electric_data_end)
+    #print sQuery
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
+ 
+def MakeSqlQuery_elf_period_monthly_for_all(data_start, data_end, my_params):
+    sQuery="""
+     Select z_end.ab_name, z_end.factory_number_manual, z_end.attr1,
+z_end.type_res,
+z_end.val_end, z_start.val_start, round((z_end.val_end-z_start.val_start)::numeric,3) as delta
+from
+(Select ab_name, water_abons.factory_number_manual, z1.meter,z1.val_end, z1.type_res, water_abons.attr1
+from water_abons
+left join
+(SELECT
+  daily_values.date,
+  abonents.name,
+  meters.factory_number_manual,
+
+  daily_values.value as val_end,
+  taken_params.id,
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid,
+    CASE
+            WHEN params.channel = 2 THEN '%s'::text
+            WHEN params.channel = 1 Then '%s'::text
+   END as type_res,
+   CASE
+            WHEN params.channel = 2 THEN meters.attr2
+            WHEN params.channel = 1 Then meters.attr1
+   END as meter
+FROM
+  public.meters,
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.daily_values,
+  public.params
+WHERE
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  daily_values.date='%s'
+  and (channel=1 or channel=2)
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.meter=water_abons.attr1
+) as z_end,
+
+  (Select ab_name, water_abons.factory_number_manual, z2.meter,z2.val_start, water_abons.attr1, z2.type_res
+from water_abons
+left join
+(SELECT
+  daily_values.date,
+  abonents.name,
+  meters.factory_number_manual,
+
+  daily_values.value as val_start,
+  taken_params.id,
+  params.channel,
+  abonents.guid as ab_guid,
+   meters.guid,
+    CASE
+            WHEN params.channel = 2 THEN '%s'::text
+            WHEN params.channel = 1 Then '%s'::text
+   END as type_res,
+  CASE
+            WHEN params.channel = 2 THEN meters.attr2
+            WHEN params.channel = 1 Then meters.attr1
+   END as meter
+FROM
+  public.meters,
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.daily_values,
+  public.params
+WHERE
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  daily_values.date='%s'
+  and (channel=1 or channel=2)
+ORDER BY
+  abonents.name ASC) as z2
+  on z2.meter=water_abons.attr1
+ ) as z_start
+  where z_end.attr1=z_start.attr1
+  order by z_end.ab_name """%(my_params[0],my_params[1],data_end,my_params[0],my_params[1],data_start)
+    #print sQuery
+    #print '______________________________________________________________________________'
+    return sQuery
+    
+    
+def get_data_table_elf_period_monthly(data_start, data_end):
+    my_params=[u'ГВ', u'ХВ']    
+    cursor = connection.cursor()
+    data_table=[]  
+    cursor.execute(MakeSqlQuery_elf_period_monthly_for_all(data_start, data_end, my_params))  
+    data_table = cursor.fetchall()
+    
+    return data_table

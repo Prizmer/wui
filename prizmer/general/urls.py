@@ -4,12 +4,14 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 import views
+ 
 
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'prizmer.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+    # url(r'^blog/', include('blog.urls')),   
 
+    
     url(r'^$', views.default),
     url(r'^tree_data/$', views.tree_data_json),
     url(r'^get_object_title/$', views.get_object_title),
@@ -123,6 +125,8 @@ urlpatterns = patterns('',
     url(r'^77/$', views.balance_period_electric),
 
     url(r'^79/$', views.water_potreblenie_pulsar_with_graphic), # вода, показания за период Импульсные, отчёт как 39
+    
+    url(r'^83/$', views.water_elf_potreblenie_monthly_with_delta), # Потребление по месяцам с эльфов хв и гв
     
     url(r'^81/$', views.pulsar_heat_period_with_graphic), # Показание на дату с теплосчётчиков Пульсар, отчёт как 59
     

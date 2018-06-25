@@ -12749,7 +12749,7 @@ def balance_daily_electric(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
-    print obj_title
+    #print obj_title
     type_resource=u'Электричество'
     if not(bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_balance_electric_daily(obj_parent_title, obj_title, electric_data_end,type_resource)
@@ -13043,15 +13043,108 @@ def pulsar_heat_period_with_graphic(request):
     return render_to_response("data_table/heat/81.html", args)
     
 def instruction_user(request):
-    with open('static/User_manual_Prizmer.pdf', 'rb') as pdf:
+    from django.contrib.staticfiles.storage import staticfiles_storage
+    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
+    #print url
+    with open(url, 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename=instruction.pdf'
         return response
     pdf.closed
     
 def instruction_admin(request):
-    with open('static/Admin_manual_Prizmer.pdf', 'rb') as pdf:
+#    with open('static/Admin_manual_Prizmer.pdf', 'rb') as pdf:
+    from django.contrib.staticfiles.storage import staticfiles_storage
+    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
+    #print url
+    with open(url, 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename=instruction.pdf'
         return response
     pdf.closed
+
+def add_3columns_to_dt(data_table,data_range,n1,n2,n3):
+    print 'len(data_table) in function ', len(data_table)
+    print 'len(data_range) in function ', len(data_range)
+    for i in range(0,len(data_table)):
+        data_table[i]=list(data_table[i]) 
+        print i
+        print data_range[i][n1]
+        data_table[i].append(data_range[i][n1])
+        data_table[i].append(data_range[i][n2])
+        data_table[i].append(data_range[i][n3])
+        #print data_table[i]
+        data_table[i]=tuple(data_table[i])
+    return data_table    
+    
+   
+    
+def water_elf_potreblenie_monthly_with_delta(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title'] 
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+    
+    dt_date=[]
+    dt_range=[]
+    dt_date=common_sql.generate_monthly_range(electric_data_start,electric_data_end)
+    
+   
+    for row in range(0,len(dt_date)):
+       data_start = dt_date[row][0].strftime("%d.%m.%Y")
+       #print 'len(dt_date)', len(dt_date)
+       print 'row', row
+       if (row+1)<len(dt_date):
+           data_end = dt_date[row+1][0].strftime("%d.%m.%Y")
+       else:
+           data_end = dt_date[row][0].strftime("%d.%m.%Y")
+       print data_start, data_end
+       dt_range = common_sql.get_data_table_elf_period_monthly(data_start, data_end)
+       #print dt_range
+       if row == 0:
+           print 'len(dt_range) ',len(dt_range)
+           data_table=dt_range
+           print 'dt_range copy to data_table'
+           print 'len(data_table) ', len(data_table)
+       else:
+           #print len(data_table)
+           print 'add columns'                 
+           data_table=add_3columns_to_dt(data_table,dt_range,4,5,6)
+                  
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)
+        
+    count_month=len(dt_date)-1
+         
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta  
+    
+    args['electric_data_end'] = dt_date[-1][0].strftime("%d.%m.%Y")
+    args['electric_data_start'] = dt_date[0][0].strftime("%d.%m.%Y")
+    
+    args['count_month'] =  count_month 
+
+    return render_to_response("data_table/water/83.html", args)

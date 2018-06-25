@@ -2399,6 +2399,7 @@ WHERE
     #print sQuery
     cursor.execute(sQuery)
     dt = cursor.fetchall()
+    #print sQuery
     return dt
    
 def UpdateSimpleTable(table,guid,field,val):
