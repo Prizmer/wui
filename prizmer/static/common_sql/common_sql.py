@@ -2637,7 +2637,7 @@ on electric_abons.ab_name=z2.name_abonents
 where electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name ASC;
 """%(params[0],params[1],params[2],params[3], res,obj_title, electric_data, obj_title)
-
+    #print sQuery
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('monthly',dm)
         #print sQuery
@@ -7981,19 +7981,66 @@ make_date(extract(year from '%s'::timestamp)::int,extract(month from '%s'::times
  
 def MakeSqlQuery_elf_period_monthly_for_all(data_start, data_end, my_params):
     sQuery="""
-     Select z_end.ab_name, z_end.factory_number_manual, z_end.attr1,
-z_end.type_res,
-z_end.val_end, z_start.val_start, round((z_end.val_end-z_start.val_start)::numeric,3) as delta
+    Select z_end.ab_name, z_end.factory_number_manual, z_end.attr2,
+CASE
+            WHEN  z_end.channel = 2 THEN 'ГВ'::text
+            WHEN  z_end.channel = 1 Then 'ХВ'::text
+   END as type_res,  
+   z_start.val_start,
+z_end.val_end, round((z_end.val_end-z_start.val_start)::numeric,3) as delta
 from
-(Select ab_name, water_abons.factory_number_manual, z1.meter,z1.val_end, z1.type_res, water_abons.attr1
+(Select ab_name, water_abons.factory_number_manual,water_abons.attr2,z1.val_end, z1.type_res, water_abons.ab_guid,  water_abons.channel
 from water_abons
 left join
 (SELECT
   daily_values.date,
-  abonents.name,
+  abonents.name,  
   meters.factory_number_manual,
-
+  abonents.guid as abon_guid,
   daily_values.value as val_end,
+  taken_params.id,
+  params.channel,
+  abonents.guid as ab_guid,
+  meters.guid,
+    CASE
+            WHEN params.channel = 2 THEN '%s'::text
+            WHEN params.channel = 1 Then '%s'::text
+   END as type_res,
+   CASE
+            WHEN params.channel = 2 THEN meters.attr2
+            WHEN params.channel = 1 Then meters.attr1
+   END as meter
+FROM
+  public.meters,
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.daily_values,
+  public.params
+WHERE
+  meters.guid = taken_params.guid_meters AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  taken_params.id = daily_values.id_taken_params AND
+  taken_params.guid_params = params.guid AND
+  daily_values.date='%s' 
+  and (channel=1 or channel=2)
+ORDER BY
+  abonents.name ASC) as z1
+  on z1.meter=water_abons.attr2 and z1.abon_guid=water_abons.ab_guid and z1.channel=water_abons.channel
+) as z_end,
+
+  (Select ab_name, water_abons.factory_number_manual, z1.meter,z1.val_start, z1.type_res, water_abons.attr2,  water_abons.ab_guid, water_abons.channel
+from water_abons
+left join
+(SELECT
+  daily_values.date,
+  abonents.name,  
+  meters.factory_number_manual,
+abonents.guid as abon_guid,
+  daily_values.value as val_start,
   taken_params.id,
   params.channel,
   abonents.guid as ab_guid,
@@ -8021,57 +8068,15 @@ WHERE
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   taken_params.id = daily_values.id_taken_params AND
   taken_params.guid_params = params.guid AND
-  daily_values.date='%s'
-  and (channel=1 or channel=2)
+  daily_values.date='%s' 
+  and (channel=1 or channel=2) 
 ORDER BY
   abonents.name ASC) as z1
-  on z1.meter=water_abons.attr1
-) as z_end,
-
-  (Select ab_name, water_abons.factory_number_manual, z2.meter,z2.val_start, water_abons.attr1, z2.type_res
-from water_abons
-left join
-(SELECT
-  daily_values.date,
-  abonents.name,
-  meters.factory_number_manual,
-
-  daily_values.value as val_start,
-  taken_params.id,
-  params.channel,
-  abonents.guid as ab_guid,
-   meters.guid,
-    CASE
-            WHEN params.channel = 2 THEN '%s'::text
-            WHEN params.channel = 1 Then '%s'::text
-   END as type_res,
-  CASE
-            WHEN params.channel = 2 THEN meters.attr2
-            WHEN params.channel = 1 Then meters.attr1
-   END as meter
-FROM
-  public.meters,
-  public.abonents,
-  public.objects,
-  public.link_abonents_taken_params,
-  public.taken_params,
-  public.daily_values,
-  public.params
-WHERE
-  meters.guid = taken_params.guid_meters AND
-  abonents.guid_objects = objects.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  taken_params.id = daily_values.id_taken_params AND
-  taken_params.guid_params = params.guid AND
-  daily_values.date='%s'
-  and (channel=1 or channel=2)
-ORDER BY
-  abonents.name ASC) as z2
-  on z2.meter=water_abons.attr1
- ) as z_start
-  where z_end.attr1=z_start.attr1
-  order by z_end.ab_name """%(my_params[0],my_params[1],data_end,my_params[0],my_params[1],data_start)
+  on z1.meter=water_abons.attr2 and z1.abon_guid=water_abons.ab_guid  and z1.channel=water_abons.channel
+ ) as z_start 
+  where z_end.attr2=z_start.attr2 and z_end.ab_guid=z_start.ab_guid and z_end.channel=z_start.channel
+  order by z_end.ab_name,z_end.attr2,z_end.channel 
+      """%(my_params[0],my_params[1],data_end,my_params[0],my_params[1],data_start)
     #print sQuery
     #print '______________________________________________________________________________'
     return sQuery

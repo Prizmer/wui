@@ -13043,33 +13043,52 @@ def pulsar_heat_period_with_graphic(request):
     return render_to_response("data_table/heat/81.html", args)
     
 def instruction_user(request):
-    from django.contrib.staticfiles.storage import staticfiles_storage
-    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
-    #print url
-    with open(url, 'rb') as pdf:
+    from django.contrib.staticfiles import finders
+    result_url = finders.find('User_manual_Prizmer.pdf')
+
+    with open(result_url, 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename=instruction.pdf'
         return response
-    pdf.closed
+    pdf.closed    
+#    
+#    from django.contrib.staticfiles.storage import staticfiles_storage
+#    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
+#    #print url
+#    with open(url, 'rb') as pdf:
+#        response = HttpResponse(pdf.read(), content_type='application/pdf')
+#        response['Content-Disposition'] = 'inline; filename=instruction.pdf'
+#        return response
+#    pdf.closed
     
 def instruction_admin(request):
-#    with open('static/Admin_manual_Prizmer.pdf', 'rb') as pdf:
-    from django.contrib.staticfiles.storage import staticfiles_storage
-    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
-    #print url
-    with open(url, 'rb') as pdf:
+    from django.contrib.staticfiles import finders
+    result_url = finders.find('Admin_manual_Prizmer.pdf')
+
+    with open(result_url, 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename=instruction.pdf'
         return response
-    pdf.closed
+    pdf.closed       
+    
+    
+#    with open('static/Admin_manual_Prizmer.pdf', 'rb') as pdf:
+#    from django.contrib.staticfiles.storage import staticfiles_storage
+#    url = staticfiles_storage.url('User_manual_Prizmer.pdf')
+#    #print url
+#    with open(url, 'rb') as pdf:
+#        response = HttpResponse(pdf.read(), content_type='application/pdf')
+#        response['Content-Disposition'] = 'inline; filename=instruction.pdf'
+#        return response
+#    pdf.closed
 
 def add_3columns_to_dt(data_table,data_range,n1,n2,n3):
-    print 'len(data_table) in function ', len(data_table)
-    print 'len(data_range) in function ', len(data_range)
+#    print 'len(data_table) in function ', len(data_table)
+#    print 'len(data_range) in function ', len(data_range)
     for i in range(0,len(data_table)):
         data_table[i]=list(data_table[i]) 
-        print i
-        print data_range[i][n1]
+#        print i
+#        print data_range[i][n1]
         data_table[i].append(data_range[i][n1])
         data_table[i].append(data_range[i][n2])
         data_table[i].append(data_range[i][n3])
@@ -13077,7 +13096,8 @@ def add_3columns_to_dt(data_table,data_range,n1,n2,n3):
         data_table[i]=tuple(data_table[i])
     return data_table    
     
-   
+
+            
     
 def water_elf_potreblenie_monthly_with_delta(request):
     args = {}
@@ -13105,34 +13125,40 @@ def water_elf_potreblenie_monthly_with_delta(request):
     dt_date=[]
     dt_range=[]
     dt_date=common_sql.generate_monthly_range(electric_data_start,electric_data_end)
-    
+    double_dates=[]
    
     for row in range(0,len(dt_date)):
        data_start = dt_date[row][0].strftime("%d.%m.%Y")
        #print 'len(dt_date)', len(dt_date)
-       print 'row', row
+       #print 'row', row
        if (row+1)<len(dt_date):
            data_end = dt_date[row+1][0].strftime("%d.%m.%Y")
        else:
            data_end = dt_date[row][0].strftime("%d.%m.%Y")
        print data_start, data_end
-       dt_range = common_sql.get_data_table_elf_period_monthly(data_start, data_end)
-       #print dt_range
-       if row == 0:
-           print 'len(dt_range) ',len(dt_range)
-           data_table=dt_range
-           print 'dt_range copy to data_table'
-           print 'len(data_table) ', len(data_table)
+       double_dates.append('Значение на ' + data_start)
+       double_dates.append('Значение на ' + data_end)
+       double_dates.append('Разница')
+       dt_range = common_sql.get_data_table_elf_period_monthly(data_start, data_end)       
+       if row == 0:         
+           data_table=dt_range           
        else:
-           #print len(data_table)
-           print 'add columns'                 
+                          
            data_table=add_3columns_to_dt(data_table,dt_range,4,5,6)
-                  
+    val_num=0 
+    count_month=[]            
     if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table,None)
+        data_table=common_sql.ChangeNull(data_table,None)    
+        val_num= len(data_table[0]) - 6   
         
-    count_month=len(dt_date)-1
-         
+    count_month=range(1,len(dt_date)-1)
+    if len(data_table)>03:
+        double_dates.pop()
+        double_dates.pop()
+        double_dates.pop()
+    
+    
+    print 'val_num', val_num
     args['data_table'] = data_table
     args['obj_title'] = obj_title
     args['obj_key'] = obj_key
@@ -13144,7 +13170,8 @@ def water_elf_potreblenie_monthly_with_delta(request):
     
     args['electric_data_end'] = dt_date[-1][0].strftime("%d.%m.%Y")
     args['electric_data_start'] = dt_date[0][0].strftime("%d.%m.%Y")
-    
-    args['count_month'] =  count_month 
+    args['dt_dates'] = double_dates
+    args['count_month'] =  count_month
+    args['val_num'] =  val_num
 
     return render_to_response("data_table/water/83.html", args)

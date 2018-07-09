@@ -10983,3 +10983,189 @@ def report_empty_alert(request):
  
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
     return response
+
+
+def get_month_russian_name_by_num(m):
+    if m == 1:
+         M='январь'
+    elif m==2:
+         M='февраль'
+    elif m==3:
+         M='март'
+    elif m==4:
+         M='апрель'
+    elif m==5:
+         M='май'
+    elif m==6:
+         M='июнь'
+    elif m==7:
+         M='июль'
+    elif m==8:
+         M='август'
+    elif m==9:
+         M='сентябрь'
+    elif m==10:
+         M='октябрь'
+    elif m==11:
+         M='ноябрь'
+    elif m==12:
+         M='декабрь'
+    else:
+         M='ошибка'
+    return M
+    
+def add_3columns_to_dt(data_table,data_range,n1,n2,n3):
+
+    for i in range(0,len(data_table)):
+        data_table[i]=list(data_table[i])
+        data_table[i].append(data_range[i][n1])
+        data_table[i].append(data_range[i][n2])
+        data_table[i].append(data_range[i][n3])
+        data_table[i]=tuple(data_table[i])
+    return data_table  
+    
+def report_water_elf_potreblenie_monthly_with_delta(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    
+    # запрашиваем данные
+    data_table = []
+    electric_data_end        = request.GET.get("electric_data_end")
+    electric_data_start      = request.GET.get("electric_data_start")
+    
+    dt_date=[]
+    dt_range=[]
+    dt_date=common_sql.generate_monthly_range(electric_data_start,electric_data_end)
+    double_dates=[]
+   
+    for row in range(0,len(dt_date)):
+       data_start = dt_date[row][0].strftime("%d.%m.%Y")
+       if (row+1)<len(dt_date):
+           data_end = dt_date[row+1][0].strftime("%d.%m.%Y")
+       else:
+           data_end = dt_date[row][0].strftime("%d.%m.%Y")
+       
+       double_dates.append(data_start[3:])
+       double_dates.append(data_end[3:])
+       double_dates.append(get_month_russian_name_by_num(datetime.datetime.strptime(data_end, '%d.%m.%Y').month))
+       dt_range = common_sql.get_data_table_elf_period_monthly(data_start, data_end)       
+       if row == 0:         
+           data_table=dt_range           
+       else:                          
+           data_table=add_3columns_to_dt(data_table,dt_range,4,5,6)
+           
+    val_num=0 
+    count_month=[]            
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table,None)    
+        val_num= len(data_table[0]) - 6   
+        
+    count_month=range(1,len(dt_date)-1)
+    if len(data_table)>03:
+        double_dates.pop()
+        double_dates.pop()
+        double_dates.pop()
+
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Потребление по водосчётчикам Эльф по месяцам с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    
+    ws.merge_cells('A4:A6')
+    ws['A4'] = '№ помещения'
+    ws['A4'].style = ali_grey
+    
+    ws.merge_cells('В4:В6')
+    ws['B4'] = 'Тип прибора'
+    ws['B4'].style = ali_grey
+    
+    ws.merge_cells('с4:с6')
+    ws['C4'] = 'Номер ПУ'
+    ws['C4'].style = ali_grey
+    
+    ws.merge_cells('d4:e4')
+    ws['d4'] = 'Значения'
+    ws['d4'].style = ali_grey
+    
+    ws['d5'] = 'педыдущие'
+    ws['d5'].style = ali_grey
+    
+    ws['е5'] = 'текущие'
+    ws['е5'].style = ali_grey
+    
+    chrNum=68
+    for i in range(0,len(double_dates)):
+        
+        ws[chr(chrNum)+'6'] =  double_dates[i]  #получаем букву экселевского столбца и перебираем их черех аццкие коды
+        ws[chr(chrNum)+'6'].style = ali_grey
+        chrNum+=1
+        
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][3])  # Потребление
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Время работы
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 17
+    ws.column_dimensions['E'].width = 17
+    ws.column_dimensions['F'].width = 18
+#____________
+   
+#------------
+
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'potreblenie_elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+u'_'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

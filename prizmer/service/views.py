@@ -329,7 +329,7 @@ def LoadObjectsAndAbons(sPath, sSheet):
     
     for i in range(1,len(dtAll)):
         #print  dtAll[i][2],dtAll[i][3]
-        writeToLog( u'Обрабатываем строку ' + dtAll[i][2]+' - '+dtAll[i][3])
+        print u'Обрабатываем строку ' + dtAll[i][2]+' - '+dtAll[i][3]
         obj_l0=dtAll[i][0]
         writeToLog( obj_l0)
         obj_l1=dtAll[i][1]
