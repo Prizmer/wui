@@ -11168,3 +11168,241 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    
+def report_water_elf_daily(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Показания по водосчётчикам Эльф на' + unicode(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик Эльф'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Счётчик воды'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Тип счётчика'
+    ws['D5'].style = ali_grey
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])
+    ws['E5'].style = ali_grey
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         =  request.session['obj_parent_title']
+    obj_title         =  request.session['obj_title']
+    electric_data_end   =  request.session['electric_data_end']            
+    obj_key             =  request.session['obj_key']
+    
+    data_table = []
+                     
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_water_daily_elf(obj_title, obj_parent_title,  electric_data_end, True)
+      
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_water_daily_elf(obj_title, obj_parent_title,  electric_data_end, False)
+       
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # счётчик эльф
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # счётчик хвс
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания 
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания 
+            ws.cell('e%s'%(row)).style = ali_white
+        except:
+            ws.cell('e%s'%(row)).style = ali_white
+            next
+
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 17
+
+#------------
+
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'elf_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_end
+    print output_name
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    
+    return response
+    
+def report_water_elf_potreblenie(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Потребление по водосчётчикам Эльф за период с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Счётчик Эльф'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Счётчик  воды'
+    ws['C5'].style = ali_grey
+    
+    ws['d5'] = 'Тип счётчика'
+    ws['d5'].style = ali_grey
+        
+    ws['e5'] = 'Показания на '  + str(request.session["electric_data_start"])
+    ws['e5'].style = ali_grey
+    
+    ws['f5'] = 'Показания на '  +  str(request.session["electric_data_end"])
+    ws['f5'].style = ali_grey
+    
+    ws['g5'] = 'Потребление'
+    ws['g5'].style = ali_grey
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']            
+    obj_key             = request.session['obj_key']
+    electric_data_start = request.session['electric_data_start']
+    
+    data_table = []
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_water_period_elf(obj_title, obj_parent_title, electric_data_start, electric_data_end, True)
+      
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_water_period_elf(obj_title, obj_parent_title, electric_data_start, electric_data_end, False)
+       
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+                  
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).style = ali_white
+        except:
+            ws.cell('E%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Время работы
+            ws.cell('F%s'%(row)).style = ali_white
+        except:
+            ws.cell('F%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('g%s'%(row)).value = '%s' % (data_table[row-6][6])  # Показания по теплу на начало
+            ws.cell('g%s'%(row)).style = ali_white
+        except:
+            ws.cell('g%s'%(row)).style = ali_white
+            next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 17
+    ws.column_dimensions['E'].width = 17
+    ws.column_dimensions['F'].width = 17
+    ws.column_dimensions['g'].width = 18
+#____________
+   
+
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'potreblenie_elf_report'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+u'_'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
