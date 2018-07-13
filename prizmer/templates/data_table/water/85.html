@@ -1,0 +1,48 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<p>
+<span>Потребление по водосчётчикам Эльф за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик Эльф</th>
+<th>Счётчик воды</th>
+<th>Тип счётчика</th>
+<th>Значение на {{electric_data_start}}</th>
+<th>Значение на {{electric_data_end}}</th>
+<th  class="th_hvs">Разница</th>
+
+
+<!--<th>Дата</th>-->
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td class="th_hvs"><strong>{{value.6}}</strong></td>
+
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

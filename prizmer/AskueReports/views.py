@@ -11034,10 +11034,16 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
     electric_data_end        = request.GET.get("electric_data_end")
     electric_data_start      = request.GET.get("electric_data_start")
     
-    dt_date=[]
-    dt_range=[]
-    dt_date=common_sql.generate_monthly_range(electric_data_start,electric_data_end)
-    double_dates=[]
+    dt_date = []
+    dt_range = []
+    dt_date = common_sql.generate_monthly_range(electric_data_start,electric_data_end)
+    double_dates = []
+    dt_row4 = []
+    dt_row5 = []
+    rash = 'РАСХОД'
+    znach = 'Значения'
+    pred = 'предыдущие'
+    tek = 'текущие'
    
     for row in range(0,len(dt_date)):
        data_start = dt_date[row][0].strftime("%d.%m.%Y")
@@ -11049,6 +11055,15 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
        double_dates.append(data_start[3:])
        double_dates.append(data_end[3:])
        double_dates.append(get_month_russian_name_by_num(datetime.datetime.strptime(data_end, '%d.%m.%Y').month))
+       
+       dt_row4.append(znach)
+       dt_row4.append(znach)
+       dt_row4.append(rash)
+       
+       dt_row5.append(pred)
+       dt_row5.append(tek)
+       dt_row5.append('___')
+       
        dt_range = common_sql.get_data_table_elf_period_monthly(data_start, data_end)       
        if row == 0:         
            data_table=dt_range           
@@ -11069,102 +11084,86 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
 
 
 #Шапка
-    ws.merge_cells('A2:E2')
-    ws['A2'] = 'Потребление по водосчётчикам Эльф по месяцам с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    ws.merge_cells('A2:J2')
+    ws['A2'] = 'Потребление по водосчётчикам Эльф по месяцам с ' + dt_date[0][0].strftime("%d.%m.%Y") + ' по ' + dt_date[-1][0].strftime("%d.%m.%Y")
     
     ws.merge_cells('A4:A6')
     ws['A4'] = '№ помещения'
     ws['A4'].style = ali_grey
     
-    ws.merge_cells('В4:В6')
+    ws.merge_cells('B4:B6')
     ws['B4'] = 'Тип прибора'
     ws['B4'].style = ali_grey
     
-    ws.merge_cells('с4:с6')
+    ws.merge_cells('C4:C6')
     ws['C4'] = 'Номер ПУ'
-    ws['C4'].style = ali_grey
-    
-    ws.merge_cells('d4:e4')
-    ws['d4'] = 'Значения'
-    ws['d4'].style = ali_grey
-    
-    ws['d5'] = 'педыдущие'
-    ws['d5'].style = ali_grey
-    
-    ws['е5'] = 'текущие'
-    ws['е5'].style = ali_grey
+    ws['C4'].style = ali_grey    
+
     
     chrNum=68
     for i in range(0,len(double_dates)):
+        print not bool(i % 2)
+        if not bool(i % 3): 
+            ws.merge_cells(chr(chrNum)+'4:'+chr(chrNum+1)+'4')
+        
+        ws[chr(chrNum)+'4'] = dt_row4[i]               
+        ws[chr(chrNum)+'4'].style = ali_grey
+        
+        ws[chr(chrNum)+'5'] = dt_row5[i]               
+        ws[chr(chrNum)+'5'].style = ali_grey        
         
         ws[chr(chrNum)+'6'] =  double_dates[i]  #получаем букву экселевского столбца и перебираем их черех аццкие коды
         ws[chr(chrNum)+'6'].style = ali_grey
+        
+        ws.column_dimensions[chr(chrNum)].width = 15
         chrNum+=1
         
         
 # Заполняем отчет значениями
-    for row in range(6, len(data_table)+6):
+    for row in range(7, len(data_table)+7):
         try:
-            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-7][0][9:])  # номре помещения
             ws.cell('A%s'%(row)).style = ali_white
         except:
             ws.cell('A%s'%(row)).style = ali_white
             next
         
         try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-7][3])  # тип прибора
             ws.cell('B%s'%(row)).style = ali_white
         except:
             ws.cell('B%s'%(row)).style = ali_white
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-7][2])  # номер счётчика
             ws.cell('C%s'%(row)).style = ali_white
         except:
             ws.cell('C%s'%(row)).style = ali_white
             next
-            
-        try:
-            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][4])  # Показания по теплу на конец
-            ws.cell('D%s'%(row)).style = ali_white
-        except:
-            ws.cell('D%s'%(row)).style = ali_white
-            next
-            
-        try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][3])  # Потребление
-            ws.cell('E%s'%(row)).style = ali_white
-        except:
-            ws.cell('E%s'%(row)).style = ali_white
-            next
-        
-        try:
-            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][5])  # Время работы
-            ws.cell('F%s'%(row)).style = ali_white
-        except:
-            ws.cell('F%s'%(row)).style = ali_white
-            next
+           
+           
+        chrNum=68
+        for dt_col in range(4,len(data_table[row-7])-3):
+             try:
+                ws.cell(chr(chrNum)+'%s'%(row)).value = '%s' % (data_table[row-7][dt_col])  #дельта
+                ws.cell(chr(chrNum)+'%s'%(row)).style = ali_white
+             except:
+                ws.cell(chr(chrNum)+'%s'%(row)).style = ali_white
+                next
+             chrNum+=1
 
-    ws.row_dimensions[5].height = 41
-    ws.column_dimensions['A'].width = 17 
-    ws.column_dimensions['B'].width = 17 
-    ws.column_dimensions['C'].width = 17
-    ws.column_dimensions['D'].width = 17
-    ws.column_dimensions['E'].width = 17
-    ws.column_dimensions['F'].width = 18
+#    ws.column_dimensions['D'].width = 17
+#    ws.column_dimensions['E'].width = 17
+#    ws.column_dimensions['F'].width = 18
 #____________
-   
-#------------
 
-                    
-    
     wb.save(response)
     response.seek(0)
     response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
     #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
     
-    output_name = u'potreblenie_elf_hvs_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+u'_'+electric_data_end
+    output_name = u'potreblenie_elf_'+electric_data_start+u'_'+electric_data_end
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   

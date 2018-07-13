@@ -127,6 +127,8 @@ urlpatterns = patterns('',
     url(r'^79/$', views.water_potreblenie_pulsar_with_graphic), # вода, показания за период Импульсные, отчёт как 39
     
     url(r'^83/$', views.water_elf_potreblenie_monthly_with_delta), # Потребление по месяцам с эльфов хв и гв
+    url(r'^84/$', views.water_elf_daily), # 
+    url(r'^85/$', views.water_elf_potreblenie), # Потребление за период с эльфов хв и гв
     
     url(r'^81/$', views.pulsar_heat_period_with_graphic), # Показание на дату с теплосчётчиков Пульсар, отчёт как 59
     
