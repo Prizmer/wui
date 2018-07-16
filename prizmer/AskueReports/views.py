@@ -11074,9 +11074,9 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
     count_month=[]            
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table,None)    
-        val_num= len(data_table[0]) - 6   
+        #val_num= len(data_table[0]) - 6   
         
-    count_month=range(1,len(dt_date)-1)
+    #count_month=range(1,len(dt_date)-1)
     if len(data_table)>03:
         double_dates.pop()
         double_dates.pop()
@@ -11101,57 +11101,78 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
 
     
     chrNum=68
-    for i in range(0,len(double_dates)):
-        print not bool(i % 2)
-        if not bool(i % 3): 
-            ws.merge_cells(chr(chrNum)+'4:'+chr(chrNum+1)+'4')
-        
-        ws[chr(chrNum)+'4'] = dt_row4[i]               
-        ws[chr(chrNum)+'4'].style = ali_grey
-        
-        ws[chr(chrNum)+'5'] = dt_row5[i]               
-        ws[chr(chrNum)+'5'].style = ali_grey        
-        
-        ws[chr(chrNum)+'6'] =  double_dates[i]  #получаем букву экселевского столбца и перебираем их черех аццкие коды
-        ws[chr(chrNum)+'6'].style = ali_grey
-        
-        ws.column_dimensions[chr(chrNum)].width = 15
-        chrNum+=1
-        
-        
-# Заполняем отчет значениями
-    for row in range(7, len(data_table)+7):
-        try:
-            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-7][0][9:])  # номре помещения
-            ws.cell('A%s'%(row)).style = ali_white
-        except:
-            ws.cell('A%s'%(row)).style = ali_white
-            next
-        
-        try:
-            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-7][3])  # тип прибора
-            ws.cell('B%s'%(row)).style = ali_white
-        except:
-            ws.cell('B%s'%(row)).style = ali_white
-            next
+    nextLitera=False
+    if len(double_dates) < 49: #выход за пределы дат - и выполнятся долго будет и нужна спец.обработка букв в эксель, это будет около 1,5 года        
+        for i in range(0,len(double_dates)): 
+            if chrNum == 91:            
+                nextLitera=True
+                chrNum=65
+            if not nextLitera:            
+                bukva = chr(chrNum)
+                if chrNum != 90:
+                    bukva_next= chr(chrNum+1)
+                else:
+                     bukva_next= 'AA'
+            else:            
+                bukva = 'A'+chr(chrNum)
+                bukva_next= 'A'+chr(chrNum+1)
+            if not bool(i % 3): 
+                ws.merge_cells(bukva+'4:'+bukva_next+'4')
+            print bukva, chrNum
+            ws[bukva+'4'] = dt_row4[i]               
+            ws[bukva+'4'].style = ali_grey
             
-        try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-7][2])  # номер счётчика
-            ws.cell('C%s'%(row)).style = ali_white
-        except:
-            ws.cell('C%s'%(row)).style = ali_white
-            next
-           
-           
-        chrNum=68
-        for dt_col in range(4,len(data_table[row-7])-3):
-             try:
-                ws.cell(chr(chrNum)+'%s'%(row)).value = '%s' % (data_table[row-7][dt_col])  #дельта
-                ws.cell(chr(chrNum)+'%s'%(row)).style = ali_white
-             except:
-                ws.cell(chr(chrNum)+'%s'%(row)).style = ali_white
+            ws[bukva+'5'] = dt_row5[i]               
+            ws[bukva+'5'].style = ali_grey        
+            
+            ws[bukva+'6'] =  double_dates[i]  #получаем букву экселевского столбца и перебираем их черех аццкие коды
+            ws[bukva+'6'].style = ali_grey
+            
+            ws.column_dimensions[bukva].width = 15
+            chrNum+=1
+            
+            
+    # Заполняем отчет значениями
+        for row in range(7, len(data_table)+7):
+            try:
+                ws.cell('A%s'%(row)).value = '%s' % (data_table[row-7][0][9:])  # номре помещения
+                ws.cell('A%s'%(row)).style = ali_white
+            except:
+                ws.cell('A%s'%(row)).style = ali_white
                 next
-             chrNum+=1
+            
+            try:
+                ws.cell('B%s'%(row)).value = '%s' % (data_table[row-7][3])  # тип прибора
+                ws.cell('B%s'%(row)).style = ali_white
+            except:
+                ws.cell('B%s'%(row)).style = ali_white
+                next
+                
+            try:
+                ws.cell('C%s'%(row)).value = '%s' % (data_table[row-7][2])  # номер счётчика
+                ws.cell('C%s'%(row)).style = ali_white
+            except:
+                ws.cell('C%s'%(row)).style = ali_white
+                next
+               
+               
+            chrNum=68
+            nextLitera = False
+            for dt_col in range(4,len(data_table[row-7])-3):
+                 if chrNum == 91:
+                    nextLitera=True
+                    chrNum=65
+                 if not nextLitera:
+                    bukva = chr(chrNum)                
+                 else:               
+                    bukva = 'A'+chr(chrNum)                
+                 try:
+                    ws.cell(bukva+'%s'%(row)).value = '%s' % (data_table[row-7][dt_col])  #дельта
+                    ws.cell(bukva+'%s'%(row)).style = ali_white
+                 except:
+                    ws.cell(bukva+'%s'%(row)).style = ali_white
+                    next
+                 chrNum+=1
 
 #    ws.column_dimensions['D'].width = 17
 #    ws.column_dimensions['E'].width = 17

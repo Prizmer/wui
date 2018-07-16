@@ -13133,7 +13133,7 @@ def water_elf_potreblenie_monthly_with_delta(request):
            data_end = dt_date[row+1][0].strftime("%d.%m.%Y")
        else:
            data_end = dt_date[row][0].strftime("%d.%m.%Y")
-       print data_start, data_end
+       #print data_start, data_end
        double_dates.append('Значение на ' + data_start)
        double_dates.append('Значение на ' + data_end)
        double_dates.append('Разница')
@@ -13156,7 +13156,7 @@ def water_elf_potreblenie_monthly_with_delta(request):
         double_dates.pop()
     
     
-    print 'val_num', val_num
+    #print 'val_num', val_num
     args['data_table'] = data_table
     args['obj_title'] = obj_title
     args['obj_key'] = obj_key
