@@ -89,6 +89,8 @@ urlpatterns = patterns('',
     url(r'^75/$', views.report_heat_karat_potreblenie),#karat307 potreblenie
     
     url(r'^40/$', views.report_empty_alert),
+
+    url(r'^76/$', views.report_all_res_by_date_v2),
     url(r'^77/$', views.report_balance_period_electric),
    
     

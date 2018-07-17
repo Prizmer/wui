@@ -11604,3 +11604,108 @@ def report_balance_period_electric(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     
     return response
+    
+def report_all_res_by_date_v2(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]  
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Отчёт по всем ресурсам на ' + str(electric_data_end)
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Тип показаний'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = ali_grey
+    
+    ws['D5'] = 'Показания Энергии на ' + str(electric_data_end)
+    ws['D5'].style = ali_grey
+    
+  
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')   
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    electric_data_end = u''
+    decimal.getcontext().prec = 3
+    obj_title           = request.session['obj_title']
+    obj_key             = request.session['obj_key']
+    obj_parent_title    = request.session['obj_parent_title']       
+    electric_data_end   = request.session['electric_data_end']  
+               
+    data_table=[]
+    obj_parent_title_water=u""
+    obj_parent_title_electric=u""
+    if (bool(is_abonent_level.search(obj_key))):      
+            obj_parent_title_water=unicode(obj_parent_title)+u" Вода"
+            obj_parent_title_electric=obj_parent_title
+            #print  obj_parent_title_water, obj_parent_title_electric, len( obj_parent_title_electric)
+            data_table = common_sql.get_data_table_all_res_for_abon(obj_parent_title_water, obj_parent_title_electric, obj_title, electric_data_end)
+    if (bool(is_object_level.search(obj_key))):
+        #здесь условно на уровне абонента
+        n=unicode(obj_parent_title).find(u'Вода')
+        #print obj_parent_title, n
+        if (n>0):
+            obj_parent_title_water=obj_parent_title
+            obj_parent_title_electric=obj_parent_title[0:n-1]
+            #print  obj_parent_title_water, obj_parent_title_electric, len( obj_parent_title_electric)
+        data_table = common_sql.get_data_table_all_res_for_abon(obj_parent_title_water, obj_parent_title_electric, obj_title, electric_data_end)
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None) 
+
+    
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # заводской номер
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][2]) # '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (round(float(data_table[row-6][3]),3)) # '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).style = ali_white
+        except:
+            ws.cell('D%s'%(row)).style = ali_white
+            next
+            
+    ws.row_dimensions[5].height = 51
+    ws.column_dimensions['A'].width = 30 
+    ws.column_dimensions['b'].width = 20 
+    ws.column_dimensions['c'].width = 20 
+   
+    #ws.column_dimensions['H'].width = 15
+        
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'report_all_res_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)
+    file_ext = u'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
