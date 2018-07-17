@@ -15,7 +15,7 @@ import re
 from excel_response import ExcelResponse
 from django.shortcuts import redirect
 #from datetime import datetime, date, time
-
+import decimal
 # для работы с xml
 from lxml import etree
 
@@ -11069,9 +11069,7 @@ def report_water_elf_potreblenie_monthly_with_delta(request):
            data_table=dt_range           
        else:                          
            data_table=add_3columns_to_dt(data_table,dt_range,4,5,6)
-           
-    val_num=0 
-    count_month=[]            
+                         
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table,None)    
         #val_num= len(data_table[0]) - 6   
@@ -11426,4 +11424,183 @@ def report_water_elf_potreblenie(request):
     file_ext = u'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+    
+def report_balance_period_electric(request):
+    response = StringIO.StringIO()
+    wb = Workbook()
+    
+    ws = wb.active
+    ws.title = "percent_noBalance"
+    
+    obj_parent_title         =  request.session['obj_parent_title']
+    obj_title         =         request.session['obj_title']
+    electric_data_start   =     request.session['electric_data_start'] 
+    electric_data_end   =       request.session['electric_data_end'] 
+    is_abonent_level =          re.compile(r'abonent')
+    obj_key             =       request.session['obj_key']
+#Шапка
+    ws.merge_cells('A1:E1')
+    ws['A1'] = 'Балансная группа: ' + obj_title
+    
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Баланс по электричеству c ' + str(electric_data_start) + ' по ' + str(electric_data_end)
+    
+    ws['A5'] = 'Дата'
+    ws['A5'].style = ali_grey
+    
+    ws['B5'] = 'Небаланс, кВт*ч'
+    ws['B5'].style = ali_grey
+    
+    ws['C5'] = '% '
+    ws['C5'].style = ali_grey
+    
+       
+#Запрашиваем данные для отчета
+          
+    dtAll=[]
+    dt_type_abon=common_sql.GetSimpleTable('types_abonents',"","")
+    
+    for i in range(0,len(dt_type_abon)):
+         guid_type_abon=dt_type_abon[i][0]         
+         if not(bool(is_abonent_level.search(obj_key))):
+             data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
+             #type_abon=translate(dt_type_abon[i][1])             
+             if len(data_table)>0: data_table=common_sql.ChangeNull(data_table, None)          
+             dtAll.append(data_table)
+             
+    dt_delta=[]   
+   
+    if len(dtAll)>0:
+        for j in range(1,len(dtAll[0])):
+            sumD=0
+            vv=0
+            for i in range(0,len(dtAll)):                
+                if (dtAll[i][j][6] == 'Н/Д' or dtAll[i][j][6] == None  or dtAll[i][j][6] == 'None'): 
+                    if (j+1)<len(dtAll[0]): j+=1                             
+                if dtAll[i][j][1] == True:                   
+                    sumD+=decimal.Decimal(dtAll[i][j][6])
+                    vv=decimal.Decimal(dtAll[i][j][6])                    
+                else:
+                    sumD-=decimal.Decimal(dtAll[i][j][6])
+            #считаем проценты
+            percent=0           
+            if (vv > decimal.Decimal(0)):
+                percent=sumD*100/vv
+            #print data_table[j][5]
+            dt_delta.append([data_table[j][5],sumD, decimal.Decimal(percent)])
+
+        
+# Заполняем отчет значениями
+    for row in range(6, len(dt_delta)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (dt_delta[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (dt_delta[row-6][1])  # счётчик эльф
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (round(dt_delta[row-6][2],2))  # счётчик хвс
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+       
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+   
+    #___________________________________________________
+   
+    
+    
+    for val in dtAll: 
+        #print val[1], val[2], val[3]
+        ws2 = wb.create_sheet(title="balance_detail_"+translate(val[0][2]))
+        ws2.merge_cells('A1:E1')
+        ws2['A1'] = 'Балансная группа: ' + obj_title
+        
+        ws2.merge_cells('A2:E2')
+        ws2['A2'] = 'Баланс по электричеству c' + str(electric_data_start) + ' по ' + str(electric_data_end)
+        
+        ws2['A5'] = 'Тип'
+        ws2['A5'].style = ali_grey
+        
+        ws2['B5'] = 'Сумма T0, кВт*ч'
+        ws2['B5'].style = ali_grey
+        
+        ws2['C5'] = 'Дата '
+        ws2['C5'].style = ali_grey
+        
+        ws2['d5'] = 'Потребление T0, кВт*ч'
+        ws2['d5'].style = ali_grey
+        
+        ws2['e5'] = 'Опрошено счётчиков'
+        ws2['e5'].style = ali_grey
+        #print val
+        for row in range(6, len(val)+6):
+            try:
+                ws2.cell('A%s'%(row)).value = '%s' % (val[row-6][2])  # Абонент
+                ws2.cell('A%s'%(row)).style = ali_white
+            except:
+                ws2.cell('A%s'%(row)).style = ali_white
+                next
+            
+            try:
+                ws2.cell('B%s'%(row)).value = '%s' % (val[row-6][3])  # счётчик эльф
+                ws2.cell('B%s'%(row)).style = ali_white
+            except:
+                ws2.cell('B%s'%(row)).style = ali_white
+                next
+                
+            try:
+                ws2.cell('C%s'%(row)).value = '%s' % (val[row-6][5])  # счётчик хвс
+                ws2.cell('C%s'%(row)).style = ali_white
+            except:
+                ws2.cell('C%s'%(row)).style = ali_white
+                next
+                
+            try:
+                ws2.cell('d%s'%(row)).value = '%s' % (val[row-6][6])  # счётчик хвс
+                ws2.cell('d%s'%(row)).style = ali_white
+            except:
+                ws2.cell('d%s'%(row)).style = ali_white
+                next
+                
+            try:
+                ws2.cell('e%s'%(row)).value = '%s' % (val[row-6][7])  # счётчик хвс
+                ws2.cell('e%s'%(row)).style = ali_white
+            except:
+                ws2.cell('e%s'%(row)).style = ali_white
+                next
+       
+        ws2.row_dimensions[5].height = 41
+        ws2.column_dimensions['A'].width = 17 
+        ws2.column_dimensions['B'].width = 17 
+        ws2.column_dimensions['C'].width = 17    
+    
+#------------
+
+                    
+    
+    wb.save(response)
+    response.seek(0)
+    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = u'balance_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
+    print output_name
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    
     return response

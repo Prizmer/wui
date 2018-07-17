@@ -89,7 +89,8 @@ urlpatterns = patterns('',
     url(r'^75/$', views.report_heat_karat_potreblenie),#karat307 potreblenie
     
     url(r'^40/$', views.report_empty_alert),
-    url(r'^77/$', views.report_empty_alert),#voznrashaet pustoy txt
+    url(r'^77/$', views.report_balance_period_electric),
+   
     
     url(r'^79/$', views.report_water_potreblenie_pulsar), #выгрузка данных за период по воде Импульсные
     

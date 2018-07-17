@@ -13099,8 +13099,8 @@ def add_3columns_to_dt(data_table,data_range,n1,n2,n3):
 
 def water_elf_potreblenie_monthly_with_delta(request):
     args = {}
-    is_abonent_level = re.compile(r'abonent')
-    is_object_level_2 = re.compile(r'level2')
+#    is_abonent_level = re.compile(r'abonent')
+#    is_object_level_2 = re.compile(r'level2')
     data_table = []
     obj_title = u'Не выбран'
     obj_key = u'Не выбран'
