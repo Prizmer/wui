@@ -13268,3 +13268,154 @@ def water_elf_daily(request):
     args['electric_data_start'] = electric_data_start
 
     return render_to_response("data_table/water/84.html", args)
+    
+def electric_res_status(request):
+    args = {}
+
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title'] 
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+    
+    dt_objects = common_sql.get_res_objects('electric')
+    #print 'print len(dt_objects) ', len(dt_objects)
+    dtAll_statistic=[]
+    dtAll_no_data_meters=[]
+    for obj in dt_objects:
+        #print obj[0]
+        dt_statistic= common_sql.get_electric_count(obj[0],  electric_data_end)
+        dt_no_data_meters=common_sql.get_electric_no_data(obj[0],  electric_data_end)
+        dtAll_statistic.append(dt_statistic)
+        if len(dt_no_data_meters)>0: 
+            dt_no_data_meters=common_sql.ChangeNull(dt_no_data_meters, None)
+            dtAll_no_data_meters.append(dt_no_data_meters)
+      
+   
+    
+    
+    args['dtAll_statistic'] = dtAll_statistic
+    args['dtAll_no_data_meters'] = dtAll_no_data_meters
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta      
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+
+    return render_to_response("data_table/86.html", args)
+    
+def heat_digital_res_status(request):
+    args = {}
+
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']             
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+    
+    dt_objects = common_sql.get_res_objects('heat')
+    #print 'print len(dt_objects) ', len(dt_objects)
+    dtAll_statistic=[]
+    dtAll_no_data_meters=[]
+    for obj in dt_objects:
+        #print obj[0]
+        dt_statistic= common_sql.get_heat_count(obj[0],  electric_data_end)
+        dt_no_data_meters=common_sql.get_heat_no_data(obj[0],  electric_data_end)
+        dtAll_statistic.append(dt_statistic)
+        if len(dt_no_data_meters)>0: 
+            dt_no_data_meters=common_sql.ChangeNull(dt_no_data_meters, None)
+            dtAll_no_data_meters.append(dt_no_data_meters)
+      
+   
+    
+    
+    args['dtAll_statistic'] = dtAll_statistic
+    args['dtAll_no_data_meters'] = dtAll_no_data_meters
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta      
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+
+    return render_to_response("data_table/88.html", args)
+    
+def water_impulse_res_status(request):
+    args = {}
+
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']             
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+    
+    dt_objects = common_sql.get_water_impulse_objects()
+    
+    dtAll_statistic=[]
+    dtAll_no_data_meters=[]
+    for obj in dt_objects:
+        #print electric_data_end
+        dt_statistic= common_sql.get_water_impulse_count(obj[0],  electric_data_end)
+        dt_no_data_meters=common_sql.get_water_impulse_no_data(obj[0],  electric_data_end)
+        dtAll_statistic.append(dt_statistic)
+        if len(dt_no_data_meters)>0: 
+            dt_no_data_meters=common_sql.ChangeNull(dt_no_data_meters, None)
+            dtAll_no_data_meters.append(dt_no_data_meters)
+      
+   
+    
+    
+    args['dtAll_statistic'] = dtAll_statistic
+    args['dtAll_no_data_meters'] = dtAll_no_data_meters
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta      
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+
+    return render_to_response("data_table/90.html", args)

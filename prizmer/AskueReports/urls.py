@@ -101,6 +101,10 @@ urlpatterns = patterns('',
     url(r'^83/$', views.report_water_elf_potreblenie_monthly_with_delta), # Потребление по месяцам с эльфов хв и гв
     url(r'^84/$', views.report_water_elf_daily), # 
     url(r'^85/$', views.report_water_elf_potreblenie), # Потребление за период с эльфов хв и гв
+    
+    url(r'^86/$', views.report_electric_res_status),
+    url(r'^88/$', views.report_heat_res_status),
+    url(r'^90/$', views.report_water_impulse_res_status),
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

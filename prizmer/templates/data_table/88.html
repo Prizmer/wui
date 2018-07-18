@@ -1,0 +1,80 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<br>
+<span>Статистика опроса по теплу на <strong>{{electric_data_end}}</strong> </span>
+<br>
+<br>
+	
+{% if dtAll_statistic %}
+<table class="content" id="data-table">
+<tr>
+<th>Объект</th>
+<th>Опрошено</th>
+<th>Счётчиков всего</th>
+<th class="th_hvs">Процент опроса</th>
+<th>Не опрошено счётчиков</th>
+
+</tr>
+{% for val in dtAll_statistic  %}
+{% for value in val %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td class="th_hvs"><strong>{{value.3}} &#037;<strong></td>
+<td>{{value.4}}</td>
+</tr>
+{% endfor %}
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+
+<br>
+<br>
+{% if dtAll_no_data_meters %}
+<table class="content" id="data-table">
+<tr>
+<th>Объект</th>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Энергия, Гкал</th>
+<th>Объем, м3</th>
+<th>Температура входа, С</th>
+<th>Температура выхода, С</th>
+
+</tr>
+{% for val in dtAll_no_data_meters %}
+{% for value in val %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+</tr>
+{% endfor %}
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных по не опрошеным счётчикам</strong></span>
+<br>
+{% endif %}
+
+
+
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

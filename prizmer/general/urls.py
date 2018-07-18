@@ -132,6 +132,9 @@ urlpatterns = patterns('',
     
     url(r'^81/$', views.pulsar_heat_period_with_graphic), # Показание на дату с теплосчётчиков Пульсар, отчёт как 59
     
+    url(r'^86/$', views.electric_res_status),
+    url(r'^88/$', views.heat_digital_res_status),
+    url(r'^90/$', views.water_impulse_res_status),
     
    #---- Test urls
     url(r'^addnum/$', views.add_numbers),

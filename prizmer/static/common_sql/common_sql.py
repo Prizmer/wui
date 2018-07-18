@@ -2361,7 +2361,8 @@ def ChangeNull(data_table, electric_data):
         data_table[i]=list(data_table[i])
         #if i<10: print data_table[i]
         for j in range(1,len(data_table[i])):
-            if (data_table[i][j] == None) or (data_table[i][j] is None):
+            #print data_table[i][j]
+            if (data_table[i][j] == None) or (data_table[i][j] is None) or (data_table[i][j] == "None"):
                 data_table[i][j]=u'Н/Д'
                 #print data_table[i][j]
         if (electric_data is not None):
@@ -8414,4 +8415,411 @@ def get_data_table_water_daily_elf(obj_title, obj_parent_title, electric_data_en
         cursor.execute(MakeSqlQuery_elf_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params))  
     data_table = cursor.fetchall()
     
+    return data_table
+
+def MakeSqlQuery_electric_no_data( obj_title,  electric_data_end, my_params):
+    sQuery="""
+    Select 
+  electric_abons.obj_name, electric_abons.ab_name, 
+    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3
+    
+from electric_abons
+LEFT JOIN 
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
+                        FROM
+                        (SELECT daily_values.date as daily_date, 
+                        objects.name as name_objects, 
+                        abonents.name as name_abonents, 
+                        meters.factory_number_manual as number_manual, 
+                        daily_values.value as value_daily, 
+                        names_params.name as params_name,
+                        link_abonents_taken_params.coefficient as ktt,
+                         link_abonents_taken_params.coefficient_2 as ktn,
+                          link_abonents_taken_params.coefficient_3 as a
+                        FROM
+                         public.daily_values, 
+                         public.link_abonents_taken_params, 
+                         public.taken_params, 
+                         public.abonents, 
+                         public.objects, 
+                         public.names_params, 
+                         public.params, 
+                         public.meters,
+                         public.types_meters,
+                         public.resources			
+                        WHERE
+                        taken_params.guid = link_abonents_taken_params.guid_taken_params AND 
+                        taken_params.id = daily_values.id_taken_params AND 
+                        taken_params.guid_params = params.guid AND 
+                        taken_params.guid_meters = meters.guid AND 
+                        abonents.guid = link_abonents_taken_params.guid_abonents AND 
+                        objects.guid = abonents.guid_objects AND 
+                        names_params.guid = params.guid_names_params AND
+                        params.guid_names_params=names_params.guid and 
+                        types_meters.guid=meters.guid_types_meters and
+                        names_params.guid_resources=resources.guid and
+                        resources.name='%s' and
+                        Objects.name= '%s' 
+                        and            
+                        daily_values.date = '%s' 
+                        ) z1                      
+group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktn, z1.ktt, z1.a 
+) z2
+on electric_abons.ab_name=z2.name_abonents
+where  electric_abons.obj_name= '%s' 
+and z2.t0 is null
+   
+ORDER BY electric_abons.ab_name ASC """%(my_params[0],my_params[1],my_params[2],my_params[3],my_params[4],obj_title,electric_data_end,obj_title)
+    return sQuery
+    
+def get_electric_no_data(obj_title, electric_data_end):
+    my_params=['T0 A+','T1 A+','T2 A+','T3 A+','Электричество']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_electric_no_data( obj_title,  electric_data_end, my_params))  
+    data_table = cursor.fetchall()    
+    return data_table
+
+def MakeSqlQuery_electric_count( obj_title,  electric_data_end, my_params):
+    sQuery="""
+    select obj_name, count (t0) as have_val,  count (ab_name) as all_row, round((count(t0)*100/count(ab_name))::numeric,0) as percent_val, (count (ab_name)-count (t0)) as no_val
+from
+(
+Select  z2.daily_date,
+  electric_abons.obj_name, electric_abons.ab_name, 
+    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3, z2.ktn, z2.ktt, z2.a
+    
+from electric_abons
+LEFT JOIN 
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+z1.ktn, z1.ktt, z1.a 
+                        FROM
+                        (SELECT daily_values.date as daily_date, 
+                        objects.name as name_objects, 
+                        abonents.name as name_abonents, 
+                        meters.factory_number_manual as number_manual, 
+                        daily_values.value as value_daily, 
+                        names_params.name as params_name,
+                        link_abonents_taken_params.coefficient as ktt,
+                         link_abonents_taken_params.coefficient_2 as ktn,
+                          link_abonents_taken_params.coefficient_3 as a
+                        FROM
+                         public.daily_values, 
+                         public.link_abonents_taken_params, 
+                         public.taken_params, 
+                         public.abonents, 
+                         public.objects, 
+                         public.names_params, 
+                         public.params, 
+                         public.meters,
+                         public.types_meters,
+                         public.resources			
+                        WHERE
+                        taken_params.guid = link_abonents_taken_params.guid_taken_params AND 
+                        taken_params.id = daily_values.id_taken_params AND 
+                        taken_params.guid_params = params.guid AND 
+                        taken_params.guid_meters = meters.guid AND 
+                        abonents.guid = link_abonents_taken_params.guid_abonents AND 
+                        objects.guid = abonents.guid_objects AND 
+                        names_params.guid = params.guid_names_params AND
+                        params.guid_names_params=names_params.guid and 
+                        types_meters.guid=meters.guid_types_meters and
+                        names_params.guid_resources=resources.guid and
+                        resources.name='%s' and
+                        Objects.name= '%s' 
+                        and            
+                        daily_values.date = '%s' 
+                        ) z1                      
+group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktn, z1.ktt, z1.a 
+) z2
+on electric_abons.ab_name=z2.name_abonents
+where  electric_abons.obj_name= '%s' 
+   
+ORDER BY electric_abons.ab_name ASC) as z 
+group by obj_name"""%(my_params[0],my_params[1],my_params[2],my_params[3],my_params[4],obj_title,electric_data_end,obj_title)
+    return sQuery 
+    
+def get_electric_count(obj_title, electric_data_end):
+    my_params=['T0 A+','T1 A+','T2 A+','T3 A+','Электричество']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_electric_count( obj_title,  electric_data_end, my_params))  
+    data_table = cursor.fetchall()      
+    return data_table
+    
+def get_res_objects(res): 
+    cursor = connection.cursor()
+    data_table=[]     
+    sQuery=""" SELECT  obj_name
+                       FROM %s_abons
+                        group by obj_name   
+                        order by obj_name ASC
+                        """%(res)
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()    
+    return data_table
+
+def MakeSqlQuery_heat_no_data( obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
+round(z2.energy::numeric,7),
+round(z2.volume::numeric,7),
+round(z2.t_in::numeric,1),
+round(z2.t_out::numeric,1), heat_abons.name
+from heat_abons
+left join
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
+            			  objects.name as name_objects, 
+            			  abonents.name as name_abonents, 
+            			  daily_values.value as value_daily, 
+            			  meters.factory_number_manual as number_manual, 
+            			  names_params.name as params_name, 
+            			  types_meters.name as meter_type,
+            			  resources.name as res
+            			FROM 
+            			  public.daily_values, 
+            			  public.taken_params, 
+            			  public.abonents, 
+            			  public.link_abonents_taken_params, 
+            			  public.objects, 
+            			  public.params, 
+            			  public.names_params, 
+            			  public.meters, 
+            			  public.types_meters,
+            			  resources
+            			WHERE 
+            			  daily_values.id_taken_params = taken_params.id AND
+            			  taken_params.guid_params = params.guid AND
+            			  taken_params.guid_meters = meters.guid AND
+            			  abonents.guid_objects = objects.guid AND
+            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            			  params.guid_names_params = names_params.guid AND
+            			  meters.guid_types_meters = types_meters.guid AND
+            			  names_params.guid_resources=resources.guid and
+            			  objects.name = '%s' AND            			  
+            			  resources.name = '%s' AND 
+            			  daily_values.date = '%s' 
+                                    ) z1
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.res
+            order by z1.name_abonents) as z2
+on z2.number_manual=heat_abons.factory_number_manual
+where heat_abons.obj_name='%s'
+and (z2.energy is null or z2.volume is null)
+order by heat_abons.ab_name
+    """%(my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    return sQuery    
+def get_heat_no_data(obj_title,  electric_data_end):
+    my_params=['Энергия','Объем','Ti','To', 'Тепло']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_heat_no_data( obj_title, electric_data_end, my_params))  
+    data_table = cursor.fetchall()      
+    return data_table
+ 
+def MakeSqlQuery_heat_count( obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select obj_name, Count(z.energy), Count(z.ab_name), round((count(energy)*100/count(ab_name))::numeric,0) as percent_val, (count (ab_name)-count (energy)) as no_val
+from
+(Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
+round(z2.energy::numeric,7) as energy,
+round(z2.volume::numeric,7) as volume,
+round(z2.t_in::numeric,1),
+round(z2.t_out::numeric,1), heat_abons.name
+from heat_abons
+left join
+(SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
+            
+                                    FROM
+                                    (SELECT 
+            			  daily_values.date as daily_date, 
+            			  objects.name as name_objects, 
+            			  abonents.name as name_abonents, 
+            			  daily_values.value as value_daily, 
+            			  meters.factory_number_manual as number_manual, 
+            			  names_params.name as params_name, 
+            			  types_meters.name as meter_type,
+            			  resources.name as res
+            			FROM 
+            			  public.daily_values, 
+            			  public.taken_params, 
+            			  public.abonents, 
+            			  public.link_abonents_taken_params, 
+            			  public.objects, 
+            			  public.params, 
+            			  public.names_params, 
+            			  public.meters, 
+            			  public.types_meters,
+            			  resources
+            			WHERE 
+            			  daily_values.id_taken_params = taken_params.id AND
+            			  taken_params.guid_params = params.guid AND
+            			  taken_params.guid_meters = meters.guid AND
+            			  abonents.guid_objects = objects.guid AND
+            			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+            			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            			  params.guid_names_params = names_params.guid AND
+            			  meters.guid_types_meters = types_meters.guid AND
+            			  names_params.guid_resources=resources.guid and
+            			  objects.name = '%s' AND            			  
+            			  resources.name = '%s' AND 
+            			  daily_values.date = '%s' 
+                                    ) z1
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.res
+            order by z1.name_abonents) as z2
+on z2.number_manual=heat_abons.factory_number_manual
+where heat_abons.obj_name='%s'
+order by heat_abons.ab_name) as z
+group by obj_name
+    """%(my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    return sQuery
+def get_heat_count(obj_title,  electric_data_end):
+    my_params=['Энергия','Объем','Ti','To', 'Тепло']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_heat_count( obj_title, electric_data_end, my_params))  
+    data_table = cursor.fetchall()      
+    return data_table
+    
+def get_water_impulse_objects(): 
+    cursor = connection.cursor()
+    data_table=[]     
+    sQuery=""" SELECT  name
+                       FROM water_abons_report
+                        group by name   
+                        order by name ASC
+                        """
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()    
+    return data_table
+    
+    
+def MakeSqlQuery_water_impulse_no_data( obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select water_abons_report.name as obj_name, obj_name as ab_name, water_abons_report.ab_name as meter_name,   water_abons_report.meter_name, water_abons_report.channel, z2.value 
+from water_abons_report
+
+LEFT JOIN (
+SELECT 
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,  
+  names_params.name as name_params,
+  daily_values.value,    
+  abonents.guid,
+  water_abons_report.name,
+  resources.name as res
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s' and
+  water_abons_report.name='%s'
+  order by obj_name, names_params.name ) z2
+  on z2.meters=water_abons_report.ab_name
+  where water_abons_report.name='%s'  
+  and value is null
+  order by obj_name, z2.name_params
+    """%(my_params[0],electric_data_end,obj_title,obj_title)
+    return sQuery 
+     
+def get_water_impulse_no_data(obj_title,  electric_data_end):
+    my_params=['Импульс']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_water_impulse_no_data( obj_title, electric_data_end, my_params))  
+    data_table = cursor.fetchall()      
+    return data_table
+    
+def MakeSqlQuery_water_impulse_count( obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select obj_name, Count(z.value), Count(z.ab_name), round((count(value)*100/count(ab_name))::numeric,0) as percent_val, (count (ab_name)-count (value)) as no_val
+from
+(
+Select water_abons_report.name as obj_name, obj_name as ab_name, water_abons_report.ab_name as meter_name,  z2.meter_name, z2.name_params, z2.value 
+from water_abons_report
+
+LEFT JOIN (
+SELECT 
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,  
+  names_params.name as name_params,
+  daily_values.value,    
+  abonents.guid,
+  water_abons_report.name,
+  resources.name as res
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s' and
+  water_abons_report.name='%s'
+  order by obj_name, names_params.name ) z2
+  on z2.meters=water_abons_report.ab_name
+  where water_abons_report.name='%s'  
+  order by obj_name, z2.name_params) z
+  group by obj_name
+    """%(my_params[0],electric_data_end,obj_title,obj_title)
+    return sQuery    
+def get_water_impulse_count(obj_title,  electric_data_end):
+    my_params=['Импульс']   
+    cursor = connection.cursor()
+    data_table=[]      
+    cursor.execute(MakeSqlQuery_water_impulse_count( obj_title, electric_data_end, my_params))  
+    data_table = cursor.fetchall()      
     return data_table
