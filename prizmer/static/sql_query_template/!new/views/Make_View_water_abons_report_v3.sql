@@ -20,7 +20,7 @@ CREATE OR REPLACE VIEW water_abons_report AS
     '2015-01-01'::date AS date_install,
     objects.name AS obj_name,
     meters.name as meter_name,
-    names_params.name
+    names_params.name as channel
    FROM korp,
     meters,
     abonents,

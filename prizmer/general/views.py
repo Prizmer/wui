@@ -12376,20 +12376,20 @@ def makeOneCoords(graphic_data,numField1):
     labels=[]
     for i in range(len(graphic_data)):
         graphic_data[i]=list(graphic_data[i]) 
-        date=graphic_data[i][numField1]            
-       #print date 
+        date=graphic_data[i][numField1]   
+#        print numField1         
+#        print date 
         if (date==u'Н/Д' or date is None or date==None): 
             labels.append(str(0))
         else:
-            #labels.append(str((date)))
-            #print type(date)
+            print type(date)
             if type(date)==datetime.date:
                 labels.append(date.strftime("%d-%m-%Y"))
             elif type(date)==float or type(date)==decimal.Decimal:
                 labels.append(str(date))
             elif type(date)==unicode:
                 labels.append(str(translate(date)))
-            #labels.append(translate(unicode(((date)))))
+            
     #print labels
     return labels
   
@@ -12812,17 +12812,18 @@ def balance_period_electric(request):
     
     for i in range(0,len(dt_type_abon)):
          guid_type_abon=dt_type_abon[i][0]         
-         if not(bool(is_abonent_level.search(obj_key))):
-#             electric_data_end2=datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")+datetime.timedelta(days=1)
-#             print electric_data_end2
-             data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
-             type_abon=translate(dt_type_abon[i][1])             
-             if len(data_table)>0: data_table=common_sql.ChangeNull(data_table, None)            
              
-             dtAll.append(data_table)
-             AllData.append({str("data"):makeOneCoords(data_table,6), str("label"):str(type_abon), str("backgroundColor"): get_rgba_color(i+2)})
-             if i==1:
-                 Xcoord=makeOneCoords(data_table,5)
+         if not(bool(is_abonent_level.search(obj_key))):
+
+             data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
+             type_abon=translate(dt_type_abon[i][1])
+             print type_abon             
+             if len(data_table)>0: 
+                 data_table=common_sql.ChangeNull(data_table, None)
+                 dtAll.append(data_table)
+                 AllData.append({str("data"):makeOneCoords(data_table,6), str("label"):str(type_abon), str("backgroundColor"): get_rgba_color(i+2)})
+                 if i==1:
+                     Xcoord=makeOneCoords(data_table,5)
     dt_delta=[]   
    
     if len(dtAll)>0:
@@ -13419,3 +13420,57 @@ def water_impulse_res_status(request):
     args['electric_data_start'] = electric_data_start
 
     return render_to_response("data_table/90.html", args)
+    
+def balance_period_water_impulse(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')   
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    decimal.getcontext().prec = 3
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+   
+    AllData=[]
+    Xcoord=[]    
+     
+    if not(bool(is_abonent_level.search(obj_key))):
+         data_table = common_sql.get_data_table_balance_water_impulse_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end)
+              
+         
+         
+    if (len( data_table) >0):
+        Xcoord=makeOneCoords(data_table,0) #label 
+#        print data_table[0][1],data_table[0][2],data_table[0][3],data_table[0][4],data_table[0][5],data_table[0][6]
+#        print data_table[1][1],data_table[1][2],data_table[1][3],data_table[1][4],data_table[1][5],data_table[1][6]
+#        print data_table[2][1],data_table[2][2],data_table[2][3],data_table[2][4],data_table[2][5],data_table[2][6]
+        AllData=[{str("data"):makeOneCoords(data_table,5), str("label"):str("potrebiteli(-)"), str("backgroundColor"): get_rgba_color(8)},
+             {str("data"):makeOneCoords(data_table,6), str("label"):str("vvod(-)"),  str("backgroundColor"): get_rgba_color(14)}]
+        
+        data_table=common_sql.ChangeNull(data_table, None)
+      
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    return render_to_response("data_table/water/87.html", args)

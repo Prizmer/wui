@@ -105,6 +105,8 @@ urlpatterns = patterns('',
     url(r'^86/$', views.report_electric_res_status),
     url(r'^88/$', views.report_heat_res_status),
     url(r'^90/$', views.report_water_impulse_res_status),
+
+    url(r'^87/$', views.report_balance_period_water_impulse), 
     #---- Test urls
 
 #    url(r'^test/$', views.test_page),

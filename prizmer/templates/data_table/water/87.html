@@ -3,7 +3,7 @@
     </head>
     <body>
 <script src="/static/liHighLight.js" type=text/javascript></script>
-<span>Баланс по электричеству c <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong> по сумме T0 тарифов</span>
+<span>Баланс по воде (импульсные приборы) c <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
 <br>
 <span>Балансная группа: <strong>{{obj_title}}</strong></span>
 <br>
@@ -19,12 +19,10 @@
         scales: {
             yAxes: [{
                 ticks: {
-                    beginAtZero:true,
-					stacked: true
+                    beginAtZero:true
                 }
             }],
-			xAxes: [{
-                stacked: true
+			xAxes: [{               
             }]
         }
     }
@@ -39,59 +37,34 @@
 	{% endif %}
 	<br>
 	
-{% if dt_delta %}
+{% if data_table %}
 <table class="content" id="data-table">
 <tr>
 <th>Дата</th>
-<th>Небаланс, кВт*ч</th>
+<th>Потребление за сутки, м3</th>
+<th>Подача за сутки, м3</th>
+<th>Небаланс, м3</th>
 <th>Процент</th>
-
-</tr>
-{% for value in dt_delta %}
-<tr>
-<td>{{value.0}}</td>
-<td>{{value.1}}</td>
-<td>{{value.2}} &#037;</td>
-
-</tr>
-{% endfor %}
-</table>
-{% endif %}
-	
-{% if data_table %}
-{% for val in data_table %}
-<table class="content" id="data-table" >
-<tr>
-<th>Балансная группа</th>
-<th>Тип</th>
-<th>Сумма T0, кВт*ч</th>
-<th>Дата</th>
-<th>Потребление T0, кВт*ч</th>
 <th>Опрошено счётчиков</th>
 
 </tr>
-
-{% for value in val %}
+{% for value in data_table %}
 <tr>
 <td>{{value.0}}</td>
-<td>{{value.2}}</td>
-<td>{{value.3}}</td>
 <td>{{value.5}}</td>
-<td><strong>{{value.6}}</strong></td>
-<td><strong>{{value.7}}</strong></td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}} &#037;</td>
+<td>{{value.9}}</td>
 
-<!--<td><strong>{{value.8}}</strong></td>-->
 </tr>
 {% endfor %}
-{% endfor %}
 </table>
+
 {% else %}
 <span><strong>Нет данных.</strong></span>
 <br>
 {% endif %}
-
-
-
 </div>
 <br>
 <br>

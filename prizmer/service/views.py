@@ -2417,21 +2417,15 @@ def UpdateSimpleTable(table,guid,field,val):
     result =True
     return result
     
-       
-    
-def LoadBalance(sPath, sheet):
-    result=u""
+def LoadImpulseWaterBalance(dtAll):
+    result = "Баланс по водным импульсным счётчикам"
     count_new_link=0
-    dtAll=GetTableFromExcel(sPath, sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    if len(dtAll)==0: return u'Таблица пуста!'
     for i in range(1,len(dtAll)):        
         balance_group=unicode(dtAll[i][0])
-        znak=unicode(dtAll[i][1])
-        object_name=unicode(dtAll[i][2])
-        abonent_name=unicode(dtAll[i][3])
+        znak=unicode(dtAll[i][1])        
         meter=unicode(dtAll[i][4])
         type_abonent=unicode(dtAll[i][5])
-        print balance_group, znak, abonent_name,meter, type_abonent
+        print balance_group, znak, meter, type_abonent
         isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
         isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
@@ -2447,15 +2441,9 @@ def LoadBalance(sPath, sheet):
             result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)
             print u'Создан тип абонента ' + type_abonent       
         if isNewMeter:#ничего не создаём, добавляем сообщение, что абонента надо создать
-           result += u'Счётчика '+meter+u' (в таблице должен принадлежать абоненту '+abonent_name+u') не существует. В балансную группу не добавлен!'
+           result += u'Счётчика '+meter+u' (в таблице строка '+str(i+1)+u') не существует. В балансную группу не добавлен!'
            continue
-       
-        types_abonents_guid=GetSimpleTable('types_abonents','name',type_abonent)[0][0]
-        guid_abonent=GetGuidFromFirstTableCrossWithSecondTable('abonents','objects','name',abonent_name,'name',object_name)[0][0]
-        isOk=UpdateSimpleTable('abonents', guid_abonent,'guid_types_abonents',types_abonents_guid)
-        print u'type of abonents changed: ', isOk 
-        
-        
+              
         guid_meters=GetSimpleTable('meters','factory_number_manual',meter)[0][0]        
         if not isNewBalanceGroup:
            balance_group_guid=GetSimpleTable('balance_groups','name',balance_group)[0][0]
@@ -2484,7 +2472,81 @@ def LoadBalance(sPath, sheet):
             cursor.close()
             connection.commit()
             count_new_link+=1
-    result+= u'  В балансную группу добавлено счётчиков: '+ unicode(count_new_link)    
+    result+= u'  В балансную группу добавлено счётчиков: '+ unicode(count_new_link) 
+    return result       
+    
+def LoadBalance(sPath, sheet):
+    result=u"Баланс по цифровым счётчикам"
+    count_new_link=0
+    dtAll=GetTableFromExcel(sPath, sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)    
+
+    if len(dtAll)==0: return u'Таблица пуста!'
+    
+    if (len(str(dtAll[1][3])) < 0) or (dtAll[1][3] is None):
+        result = LoadImpulseWaterBalance(dtAll)
+    else:      
+    
+        for i in range(1,len(dtAll)):        
+            balance_group=unicode(dtAll[i][0])
+            znak=unicode(dtAll[i][1])
+            object_name=unicode(dtAll[i][2])
+            abonent_name=unicode(dtAll[i][3])
+            meter=unicode(dtAll[i][4])
+            type_abonent=unicode(dtAll[i][5])
+            print balance_group, znak, abonent_name,meter, type_abonent
+            isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
+            isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
+            isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
+            print u'isNewBalanceGroup: ', isNewBalanceGroup
+            print u'isNewTypeAbonent: ', isNewTypeAbonent
+            print u'isNewMeter: ', isNewMeter
+            if isNewBalanceGroup: #если балансной группы ещё не существует, то создаём её
+                balance_group_guid=uuid.uuid4()
+                result += InsertIntoBalanceGroup(balance_group_guid, balance_group)
+                print u'Создана балансная группа '+balance_group
+            if isNewTypeAbonent: #если такого типа абонента не существует, то создаём
+                types_abonents_guid=uuid.uuid4()
+                result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)
+                print u'Создан тип абонента ' + type_abonent       
+            if isNewMeter:#ничего не создаём, добавляем сообщение, что абонента надо создать
+               result += u'Счётчика '+meter+u' (в таблице должен принадлежать абоненту '+abonent_name+u') не существует. В балансную группу не добавлен!'
+               continue
+           
+            types_abonents_guid=GetSimpleTable('types_abonents','name',type_abonent)[0][0]
+            guid_abonent=GetGuidFromFirstTableCrossWithSecondTable('abonents','objects','name',abonent_name,'name',object_name)[0][0]
+            isOk=UpdateSimpleTable('abonents', guid_abonent,'guid_types_abonents',types_abonents_guid)
+            print u'type of abonents changed: ', isOk 
+            
+            
+            guid_meters=GetSimpleTable('meters','factory_number_manual',meter)[0][0]        
+            if not isNewBalanceGroup:
+               balance_group_guid=GetSimpleTable('balance_groups','name',balance_group)[0][0]
+           
+            #проверяем нет ли такой связи уже
+            dt_link=GetSimpleTable('link_balance_groups_meters',"guid_meters",guid_meters[0][0])
+            isNewLink=True
+            for j in range(1,len(dt_link)):
+                print dt_link[j][3]
+                if dt_link[j][3] == balance_group_guid:
+                    isNewLink=False
+                    result+= u'Счётчик ' + meter + u' уже принадлежит балансной группе ' + balance_group
+                    break
+            if isNewLink:
+                print balance_group, meter
+                cursor = connection.cursor()
+                isZnak=True        
+                if znak=='0' or znak == 0:
+                    isZnak=False
+                sQuery="""
+                      INSERT INTO link_balance_groups_meters(
+                      guid, type, guid_balance_groups, guid_meters)
+                      VALUES ('%s', '%s', '%s', '%s');
+                      """%(uuid.uuid4(),isZnak,balance_group_guid,guid_meters)      
+                cursor.execute(sQuery)
+                cursor.close()
+                connection.commit()
+                count_new_link+=1
+        result+= u'  В балансную группу добавлено счётчиков: '+ unicode(count_new_link)    
          
     return result
 
