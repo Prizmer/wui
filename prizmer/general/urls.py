@@ -24,6 +24,8 @@ urlpatterns = patterns('',
     url(r'^heat/$', views.heat),
     url(r'^gas/$', views.gas),
     url(r'^comment/$', views.comment),
+    url(r'^add_comment/$', views.add_comment),
+    url(r'^load_comment/$', views.load_comment),
     url(r'^instruction_user/$', views.instruction_user),
     url(r'^instruction_admin/$', views.instruction_admin),
 
@@ -135,6 +137,8 @@ urlpatterns = patterns('',
     url(r'^86/$', views.electric_res_status),
     url(r'^88/$', views.heat_digital_res_status),
     url(r'^90/$', views.water_impulse_res_status),
+    
+    url(r'^92/$', views.electric_res_status_monthly),
 
     url(r'^87/$', views.balance_period_water_impulse),
     

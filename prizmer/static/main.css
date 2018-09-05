@@ -608,6 +608,7 @@ margin-top: 0.05em;
 	right: 10px;
 	cursor: pointer;
 	display: block;
+	overflow-y:scroll;
 }
 /* Пoдлoжкa */
 #overlay {
@@ -623,4 +624,9 @@ margin-top: 0.05em;
 	left:0;
 	cursor:pointer;
 	display:none; /* в oбычнoм сoстoянии её нет) */
+}
+
+#comment_table {
+    word-break: break-all;
+	width: 400px;
 }

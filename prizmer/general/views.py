@@ -19,8 +19,11 @@ from django.shortcuts import redirect
 
 #---------
 
-from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters
-
+from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments
+from django import forms
+from django.core.context_processors import csrf
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt
  
 def dictfetchall(cursor):
 #"Returns all rows from a cursor as a dict"
@@ -13474,3 +13477,94 @@ def balance_period_water_impulse(request):
     args['label'] = Xcoord
     args['AllData']=AllData
     return render_to_response("data_table/water/87.html", args)
+
+    
+def electric_res_status_monthly(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')   
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    is_electric_current = u''
+    is_electric_delta = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    decimal.getcontext().prec = 3
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']       
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']  
+   
+    AllData=[]
+    Xcoord=[]    
+     
+    if not(bool(is_abonent_level.search(obj_key))):
+         data_table = common_sql.get_data_table_balance_water_impulse_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end)
+
+        
+    data_table=common_sql.ChangeNull(data_table, None)
+      
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    return render_to_response("data_table/92.html", args)
+    
+class AddCommentForm(forms.ModelForm):
+    class Meta:
+        model = Comments
+        fields = ('comment','guid_abonents',)
+ 
+@csrf_exempt       
+def add_comment(request):
+    args={}
+    args.update(csrf(request))   
+    comment_status = 'добавление нового комментария'
+
+    if request.method == "GET":        
+        form=AddCommentForm()
+        guid_abonent         =  request.GET['id']
+        
+    
+
+    args['form'] = form
+    args['comment_status'] = comment_status
+    args['guid_abonent'] = guid_abonent
+    print guid_abonent
+    return render_to_response("data_table/add_comment.html", args)
+    
+@csrf_exempt       
+def load_comment(request):
+    args={}
+    args.update(csrf(request))   
+    comment_status = 'добавление нового комментария'
+      
+    if request.method == "POST":
+      
+        form = AddCommentForm(data=request.POST)  
+#        print form
+#        print request.POST
+        guid_abonent         =  request.POST['guid_abonents']
+#        print guid_abonent
+        if form.is_valid():
+            Comments = form.save(commit=False)
+            Comments.guid_abonents = Abonents.objects.get(guid=guid_abonent)  
+            Comments.date=datetime.datetime.now()          
+            Comments.save()           
+            comment_status = 'Комментарий добавлен'
+            
+    return redirect('../electric', args)

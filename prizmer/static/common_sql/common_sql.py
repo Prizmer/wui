@@ -1504,9 +1504,10 @@ def get_data_table_diferent_numbers():
 
 def makeSqlQuery_electric_by_daily_or_monthly_for_object_v3(obj_title, electric_data, params, dm, res):
     sQuery="""Select  z2.monthly_date,
-   electric_abons.ab_name, 
-    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3,electric_abons.obj_name, z2.ktt,z2.ktn,z2.a, electric_abons.comment, electric_abons.date, electric_abons.ab_guid
-from electric_abons
+    electric_abons_2.ab_name, 
+    electric_abons_2.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3,electric_abons_2.obj_name, z2.ktt,z2.ktn,z2.a, 
+    electric_abons_2.comment, electric_abons_2.date, electric_abons_2.ab_guid
+from electric_abons_2
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
 sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
@@ -1555,9 +1556,9 @@ z1.ktt,z1.ktn,z1.a
 group by z1.name_objects, z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktt,z1.ktn,z1.a
 
 ) z2
-on electric_abons.ab_name=z2.name_abonents
-where electric_abons.obj_name='%s'
-ORDER BY electric_abons.ab_name ASC;
+on electric_abons_2.ab_name=z2.name_abonents
+where electric_abons_2.obj_name='%s'
+ORDER BY electric_abons_2.ab_name ASC;
 """%(params[0],params[1],params[2],params[3], res,obj_title, electric_data, obj_title)
     
     if dm=='monthly' or dm=='daily' or dm=='current':
@@ -2638,7 +2639,7 @@ on electric_abons.ab_name=z2.name_abonents
 where electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name ASC;
 """%(params[0],params[1],params[2],params[3], res,obj_title, electric_data, obj_title)
-    #print sQuery
+    print sQuery
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('monthly',dm)
         #print sQuery

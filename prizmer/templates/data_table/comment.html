@@ -1,10 +1,10 @@
 <script src="/static/liHighLight.js" type=text/javascript></script>
-
+{{comment_status}}
 <br>
 <span><strong> Комментарии к абоненту  {{abonent}} ({{object}})</strong> </span>
 <br><br>
 {% if data_table %}
-<table class="content" id="data-table" >
+<table class="content" id="comment_table">
 <tr>
 <th>Дата</th>
 <th class="th_hvs">Комментарий</th>
@@ -12,7 +12,7 @@
 </tr>
 {% for value in data_table %}
 <tr>
-<td>{{value.2}}</td>
+<td width=>{{value.2}}</td>
 <td class="th_hvs">{{value.1}} </td>
 </tr>
 {% endfor %}

@@ -2,11 +2,12 @@
     <head>
 
 	<script>
-console.log('test')
+
 $(document).ready(function(){
 $(".comment").click(LoadComments);   
+$(".add_comment").click(AddComments);   
 });
-
+//AddComments(form=null, guid_abonents=$(this).attr('id'))
 	</script>
     </head>
     <body>
@@ -17,7 +18,7 @@ $(".comment").click(LoadComments);
 <br>
 
 <!--Комментарии -->
-<div id='comment-block'>
+<div id='comment-block' style="overflow-y:scroll;">
  <span id="modal_close">X</span> <!-- Кнoпкa зaкрыть -->
 	здесь будут комментарии
 </div>

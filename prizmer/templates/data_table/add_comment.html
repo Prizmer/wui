@@ -1,0 +1,20 @@
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span><strong> Комментарии к абоненту </strong> </span>
+<br>
+{{comment_status}}
+<br>
+{{guid_abonents}}
+{% block content %}
+<br>
+<div class="colM">
+    <form method="POST" class="post-form" action="../../askue/load_comment/">
+	{% csrf_token %}
+	
+	    <textarea rows=10 cols=60 name='comment'> </textarea> 
+		<input type=hidden  name="guid_abonents" value={{guid_abonent}}>
+		
+		<br> <br>
+        <button type="submit" >Сохранить</button>
+    </form>
+</div>
+{% endblock %}

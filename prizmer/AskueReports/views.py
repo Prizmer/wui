@@ -11609,11 +11609,19 @@ def report_all_res_by_date_v2(request):
     response = StringIO.StringIO()
     wb = Workbook()
     ws = wb.active
-    electric_data_end   = request.session["electric_data_end"]  
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    electric_data_end = u''
+    obj_title           = request.session['obj_title']
+    obj_key             = request.session['obj_key']
+    obj_parent_title    = request.session['obj_parent_title']       
+    electric_data_end   = request.session['electric_data_end']  
+    
 
 #Шапка
     ws.merge_cells('A2:E2')
-    ws['A2'] = 'Отчёт по всем ресурсам на ' + str(electric_data_end)
+    ws['A2'] = 'Отчёт по всем ресурсам на ' + str(electric_data_end) + u'. ' + unicode(obj_parent_title) + u' ' + unicode(obj_title)
     
 
     ws['A5'] = 'Абонент'
@@ -11632,15 +11640,8 @@ def report_all_res_by_date_v2(request):
 #Запрашиваем данные для отчета
     is_abonent_level = re.compile(r'abonent')
     is_object_level = re.compile(r'level')   
-    obj_title = u'Не выбран'
-    obj_key = u'Не выбран'
-    obj_parent_title = u'Не выбран'
-    electric_data_end = u''
-    decimal.getcontext().prec = 3
-    obj_title           = request.session['obj_title']
-    obj_key             = request.session['obj_key']
-    obj_parent_title    = request.session['obj_parent_title']       
-    electric_data_end   = request.session['electric_data_end']  
+    
+    decimal.getcontext().prec = 3   
                
     data_table=[]
     obj_parent_title_water=u""
